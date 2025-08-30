@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: cmp-plugin
+    namespace: argocd
+data:
+    avp-directory-include.yaml: |
+        apiVersion: argoproj.io/v1alpha1
+        kind: ConfigManagementPlugin
+        metadata:
+          name: avp-directory-include
+        spec:
+          allowConcurrency: true
+          generate:
+            command:
+              - bash
+              - "-c"
+              - |
+                argocd-vault-plugin generate $ARGOCD_ENV_FILE_NAME
+          lockRepo: false
+    kustomize-inline.yaml: |
+        apiVersion: argoproj.io/v1alpha1
+        kind: ConfigManagementPlugin
+        metadata:
+          name: kustomize-inline
+        spec:
+          allowConcurrency: true
+          generate:
+            command:
+              - /bin/sh
+              - -c
+            args:
+              - |
+                echo "$ARGOCD_ENV_KUSTOMIZATION_YAML" > kustomization.yaml;
+                kustomize build
+          lockRepo: false

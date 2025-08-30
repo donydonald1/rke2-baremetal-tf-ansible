@@ -1,0 +1,277 @@
+locals {
+  ansible_hosts_group = var.ansible_hosts_group != "" ? var.ansible_hosts_group : "all"
+  all_sans = concat(
+    flatten([module.rke2_mater_servers.server_ips]),
+    flatten([module.rke2_mater_servers.server_names]),
+    flatten([var.manager_rke2_api_dns]),
+    flatten([var.manager_rke2_api_ip]),
+  )
+
+  cluster_config_values = var.cluster_config_values != "" ? var.cluster_config_values : <<EOT
+rke2_airgap_mode: false
+rke2_ha_mode: true
+rke2_ha_mode_keepalived: false
+rke2_api_ip: ${var.manager_rke2_api_ip}
+rke2_token: "${random_password.rke2_token.result}"
+rke2_debug: true
+rke2_wait_for_all_pods_to_be_ready: false
+rke2_additional_sans: [
+%{for item in local.all_sans~}
+  "${item}"%{if index(local.all_sans, item) < length(local.all_sans) - 1}, %{endif}
+%{endfor~}
+]
+rke2_download_kubeconf: true
+rke2_download_kubeconf_file_name: "${var.cluster_name}-kubeconfig.yaml"
+rke2_download_kubeconf_path: "${path.cwd}/"
+rke2_cluster_group_name: "${var.cluster_name}"
+rke2_channel: stable
+rke2_cis_profile: "cis"
+rke2_kubevip_image: ghcr.io/kube-vip/kube-vip:v0.9.2
+
+rke2_loadbalancer_ip_range: 
+  range-global: "${var.manager_rke2_loadbalancer_ip_range}"
+  allow-share-global: "true"
+  allow-share-ingress-nginx: "true"
+  allow-share-netbootxyz: "true"
+
+rke2_ha_mode_kubevip: true
+rke2_kubevip_ipvs_lb_enable: true
+rke2_kubevip_cloud_provider_enable: true
+rke2_kubevip_cloud_provider_image: ghcr.io/kube-vip/kube-vip-cloud-provider:v0.0.11
+rke2_kubevip_svc_enable: true
+rke2_kubevip_metrics_port: 2112
+rke2_version: "${var.rke2_version}"
+# rke2_apiserver_dest_port: 6443
+
+rke2_cni:
+  - multus
+  - cilium
+# rke2_disable:
+#   - rke2-ingress-nginx
+
+rke2_kube_apiserver_args: [
+    "audit-policy-file=/etc/rancher/rke2/audit-policy.yaml",
+    "audit-log-path=/var/log/rancher/audit.log",
+    "audit-log-maxage=30",
+    "audit-log-mode=blocking-strict",
+    "audit-log-maxage=30",
+    "admission-control-config-file=/etc/rancher/rke2/rke2-psa.yaml",
+]
+rke2_kube_controller_manager_arg:
+  - "bind-address=0.0.0.0"
+  - "node-monitor-period=4s"
+
+rke2_kube_scheduler_arg:
+  - "bind-address=0.0.0.0"
+
+k8s_node_label: 
+  - rke2_upgrade=true
+
+rke2_kubelet_config:
+  imageGCHighThresholdPercent: 80
+  imageGCLowThresholdPercent: 70
+
+rke2_kubelet_arg:
+  # - "kube-reserved=cpu=0.5,memory=1Gi,ephemeral-storage=1Gi"
+  # - "system-reserved=cpu=2,memory=10Gi,ephemeral-storage=1Gi"
+  - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
+  - "cgroup-driver=systemd"
+  - "max-pods=600"
+  - "skip-log-headers=false"
+  - "stderrthreshold=INFO"
+  - "log-file-max-size=10"
+  - "alsologtostderr=true"
+  - "logtostderr=true"
+  - "protect-kernel-defaults=true"
+  - "--config=/etc/rancher/rke2/kubelet-config.yaml"
+
+rke2_selinux: true
+disable_kube_proxy: false
+rke2_disable_cloud_controller: false
+
+rke2_custom_manifests: 
+  # - "${path.module}/manifest/rke2-cilium.yaml"
+  - "${path.module}/manifest/rke2-coredns.yaml"
+  - "${path.module}/manifest/rke2-multus.yaml"
+  - "${path.module}/manifest/generic-device-plugin.yaml"
+  - "${path.module}/manifest/nodelocaldns.yaml"
+  - "${path.module}/manifest/configmap-dns-proxy.yaml"
+
+rke2_server_options:
+  - "private-registry: /etc/rancher/rke2/registries.yaml"
+
+rke2_cluster_cidr:
+  - 10.42.0.0/16
+rke2_service_cidr:
+  - 10.43.0.0/16
+
+rke2_etcd_snapshot_s3_options:
+  s3_endpoint: "${var.s3_backup_endpoint}" # required
+  access_key: "${var.s3_backup_access_key}" # required
+  secret_key: "${var.s3_backup_secret_key}" # required
+  bucket: "${var.s3_backup_bucketname}" # required
+  snapshot_name: "${var.snapshot_name}" # required.
+  skip_ssl_verify: ${var.s3_backup_skip_ssl_verify} # optional
+  endpoint_ca: "" 
+  region: "" 
+  folder: "${var.cluster_name}" 
+
+rke2_ingress_controller: ingress-nginx
+rke2_ingress_nginx_values:
+  controller:
+    admissionWebhooks:
+      enabled: enable
+      timeoutSeconds: 30
+
+    replicaCount: ${length(try(module.rke2_mater_servers.server_ips, []))}
+    extraArgs:
+      # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
+      enable-annotation-validation: "false"
+
+    config:
+      # auto value takes all nodes in cgroups v2 (dell_v2)
+      worker-processes: 1
+      hsts: "true"
+      http-snippet: |
+        proxy_cache_path /dev/shm levels=1:2 keys_zone=static-cache:2m max_size=300m inactive=7d use_temp_path=off;
+        proxy_cache_key $scheme$proxy_host$request_uri;
+        proxy_cache_lock on;
+        proxy_cache_use_stale updating;
+      use-forwarded-headers: true
+      allow-snippet-annotations: true
+      annotations-risk-level: Critical
+      enable-brotli: "true"
+      brotli-level: "6"
+      brotli-types: text/html and application/vnd.api+json application/xml+rss application/atom+xml application/javascript application/x-javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/svg+xml image/x-icon text/css text/plain text/x-component
+
+    ingressClassResource:
+      name: nginx
+      enabled: true
+      default: true
+      # controllerValue: "k8s.io/ingress-nginx"
+
+    ingressClass: nginx
+
+    resources:
+      limits:
+        memory: 328Mi
+      requests:
+        cpu: 40m
+        memory: 150Mi
+
+    autoscaling:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 11
+      # when CPU == 500m
+      targetCPUUtilizationPercentage: 1250
+      targetMemoryUtilizationPercentage: 200
+    topologySpreadConstraints:
+      - maxSkew: 4
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/component: controller
+            app.kubernetes.io/instance: ingress-nginx
+            app.kubernetes.io/name: ingress-nginx
+    service:
+      enabled: true
+
+      annotations:
+        ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
+      loadBalancerClass: "kube-vip.io/kube-vip-class"
+      externalTrafficPolicy: Local
+      enableHttp: true
+      enableHttps: true
+      ports:
+        http: 80
+        https: 443
+
+      targetPorts:
+        http: http
+        https: https
+
+      type: LoadBalancer
+      # internal:
+      #   enabled: false
+
+    extraVolumeMounts:
+      - name: dshm
+        mountPath: /dev/shm
+
+    metrics:
+      enabled: false
+      serviceMonitor:
+        enabled: false
+        additionalLabels:
+          release: monitoring
+
+    extraVolumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          # not working until v1.21? https://github.com/kubernetes/kubernetes/issues/63126
+          sizeLimit: 303Mi
+
+      - name: dns-proxy-config-volume
+        configMap:
+          name: dns-proxy-config
+
+    dnsPolicy: None
+    dnsConfig:
+      nameservers:
+        - 127.0.0.1
+      searches:
+        - rke2-ingress-nginx-controller.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        - ${var.domain}
+    extraContainers:
+      - name: dns-proxy
+        image: coredns/coredns:1.12.3
+        args:
+          - -conf
+          - /etc/coredns/Corefile
+        volumeMounts:
+          - mountPath: /etc/coredns
+            name: dns-proxy-config-volume
+            readOnly: true
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 13Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+              - NET_BIND_SERVICE
+            drop:
+              - all
+          readOnlyRootFilesystem: true
+  # tcp:
+  #   22: "gitlab/gitlab-gitlab-shell:22"
+EOT
+}
+# - "${path.module}/manifest/rke2-cilium.yaml"

@@ -1,0 +1,11 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: rke2-multus
+  namespace: kube-system
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+    valuesContent: |-
+        rke2-whereabouts:
+            enabled: true

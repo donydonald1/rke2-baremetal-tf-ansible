@@ -1,0 +1,9 @@
+- name: Deploy RKE2
+  hosts: ${ansible_hosts_group}
+  become: yes
+  vars:
+%{ for line in split("\n", cluster_config_values) ~}
+    ${line}
+%{ endfor ~}
+  roles:
+    - role: lablabs.rke2

@@ -22,7 +22,15 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
-
+*baremetal01.yaml
+*baremetal02.yaml
+*baremetal03.yaml
+*ops-dev-dc-bm-rke2_kubeconfig.yaml
+*ops-dev-dc-bm-rke2-deploy-rke2.yml
+*ops-dev-dc-bm-rke2-inventory.ini
+*ops-dev-dc-bm-rke2-kubeconfig.yaml
+*providers.tf
+*provider.tf
 # Ignore transient lock info files created by terraform apply
 .terraform.tfstate.lock.info
 
