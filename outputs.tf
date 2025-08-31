@@ -88,6 +88,13 @@ output "domain_name" {
 
 }
 
+
+output "cloudflare_account_id" {
+  value       = var.cloudflare_account_id
+  description = "The Cloudflare account ID"
+  sensitive   = false
+
+}
 output "vault_admin_password" {
   value       = var.vault_admin_password
   sensitive   = true
