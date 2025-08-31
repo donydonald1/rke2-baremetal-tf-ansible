@@ -640,6 +640,9 @@ resource "kubernetes_secret" "vault_admin_credentials" {
   }
 
   type = "Opaque"
+  depends_on = [
+    helm_release.vault_operator
+  ]
 }
 resource "kubernetes_secret" "vault_credentials" {
   metadata {
