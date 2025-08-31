@@ -14,7 +14,7 @@ resource "helm_release" "cloudflared" {
   dependency_update = true
   version           = "4.2.0"
   repository        = "https://bjw-s-labs.github.io/helm-charts"
-  namespace         = var.cloudflare_namespace
+  namespace         = var.cloudflared_namespace
   create_namespace  = true
   values            = [var.cloudflared_values]
 }
