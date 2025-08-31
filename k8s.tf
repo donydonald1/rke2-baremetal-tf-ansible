@@ -659,6 +659,5 @@ resource "kubernetes_secret" "vault_credentials" {
     # VAULT_CLIENT_CERT = "/vault/tls/vault.crt"
     # VAULT_CLIENT_KEY  = "/vault/tls/vault.key"
   }
-  type       = "Opaque"
-  depends_on = [time_sleep.sleep-wait-vault]
+  type = "Opaque"
 }
