@@ -70,7 +70,7 @@ metadata:
   name: vault
   namespace: vault
 YAML
-  depends_on = [helm_release.vault_operator]
+  depends_on = [null_resource.kustomization]
 
 }
 
@@ -89,7 +89,7 @@ rules:
     resources: ["pods"]
     verbs: ["get", "update", "patch"]
 YAML
-  depends_on = [helm_release.vault_operator]
+  depends_on = [null_resource.kustomization]
 
 }
 
@@ -109,7 +109,7 @@ subjects:
     name: vault
     namespace: vault
 YAML
-  depends_on = [helm_release.vault_operator]
+  depends_on = [null_resource.kustomization]
 
 }
 
@@ -129,7 +129,7 @@ subjects:
     name: vault
     namespace: vault
 YAML
-  depends_on = [helm_release.vault_operator]
+  depends_on = [null_resource.kustomization]
 
 }
 
@@ -178,7 +178,7 @@ spec:
             name: external-secrets
             namespace: external-secrets
 YAML
-  depends_on = [null_resource.kustomization, helm_release.vault_operator, ]
+  depends_on = [null_resource.kustomization]
 }
 
 resource "kubectl_manifest" "app_projects" {
@@ -205,7 +205,7 @@ spec:
       kind: '*'
 YAML
 
-  depends_on = [kubernetes_config_map.cmp-plugin, null_resource.kustomization, helm_release.vault_operator]
+  depends_on = [kubernetes_config_map.cmp-plugin, null_resource.kustomization]
 }
 
 resource "kubernetes_config_map" "cmp-plugin" {
@@ -248,7 +248,7 @@ spec:
       selfHeal: true
       prune: true
 YAML
-  depends_on = [kubernetes_config_map.cmp-plugin, helm_release.vault_operator]
+  depends_on = [kubernetes_config_map.cmp-plugin, null_resource.kustomization]
 }
 
 resource "kubectl_manifest" "vault" {
