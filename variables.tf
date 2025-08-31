@@ -18,6 +18,17 @@ variable "private_registry_url" {
   description = "The URL of the private registry."
 }
 
+variable "kubevip_image_tag" {
+  type        = string
+  default     = "v0.9.2"
+  description = "The image tag for the Kube-VIP container."
+}
+
+variable "kubevip_cloud_provider_image_tag" {
+  type        = string
+  default     = "v0.0.12"
+  description = "The image tag for the Kube-VIP cloud provider container."
+}
 variable "private_registry_username" {
   type        = string
   default     = ""
