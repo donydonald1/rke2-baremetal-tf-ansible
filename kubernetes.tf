@@ -10,4 +10,5 @@ module "k8s_infrastructure" {
   cloudflare_api_token      = module.cloudflare.cloudflare_api_token
   cert_manager_issuer_token = module.cloudflare.cert_manager_issuer_token
   cert_manager_namespace    = var.namespaces["cert-manager"]
+  depends_on                = [module.cloudflare, module.helm_config, module.kubeconfig]
 }
