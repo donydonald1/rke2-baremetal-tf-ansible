@@ -619,6 +619,7 @@ YAML
     kubectl_manifest.vault_rolebinding,
     kubectl_manifest.vault_role,
     kubectl_manifest.vault_sa,
+    kubernetes_secret.vault_admin_credentials
   ]
 }
 
