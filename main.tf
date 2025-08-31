@@ -145,26 +145,8 @@ resource "null_resource" "rke2_selinux_labels" {
   depends_on = [local_file.ansible_rke2_playbook]
 }
 
-module "kubeconfig" {
-  source                    = "./modules/helm-k8s-config/"
-  create_kubeconfig         = var.create_kubeconfig
-  cluster_name              = var.cluster_name
-  kubeconfig_server_address = var.baremetal_servers[0].ip
-  enable_rke2_cluster_api   = var.enable_rke2_cluster_api
-  manager_rke2_api_dns      = var.manager_rke2_api_dns
-  ssh_private_key           = file(var.ssh_private_key_file)
-  ssh_port                  = var.ssh_port
-  manager_rke2_api_ip       = var.manager_rke2_api_ip
-  depends_on                = [null_resource.run_ansible_playbook, null_resource.rke2_selinux_labels]
-}
 
-module "cloudflare" {
-  source                 = "./modules/cloudflare/"
-  cloudflare_account_id  = var.cloudflare_account_id
-  cloudflare_tunnel_name = var.cluster_name
-  cloudflare_zone        = var.domain
-  depends_on             = [module.kubeconfig]
-}
+
 
 # This is where all the setup of Kubernetes components happen
 resource "null_resource" "kustomization" {
@@ -361,71 +343,71 @@ resource "null_resource" "kustomization" {
 
   depends_on = [
     null_resource.run_ansible_playbook,
-    module.kubeconfig,
+    # module.kubeconfig,
     null_resource.rke2_selinux_labels,
   ]
 }
 
-resource "null_resource" "uninstall_rke2" {
-  # (typo fix) master, not mater
-  for_each = { for idx, ip in module.rke2_mater_servers.server_ips : idx => ip }
+# resource "null_resource" "uninstall_rke2" {
+#   # (typo fix) master, not mater
+#   for_each = { for idx, ip in module.rke2_mater_servers.server_ips : idx => ip }
 
-  # Store all external refs ON the resource so we can use self.triggers.* at destroy-time
-  triggers = {
-    host            = each.value
-    ssh_port        = var.ssh_port
-    ssh_user        = "root"
-    ssh_private_key = file(var.ssh_private_key_file)
-  }
+#   # Store all external refs ON the resource so we can use self.triggers.* at destroy-time
+#   triggers = {
+#     host            = each.value
+#     ssh_port        = var.ssh_port
+#     ssh_user        = "root"
+#     ssh_private_key = file(var.ssh_private_key_file)
+#   }
 
-  connection {
-    type        = "ssh"
-    user        = self.triggers.ssh_user
-    host        = self.triggers.host
-    port        = tonumber(self.triggers.ssh_port)
-    private_key = self.triggers.ssh_private_key
-    script_path = "/root/terraform_%RAND%.sh"
-  }
+#   connection {
+#     type        = "ssh"
+#     user        = self.triggers.ssh_user
+#     host        = self.triggers.host
+#     port        = tonumber(self.triggers.ssh_port)
+#     private_key = self.triggers.ssh_private_key
+#     script_path = "/root/terraform_%RAND%.sh"
+#   }
 
-  provisioner "remote-exec" {
-    when       = destroy
-    on_failure = continue
+#   provisioner "remote-exec" {
+#     when       = destroy
+#     on_failure = continue
 
-    inline = [
-      "set -euxo pipefail",
-      "if [ -x /usr/bin/rke2-uninstall.sh ]; then",
-      "  sudo /usr/bin/rke2-uninstall.sh",
-      "elif [ -x /usr/local/bin/rke2-uninstall.sh ]; then",
-      "  sudo /usr/local/bin/rke2-uninstall.sh",
-      "else",
-      "  sudo systemctl stop rke2-server || true",
-      "  sudo systemctl disable rke2-server || true",
-      "fi",
-      "sudo rm -rf /etc/rancher/rke2 /var/lib/rancher/rke2 /var/post_install /opt/rke2-artifacts /var/lib/rancher/rke2/server/manifests || true",
-    ]
-  }
-  depends_on = [
-    module.rke2_mater_servers,
-    null_resource.run_ansible_playbook,
-    helm_release.cloudflared,
-    helm_release.vault_operator,
-    kubernetes_namespace.this,
-    kubectl_manifest.vault_role,
-    kubectl_manifest.vault_clusterrolebinding,
-    kubectl_manifest.vault_sa,
-    kubectl_manifest.vault_rolebinding,
-    kubectl_manifest.vault,
-    helm_release.cloudflared,
-    kubernetes_secret.cert_manager_token,
-    kubernetes_secret.cloudflared_credentials,
-    kubernetes_secret.external_dns_token,
-    kubernetes_secret.vault_credentials,
-    kubernetes_namespace.this,
-    kubectl_manifest.clusterissuer_letsencrypt_prod,
-    kubectl_manifest.external_secret_vault,
-    kubectl_manifest.app_projects,
-    kubernetes_config_map.cmp-plugin
+#     inline = [
+#       "set -euxo pipefail",
+#       "if [ -x /usr/bin/rke2-uninstall.sh ]; then",
+#       "  sudo /usr/bin/rke2-uninstall.sh",
+#       "elif [ -x /usr/local/bin/rke2-uninstall.sh ]; then",
+#       "  sudo /usr/local/bin/rke2-uninstall.sh",
+#       "else",
+#       "  sudo systemctl stop rke2-server || true",
+#       "  sudo systemctl disable rke2-server || true",
+#       "fi",
+#       "sudo rm -rf /etc/rancher/rke2 /var/lib/rancher/rke2 /var/post_install /opt/rke2-artifacts /var/lib/rancher/rke2/server/manifests || true",
+#     ]
+#   }
+#   depends_on = [
+#     module.rke2_mater_servers,
+#     null_resource.run_ansible_playbook,
+#     helm_release.cloudflared,
+#     helm_release.vault_operator,
+#     kubernetes_namespace.this,
+#     kubectl_manifest.vault_role,
+#     kubectl_manifest.vault_clusterrolebinding,
+#     kubectl_manifest.vault_sa,
+#     kubectl_manifest.vault_rolebinding,
+#     kubectl_manifest.vault,
+#     helm_release.cloudflared,
+#     kubernetes_secret.cert_manager_token,
+#     kubernetes_secret.cloudflared_credentials,
+#     kubernetes_secret.external_dns_token,
+#     kubernetes_secret.vault_credentials,
+#     kubernetes_namespace.this,
+#     kubectl_manifest.clusterissuer_letsencrypt_prod,
+#     kubectl_manifest.external_secret_vault,
+#     kubectl_manifest.app_projects,
+#     kubernetes_config_map.cmp-plugin
 
-  ]
-  # depends_on = [module.rke2_mater_servers]
-}
+#   ]
+#   # depends_on = [module.rke2_mater_servers]
+# }
