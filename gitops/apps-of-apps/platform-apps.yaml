@@ -1,0 +1,98 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-apps
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+  - list:
+      elements:
+      - name: keycloak
+        namespace: security
+      - name: harbor-ha
+        namespace: harbor
+        serverSideApply: true
+      - name: velero
+        namespace: velero
+        serverSideApply: true
+      # - name: sonar
+      #   namespace: sonar
+      # - name: gitlab
+      #   namespace: gitlab
+      #   serverSideApply: true
+      #   helm:
+      #     values:
+      #     - values.yaml
+      - name: netbootxyz
+        namespace: netbootxyz
+        serverSideApply: true
+        # helm:
+        #   values:
+        #   - values.yaml
+      - name: vault
+        namespace: vault
+        serverSideApply: true
+
+      - name: minio
+        namespace: minio
+        serverSideApply: true
+        helm:
+          values:
+          - values.yaml
+        # - name: go-healthcheck
+      - name: it-tools
+        namespace: it-tools
+        serverSideApply: true
+        helm:
+          values:
+          - values.yaml
+
+      - name: kroki
+        namespace: kroki
+        serverSideApply: true
+        helm:
+          values:
+          - values.yaml
+
+  template:
+    metadata:
+      name: "{{ .name }}"
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: "."
+        # notifications.argoproj.io/subscribe.on-sync-succeeded.telegram: "-1001726711150"
+        # argocd.argoproj.io/compare-options: '{{ printf "%s=%s" "ServerSideDiff" (dig "serverSideDiff" "false" . | toString) }}'
+    spec:
+      project: platform
+      source:
+        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        targetRevision: HEAD
+        path: "platform/{{ .name }}"
+        # plugin:
+        #   name: lovely-plugin
+      destination:
+        name: in-cluster
+        namespace: '{{ default .name (dig "namespace" "" .) }}'
+      ignoreDifferences:
+      - group: apiextensions.k8s.io
+        kind: CustomResourceDefinition
+        jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+      # FIXME: https://github.com/cloudnative-pg/charts/issues/426
+      # - group: postgresql.cnpg.io
+      #   kind: Cluster
+      #   jqPathExpressions:
+      #     - .spec.postgresql.pg_hba
+      #     - .spec.postgresql.pg_ident
+      - group: apps
+        kind: "*"
+        jqPathExpressions:
+        - .spec.template.spec.hostUsers
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        # - RespectIgnoreDifferences=false
+        - '{{ printf "%s=%s" "ServerSideApply" (dig "serverSideApply" "true" . | toString) }}'

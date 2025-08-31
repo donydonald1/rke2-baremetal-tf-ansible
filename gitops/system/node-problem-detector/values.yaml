@@ -1,0 +1,13 @@
+node-problem-detector:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
+
+#  tolerations:
+#    - key: arm
+#      operator: Exists
+#    - key: arm64
+#      operator: Exists

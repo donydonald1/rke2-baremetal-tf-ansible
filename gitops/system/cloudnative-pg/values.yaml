@@ -1,0 +1,27 @@
+cloudnative-pg:
+
+  replicaCount: 1
+
+# replicas: 3
+
+# storage:
+#   size: 20Gi
+#   storageClass: "vsphere"
+
+# superuserSecret: postgres-superuser-secret
+
+# liveCluster: postgres-v17
+
+# previousCluster: postgres-v17
+
+# roles:
+# - name: admin
+#   ensure: present
+#   comment: "friendly user"
+#   login: true
+#   superuser: true
+#   createdb: true
+#   createrole: false
+#   inRoles:
+#   - pg_monitor
+#   - pg_signal_backen

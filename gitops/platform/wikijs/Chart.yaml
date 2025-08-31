@@ -1,0 +1,9 @@
+name: wikijs
+apiVersion: v2
+version: 0.6.10
+dependencies:
+- name: wikijs
+  version: 0.6.10
+  repository: https://charts.plcnk.net
+
+# Kawha1234

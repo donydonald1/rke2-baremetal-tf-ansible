@@ -1,0 +1,151 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-v17
+  # namespace: default
+  annotations:
+    kyverno.io/ignore: "true"
+spec:
+  # using only 1 replica: very difficult to drain the node where postgres is running
+  # using more than 1 replica: write amplification issues when leveraging replicated storage (e.g. ceph)
+  description: "PostGreSQL cluster managed by CloudNative-PG Operator"
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5
+  primaryUpdateStrategy: unsupervised
+  startDelay: 7200
+  storage:
+    size: 20Gi
+    storageClass: vsphere
+  walStorage:
+    storageClass: vsphere
+    size: 8Gi
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: postgres-superuser-secret
+  bootstrap:
+    recovery:
+      source: postgres-v17
+    # initdb:
+    #   localeCollate: 'en_US.utf8'
+    #   localeCType: 'en_US.utf8'
+    #   dataChecksums: true
+    #   database: grafana
+    #   owner: grafana
+    #   secret:
+    #     name: postgres-superuser-secret
+    #   postInitTemplateSQL:
+    #   - CREATE EXTENSION postgis;
+    #   - CREATE EXTENSION postgis_topology;
+    #   - CREATE EXTENSION fuzzystrmatch;
+    #   - CREATE EXTENSION postgis_tiger_geocoder;
+  managed:
+    roles:
+    - name: admin
+      ensure: present
+      comment: "friendly user"
+      login: true
+      superuser: true
+      createdb: true
+      createrole: true
+      passwordSecret:
+        name: postgres-superuser-secret
+      inRoles:
+      - pg_monitor
+      - pg_signal_backend
+  postgresql:
+    parameters:
+      max_wal_size: "2GB"
+      min_wal_size: "1280MB"
+      max_wal_senders: "16"
+      wal_keep_size: "512MB"
+      # wal_level: "replica" # "logical" # immutable
+      fsync: "on"
+      # hot_standby: "on"   #  immutable
+      log_connections: "false"
+      log_disconnections: "false"
+      log_hostname: "false"
+      checkpoint_timeout: "5min" # Can be higher (15min)
+      max_connections: "300"
+      shared_buffers: 512MB
+  monitoring:
+    enablePodMonitor: true
+  # https://github.com/cloudnative-pg/cloudnative-pg/issues/2570
+  enablePDB: false
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "4Gi"
+  backup:
+    retentionPolicy: 15d
+    barmanObjectStore:
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://postgres/
+      endpointURL: http://minio.minio.svc.cluster.local:9000
+      serverName: postgres-v17
+      s3Credentials:
+        accessKeyId:
+          name: postgres-minio-secret
+          key: MINIO_ACCESS_KEY
+        secretAccessKey:
+          name: postgres-minio-secret
+          key: MINIO_SECRET_KEY
+    # use to migrate from an existing cnpg cluster to a new cluster
+    # initdb:
+    #   import:
+    #     type: monolith
+    #     databases:
+    #       - "*"
+    #     roles:
+    #       - "*"
+    #     source:
+    #       externalCluster: dendrite-psql-v16
+  externalClusters:
+  # this represents the s3 backup to restore from. *nota-bene: the backup must be the same major version of the target cluster
+  - name: postgres-v17
+    barmanObjectStore:
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://postgres/
+      endpointURL: http://minio.minio.svc.cluster.local:9000
+      serverName: postgres-v17
+      s3Credentials:
+        accessKeyId:
+          name: postgres-minio-secret
+          key: MINIO_ACCESS_KEY
+        secretAccessKey:
+          name: postgres-minio-secret
+          key: MINIO_SECRET_KEY
+  # externalClusters:
+  # Represents the backups stored in minio which can be restored from.
+  # - name: dendrite-psql-backup
+  #   barmanObjectStore:
+  #     wal:
+  #       compression: bzip2
+  #       maxParallel: 4
+  #     destinationPath: s3://postgresql/
+  #     endpointURL: http://minio.kube-system.svc:9000
+  #     serverName: dendrite-v17
+  #     s3Credentials:
+  #       accessKeyId:
+  #         name: cloudnative-pg
+  #         key: MINIO_ACCESS_KEY
+  #       secretAccessKey:
+  #         name: cloudnative-pg
+  #         key: MINIO_SECRET_KEY
+
+  # Represents the previous cluster to migrate from
+  # - name: dendrite-psql-v16
+  #   connectionParameters:
+  #     host: dendrite-psql-v16-rw.default.svc
+  #     user: postgres
+  #     dbname: postgres
+  #     sslmode: require
+  #   password:
+  #     name: cloudnative-pg
+  #     key: password

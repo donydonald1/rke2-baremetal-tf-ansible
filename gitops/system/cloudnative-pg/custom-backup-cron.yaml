@@ -1,0 +1,54 @@
+# ---
+# apiVersion: batch/v1
+# kind: CronJob
+# metadata:
+#   name: {{ .Values.liveCluster }}-backup
+# spec:
+#   schedule: "0 4 * * *"
+#   concurrencyPolicy: Forbid
+#   jobTemplate:
+#     spec:
+#       template:
+#         spec:
+#           automountServiceAccountToken: false
+#           enableServiceLinks: false
+# {{/*          securityContext:*/}}
+# {{/*            runAsUser: 1031*/}}
+# {{/*            runAsGroup: 1031*/}}
+# {{/*            fsGroup: 1031*/}}
+# {{/*            supplementalGroups:*/}}
+# {{/*              - 65541*/}}
+
+#           containers:
+#             - name: postgres-backup
+#               image: docker.io/prodrigestivill/postgres-backup-local:16
+#               imagePullPolicy: IfNotPresent
+#               command:
+#                 - "/backup.sh"
+#               env:
+#                 - name: POSTGRES_HOST
+#                   value: {{ .Values.liveCluster }}-rw.kube-system.svc.cluster.local
+#                 - name: POSTGRES_USER
+#                   valueFrom:
+#                     secretKeyRef:
+#                       name: {{ .Values.superuserSecret }}
+#                       key: username
+#                 - name: POSTGRES_PASSWORD
+#                   valueFrom:
+#                     secretKeyRef:
+#                       name: {{ .Values.superuserSecret }}
+#                       key: password
+#                 - name: POSTGRES_DB
+#                   value: "mealie,kanboard,home-assistant,webtrees"
+#               volumeMounts:
+#                 - name: backup
+#                   mountPath: /backups
+#                   subPath: {{ .Values.liveCluster }}
+
+#           restartPolicy: OnFailure
+
+#           volumes:
+#             - name: backup
+#               nfs:
+#                 server: 192.168.1.115
+#                 path: "/kube-backup"

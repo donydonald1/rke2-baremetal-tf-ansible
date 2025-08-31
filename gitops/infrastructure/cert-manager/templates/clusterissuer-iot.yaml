@@ -1,0 +1,18 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+    name: iot
+    namespace: cert-manager
+spec:
+    vault:
+        path: pki/techsecom/sign/internal-certificates-techsecom-iot
+        # Vault internal service has a custom CA that has to be added here replicating secret.
+        # This adds an additional jump through the ingress but it is cleanest:
+        server: https://vault.dev.techsecoms.com
+        auth:
+            kubernetes:
+                role: allow-iot-pki
+                mountPath: /v1/auth/kubernetes
+                serviceAccountRef:
+                    name: cert-manager

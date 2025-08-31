@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: velero-vsphere-plugin-config
+data:
+    cluster_flavor: VANILLA
+    vsphere_secret_name: velero-vsphere-config-secret
+    vsphere_secret_namespace: velero

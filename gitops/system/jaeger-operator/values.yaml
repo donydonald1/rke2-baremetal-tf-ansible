@@ -1,0 +1,24 @@
+jaeger-operator:
+  fullnameOverride: "jaeger-operator"
+  jaeger:
+    # Specifies whether Jaeger instance should be created
+    create: true
+    spec:
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        hosts:
+        - jaeger.dev.techsecoms.com
+        labels:
+          app: jaeger
+        tls:
+        - secretName: jaeger-tls
+          hosts:
+          - jaeger.dev.techsecoms.com
+        # we need to ensure that oauth2-proxy is used for authentication
+        # annotations:
+        #   nginx.ingress.kubernetes.io/auth-signin: https://oauth-edp.techsecoms.com/oauth2/start?rd=https://$host$request_uri
+        #   nginx.ingress.kubernetes.io/auth-url: http://oauth2-proxy.edp.svc.cluster.local:8080/oauth2/auth

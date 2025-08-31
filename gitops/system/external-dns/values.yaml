@@ -1,0 +1,31 @@
+external-dns:
+  interval: 1m
+  logLevel: debug
+  provider:
+    name: cloudflare
+  env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: value
+  extraArgs:
+  - --annotation-filter=external-dns.alpha.kubernetes.io/enabled in (true)
+  # policy sync for fully handle the domain
+  policy: upsert-only
+
+  sources:
+  - service
+  - ingress
+  # domainFilters:
+  # - techsecoms.com
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring
+  resources:
+    requests:
+      cpu: 10m
+      memory: 14Mi
+    limits:
+      memory: 64Mi

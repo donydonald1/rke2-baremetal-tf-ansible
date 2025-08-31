@@ -80,3 +80,21 @@ output "vault_root_token" {
   sensitive   = true
   description = "The root token for Vault"
 }
+
+output "vault_admin_password" {
+  value       = var.vault_admin_password
+  sensitive   = true
+  description = "The admin password for Vault"
+}
+
+output "vault_admin_username" {
+  value       = var.vault_admin_username
+  sensitive   = false
+  description = "The admin username for Vault"
+}
+
+output "rancher_bootstrap_password" {
+  value       = length(var.rancher_bootstrap_password) > 0 ? var.rancher_bootstrap_password : random_password.rancher_bootstrap[0].result
+  description = "The Rancher bootstrap password, either provided or generated."
+  sensitive   = true
+}

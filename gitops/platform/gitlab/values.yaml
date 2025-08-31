@@ -1,0 +1,482 @@
+gitlab:
+  certmanager:
+    install: false
+    installCRDs: false
+  nginx-ingress:
+    enabled: false
+  global:
+    time_zone: America/Chicago
+    appConfig:
+      omniauth:
+        enabled: true
+        aautoSignInWithProvider: 'saml'
+        syncProfileAttributes: [ 'email' ]
+        allowBypassTwoFactor: []
+        autoLinkSamlUser: true
+        providers:
+        - secret: idp-provider
+      contentSecurityPolicy:
+        enabled: true
+        directives:
+          default_src: "'self'"
+          script_src: "'self' 'unsafe-inline' 'unsafe-eval' https://www.recaptcha.net https://apis.google.com"
+          frame_ancestors: "'self'"
+          frame_src: "'self' https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com"
+          img_src: "* data: blob:"
+          style_src: "'self' 'unsafe-inline'"
+      terraformState:
+        enabled: true
+        bucket: gitlab-terraform-state
+        # connection: {}
+      gitlab_docs:
+        enabled: false
+        host: https://gitlab-docs.dev.techsecoms.com
+      # sidekiq:
+      #   routingRules:
+      #   - [ "resource_boundary=cpu", "cpu-boundary" ]
+      #   - [ "feature_category=pages", null ]
+      #   - [ "feature_category=search", "search" ]
+      #   - [ "feature_category=memory|resource_boundary=memory", "memory-bound" ]
+      #   - [ "*", "default" ]
+      # application:
+      #   create: true
+    psql:
+      host: gitlab-postgresql-ha-pgpool.gitlab.svc.cluster.local
+      serviceName: gitlab-postgresql-ha-pgpool
+      port: "5432"
+      database: "gitlab"
+      username: "gitlab"
+      # applicationName:
+      # preparedStatements: false
+      # databaseTasks: true
+      # connectTimeout:
+      # keepalives:
+      # keepalivesIdle:
+      # keepalivesInterval:
+      # keepalivesCount:
+      # tcpUserTimeout:
+      password:
+        useSecret: true
+        secret: postgresql-secret
+        key: password
+    redis:
+      auth:
+        enabled: true
+        secret: redis-creds
+        key: REDIS_PASSWORD
+      # connectTimeout: 1
+      # readTimeout: 1
+      # writeTimeout: 1
+      host: "redis-master"
+      port: 6379
+        # database: 0
+        # user: webservice
+        # sentinels:
+        #   - host:
+        #     port:
+      sentinelAuth:
+        enabled: false
+        secret: redis-creds
+        key: REDIS_PASSWORD
+        # geo:
+        #   enabled: true
+    shell:
+      tcp:
+        proxyProtocol: true
+    rails:
+      bootsnap:
+        enabled: true
+    defaultProjectsFeatures:
+      issues: true
+      mergeRequests: true
+      wiki: true
+      snippets: true
+      builds: true
+      containerRegistry: true
+    cron_jobs:
+      # Flag stuck CI builds as failed
+      stuck_ci_jobs_worker:
+        cron: "0 * * * *"
+      # Schedule pipelines in the near future
+      pipeline_schedule_worker:
+        cron: "19 * * * *"
+      # Remove expired build artifacts
+      expire_build_artifacts_worker:
+        cron: "*/7 * * * *"
+      # Periodically run 'git fsck' on all repositories.
+      repository_check_worker:
+        cron: "20 * * * *"
+      # Send admin emails once a week
+      admin_email_worker:
+        cron: "0 0 * * 0"
+      # Remove outdated repository archives
+      repository_archive_cache_worker:
+        cron: "0 * * * *"
+      # Verify custom GitLab Pages domains
+      pages_domain_verification_cron_worker:
+        cron: "*/15 * * * *"
+      schedule_migrate_external_diffs_worker:
+        cron: "15 * * * *"
+      # Prune stale group runners on opted-in namespaces
+      ci_runners_stale_group_runners_prune_worker_cron:
+        cron: "30 * * * *"
+      # Periodically update ci_runner_versions table with up-to-date versions and status
+      ci_runner_versions_reconciliation_worker:
+        cron: "@daily"
+      # Periodically clean up stale ci_runner_machines records
+      ci_runners_stale_machines_cleanup_worker:
+        cron: "36 * * * *"
+    packages:
+      enabled: true
+      proxy_download: true
+      bucket: gitlab-packages
+      # connection: {}
+    terraformState:
+      enabled: true
+      bucket: gitlab-terraform-state
+      # connection: {}
+    gitaly:
+      internal:
+        names:
+        - default
+        - default2
+        - default3
+    hosts:
+      domain: gitlab.dev.techsecoms.com
+      # hostSuffix: prod
+      https: true
+      gitlab:
+        name: gitlab.dev.techsecoms.com
+        # https: true
+        # tls:
+        #   enabled: true
+        #   secretName: gitlab-tls
+      registry:
+        name: gitlab.registry.dev.techsecoms.com
+        https: true
+      minio:
+        name: gitlab.minio.dev.techsecoms.com
+        https: true
+      smartcard:
+        name: gitlab.smartcard.dev.techsecoms.com
+      kas:
+        name: gitlab.kas.dev.techsecoms.com
+      pages:
+        name: pages.dev.techsecoms.com
+        https: true
+      ssh: gitlab.dev.techsecoms.com
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      external-dns.alpha.kubernetes.io/target: "rke2-manager.techsecoms.com"
+      external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+      configureCertmanager: false
+      useNewIngressForCerts: false
+      provider: "nginx"
+      class: nginx
+      tls:
+        enabled: true
+        secretName: gitlab-tls
+    initialRootPassword:
+      secret: gitlab-initial-root-password
+      key: password
+    keda:
+      enabled: true
+    spamcheck:
+      enabled: true
+    # pages:
+    #   enabled: true
+    #   # minReplicas: 1
+    #   # maxReplicas: 2
+    #   # resources:
+    #   #   requests:
+    #   #     cpu: 500m
+    #   #     memory: 1500M
+    pages:
+      enabled: true
+    praefect:
+      enabled: false
+    initialDefaults:
+      signupEnabled: false
+  postgresql:
+    install: false
+    image:
+      tag: 15.4.0-ce.0
+    primary:
+      extendedConfiguration: |-
+        max_connections = 200
+  prometheus:
+    install: true
+  gitlab:
+    toolbox:
+      replicas: 2
+      backups:
+        cron:
+          enabled: true
+          concurrencyPolicy: Replace
+          failedJobsHistoryLimit: 1
+          schedule: "0 1 * * *"
+          successfulJobsHistoryLimit: 3
+          extraArgs: "--skip registry --skip artifacts"
+          suspend: false
+          backoffLimit: 6
+          safeToEvict: false
+          restartPolicy: "OnFailure"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 550M
+    webservice:
+      minReplicas: 1
+      maxReplicas: 6
+      resources:
+        requests:
+          cpu: 5
+      #     memory: 1500M
+      # service:
+      #   type: LoadBalancer
+      #   # loadBalancerIP: 1.2.3.4
+      #   loadBalancerSourceRanges:
+      #   - 0.0.0.0/0
+      ingress:
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          nginx.ingress.kubernetes.io/ssl-redirect: false
+          nginx.ingress.kubernetes.io/ssl-passthrough: false
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Gitlab
+          gethomepage.dev/description: Prod Gitlab
+          gethomepage.dev/group: Platform
+          gethomepage.dev/app: gitlab-webservice-default
+          gethomepage.dev/icon: https://gitlab.com/gitlab-com/gitlab-artwork/raw/master/logo/logo-square.png
+          gethomepage.dev/href: https://gitlab.dev.techsecoms.com
+          gethomepage.dev/siteMonitor: https://gitlab.dev.techsecoms.com
+          gethomepage.dev/external: "true"
+          # nginx.ingress.kubernetes.io/rewrite-target: /
+        class: nginx
+        tls:
+          enabled: true
+          secretName: gitlab-web-tls
+
+    sidekiq:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 3
+      resources:
+        requests:
+          cpu: 2
+      #     memory: 1000M
+    gitlab-shell:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 6
+      config:
+        clientAliveInterval: 15
+  redis:
+    install: true
+    fullnameOverride: redis
+    architecture: replication
+    auth:
+      sentinel: true
+      existingSecret: redis-creds
+      existingSecretPasswordKey: REDIS_PASSWORD
+    master:
+      persistence:
+        size: 8Gi
+    replica:
+      persistence:
+        size: 8Gi
+      resources:
+        requests:
+          cpu: 2
+          memory: 2Gi
+        limits:
+          memory: 3Gi
+    sentinel:
+      enabled: false
+  minio:
+    # resources:
+    requests:
+      cpu: 4
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: false
+      class: nginx
+      tls:
+        enabled: true
+        secretName: minio-tls
+    persistence:
+      size: 100Gi
+    pools: 3
+    replicas: 16
+  registry:
+    # resources:
+    requests:
+      cpu: 5
+    ingress:
+      # annotations:
+      #   kubernetes.io/ingress.class: nginx
+      #   cert-manager.io/cluster-issuer: letsencrypt-prod
+      #   nginx.ingress.kubernetes.io/ssl-redirect: false
+      class: nginx
+      tls:
+        enabled: true
+        secretName: registry-tls
+
+  gitlab-zoekt:
+    install: false
+  gitlab-runner:
+    log_level: "debug"
+    install: true
+    rbac:
+      create: true
+      clusterWideAccess: true
+      serviceAccountName: gitlab-runner
+      serviceAccount:
+        create: true
+      rules:
+      - resources: [ "configmaps", "pods", "pods/attach", "secrets", "services" ]
+        verbs: [ "get", "list", "watch", "create", "patch", "delete" ]
+      - resources: [ "secrets", "namespace", "configmaps", "services", "pods", "pods/log" ]
+        verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+      - resources: [ "serviceAccounts" ]
+        verbs: [ "get" ]
+      - apiGroups: [ "" ]
+        resources: [ "pods/exec", "deployments", "statefulsets", "daemonsets" ]
+        verbs: [ "create", "patch", "delete" ]
+    revisionHistoryLimit: 2
+    runnerRegistrationToken: ""
+    runner-token: ""
+    envVars:
+    - name: RUNNER_ENV
+      value: "DOCKER_TLS_CERTDIR=/certs"
+    securityContext:
+      privileged: true
+      allowPrivilegeEscalation: true
+    runners:
+      privileged: true
+      config: |
+        [[runners]]
+          
+          name = "gitlab-runner"
+          [runners.kubernetes]
+            privileged = true
+            poll_timeout = 2000
+            node_selector_overwrite_allowed = ".*"
+            namespace = "{{.Release.Namespace}}"
+            image = "docker:stable"
+          {{- if .Values.global.minio.enabled }}
+          [runners.cache]
+            Type = "s3"
+            Path = "gitlab-runner"
+            privileged = true
+            Shared = true
+            [runners.cache.s3]
+              ServerAddress = {{ include "gitlab-runner.cache-tpl.s3ServerAddress" . }}
+              BucketName = "runner-cache"
+              BucketLocation = "us-east-1"
+              Insecure = false
+
+          {{ end }}
+        [[runners.kubernetes.volumes.empty_dir]]
+          name = "docker-certs"
+          mount_path = "/certs/client"
+          medium = "Memory"
+    podAnnotations:
+      gitlab.com/prometheus_scrape: "true"
+      gitlab.com/prometheus_port: 9252
+
+eso:
+  # -- Install components of the ESO.
+  enabled: true
+  # -- Defines provider type. One of `aws` or `generic`.
+  type: "vault"
+  # -- Defines Secret Store name.
+  secretStoreName: "vault"
+  # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
+  secretName: "secret/harbor"
+  # -- Role ARN for the ExternalSecretOperator to assume.
+postgresql-ha:
+  global:
+    storageClass: "vsphere"
+
+  postgresql:
+    username: "gitlab"
+    password: null
+    existingSecret: "postgresql-secret"
+    database: "gitlab"
+    resourcesPreset: "large"
+    maxConnections: 2000
+    image:
+      debug: true
+    command:
+    - /bin/bash
+
+    args:
+    - -ec
+    - |
+      sleep 60
+      /opt/bitnami/scripts/postgresql-repmgr/entrypoint.sh /opt/bitnami/scripts/postgresql-repmgr/run.sh
+    extendedConf: |-
+      wal_keep_size = '1GB'
+      recovery_min_apply_delay = 180s
+    resources:
+      limits:
+        cpu: 4
+        memory: "4Gi"
+      requests:
+        cpu: 2
+        memory: "1Gi"
+  witness:
+    create: false
+  repmgr:
+    password: null
+    existingSecret: "repmgr-secret"
+
+  pgpool:
+    adminUsername: "admin"
+    adminPassword: null
+    existingSecret: "pgpool-secret"
+    replicaCount: 3
+    resourcesPreset: "large"
+    maxPool: 1000
+    clientIdleLimit: 60
+    numInitChildren: 300
+    childLifeTime: 60
+    reservedConnections: 0
+    childMaxConnections: 1000
+    resources:
+      limits:
+        cpu: 4
+        memory: "8Gi"
+      requests:
+        cpu: 2
+        memory: "6Gi"
+    image:
+      debug: true
+  volumePermissions:
+    enabled: true
+  metrics:
+    enabled: true
+    # resources:
+    #   limits:
+    #     cpu: 2
+    #     memory: "2Gi"
+    #   requests:
+    #     cpu: 1
+    #     memory: "500Mi"
+  persistence:
+    enabled: true
+    existingClaim: ""
+    storageClass: ""
+    mountPath: /bitnami/postgresql
+    accessModes:
+    - ReadWriteOnce
+    size: 8Gi

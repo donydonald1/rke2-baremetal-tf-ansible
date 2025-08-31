@@ -1,0 +1,196 @@
+ingress-nginx:
+  controller:
+    admissionWebhooks:
+      enabled: enable
+      timeoutSeconds: 30
+
+    replicaCount: 2
+    extraArgs:
+      # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
+      enable-annotation-validation: "false"
+
+    config:
+      # auto value takes all nodes in cgroups v2 (dell_v2)
+      worker-processes: 1
+      hsts: "true"
+      http-snippet: |
+        proxy_cache_path /dev/shm levels=1:2 keys_zone=static-cache:2m max_size=300m inactive=7d use_temp_path=off;
+        proxy_cache_key $scheme$proxy_host$request_uri;
+        proxy_cache_lock on;
+        proxy_cache_use_stale updating;
+      use-forwarded-headers: true
+      allow-snippet-annotations: true
+      annotations-risk-level: Critical
+      enable-brotli: "true"
+      brotli-level: "6"
+      # Added text/html and application/vnd.api+json + default ones:
+      # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#gzip-types
+      brotli-types: text/html and application/vnd.api+json application/xml+rss application/atom+xml application/javascript application/x-javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/svg+xml image/x-icon text/css text/plain text/x-component
+
+    ingressClassResource:
+      name: nginx
+      enabled: true
+      default: true
+      # controllerValue: "k8s.io/ingress-nginx"
+
+    ingressClass: nginx
+
+    resources:
+      limits:
+        memory: 328Mi
+      requests:
+        cpu: 40m
+        memory: 150Mi
+
+    # affinity:
+    #   nodeAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #     - weight: 100
+    #       preference:
+    #         matchExpressions:
+    #         - key: kubernetes.io/hostname
+    #           operator: In
+    #           values:
+    #           - prusik
+    #     - weight: 50
+    #       preference:
+    #         matchExpressions:
+    #         - key: kubernetes.io/arch
+    #           operator: In
+    #           values:
+    #           - amd64
+    #     - weight: 25
+    #       preference:
+    #         matchExpressions:
+    #         - key: kubernetes.io/hostname
+    #           operator: In
+    #           values:
+    #           - k8s-odroid-hc4-3
+
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 11
+      # when CPU == 500m
+      targetCPUUtilizationPercentage: 1250
+      targetMemoryUtilizationPercentage: 200
+    topologySpreadConstraints:
+    - maxSkew: 4
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/instance: ingress-nginx
+          app.kubernetes.io/name: ingress-nginx
+    service:
+      enabled: true
+
+      annotations:
+        kube-vip.io/loadbalancerIPs: 10.10.0.84
+      loadBalancerClass: "kube-vip.io/kube-vip-class"
+      externalTrafficPolicy: Local
+      enableHttp: true
+      enableHttps: true
+      ports:
+        http: 80
+        https: 443
+
+      targetPorts:
+        http: http
+        https: https
+
+      type: LoadBalancer
+      internal:
+        enabled: false
+
+    extraVolumeMounts:
+    - name: dshm
+      mountPath: /dev/shm
+
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          release: monitoring
+
+    extraVolumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        # not working until v1.21? https://github.com/kubernetes/kubernetes/issues/63126
+        sizeLimit: 303Mi
+
+    ### START OF SECTION TO DEPLOY A DNS PROXY (CoreDNS) AS SIDECAR CONTAINER TO NGINX ###
+    # We need this DNS Proxy to overcome the issue that under Cilium network infrastructure,
+    # nginx failed to update the list of CoreDNS addresses. Thus, when CoreDNS pods are moved,
+    # nginx tried to connect to no-longer-exist CoreDNS pods which resulted in a failure in DNS resolving.
+    #
+    # We deploy a local DNS Server (CoreDNS) and this acts as a proxy between nginx and kube-system/kube-dns.
+    # By doing this, the nginx instance will always connect to this local DNS server only which eliminating
+    # the needs of refreshing/managing a fleet of CoreDNS Server.
+    #
+    # Link to some related issues:
+    # - https://github.com/kubernetes/ingress-nginx/issues/9222
+    # - https://github.com/projectcalico/calico/issues/4509
+    - name: dns-proxy-config-volume
+      configMap:
+        name: dns-proxy-config
+
+    dnsPolicy: None
+    dnsConfig:
+      nameservers:
+      - 127.0.0.1
+      searches:
+      - ingress-nginx.svc.cluster.local
+      - svc.cluster.local
+      - cluster.local
+      - techsecoms
+      - techsecoms.com
+
+    extraContainers:
+    - name: dns-proxy
+      image: coredns/coredns:1.12.0
+      args:
+      - -conf
+      - /etc/coredns/Corefile
+      volumeMounts:
+      - mountPath: /etc/coredns
+        name: dns-proxy-config-volume
+        readOnly: true
+      livenessProbe:
+        failureThreshold: 5
+        httpGet:
+          path: /health
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /health
+          port: 8080
+          scheme: HTTP
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          memory: 128Mi
+        requests:
+          cpu: 10m
+          memory: 13Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          add:
+          - NET_BIND_SERVICE
+          drop:
+          - all
+        readOnlyRootFilesystem: true
+  tcp:
+    22: "gitlab/gitlab-gitlab-shell:22"

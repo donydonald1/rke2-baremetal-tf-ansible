@@ -1,0 +1,7 @@
+name: kanboard
+apiVersion: v2
+version: 1.2.31
+dependencies:
+  - name: app-template
+    version: 0.3.1
+    repository: https://bjw-s.github.io/helm-charts/

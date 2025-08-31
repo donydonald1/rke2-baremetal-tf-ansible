@@ -1,0 +1,143 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: system-apps
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+  - list:
+      elements:
+      - name: pod-cleaner
+        namespace: pod-cleaner
+        serverSideApply: true
+      - name: eck-operator
+        namespace: elastic-system
+        serverSideApply: true
+
+      # - name: awx-operator
+      #   namespace: awx-operator
+      #   serverSideApply: true
+
+      - name: change-detection
+        namespace: change-detection
+        # #- name: awx-operator
+      - name: kured
+        namespace: kured
+        serverSideApply: true
+
+      - name: external-dns
+        namespace: external-dns
+
+      # - name: spegel
+      #   namespace: spegel
+
+      - name: jaeger-operator
+
+      - name: keycloak-operator
+        namespace: keycloak-operator
+        serverSideApply: true
+
+      - name: minio-operator
+        namespace: minio-operator
+        serverSideApply: true
+
+      - name: postgres-operator
+        namespace: postgres-operator
+        serverSideApply: true
+
+      - name: opentelemetry-operator
+      - name: redis-operator
+        serverSideApply: true
+
+      - name: sonar-operator
+        namespace: sonarqube
+        serverSideApply: true
+
+      # - name: kured
+      - name: keda
+        namespace: keda
+        serverSideApply: true
+        helm:
+          values:
+          - "values.yaml"
+
+      - name: reloader
+        namespace: reloader
+        serverSideApply: true
+
+      - name: descheduler
+        namespace: descheduler
+        serverSideApply: true
+
+      - name: node-feature-discovery
+        namespace: node-feature-discovery
+        serverSideApply: true
+
+      - name: node-problem-detector
+        namespace: node-problem-detector
+        serverSideApply: true
+
+      - name: external-secrets
+        namespace: external-secrets
+        serverSideApply: true
+        # - name: couchdb
+      - name: kanboard
+        namespace: kenboard
+        serverSideApply: true
+
+      - name: cloudnative-pg
+        namespace: cnpg-system
+        serverSideApply: true
+        # - name: ghost
+        # - name: go-healthcheck
+        # - name: kube-prometheus-stack
+        #   namespace: monitoring
+        #   serverSideApply: true
+
+  template:
+    metadata:
+      name: "{{ .name }}"
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: "."
+        notifications.argoproj.io/subscribe.on-sync-succeeded.telegram: "-1001726711150"
+        argocd.argoproj.io/sync-wave: "5"
+        argocd.argoproj.io/hook: PreSync
+        # argocd.argoproj.io/compare-options: '{{ printf "%s=%s" "ServerSideDiff" (dig "serverSideDiff" "false" . | toString) }}'
+    spec:
+      project: system
+      source:
+        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        targetRevision: HEAD
+        path: "system/{{ .name }}"
+        # plugin:
+        #   name: avp-directory-include
+        # env:
+        #   - name: FILE_NAME
+        #     value: "system/{{ .name }}"
+      destination:
+        name: in-cluster
+        namespace: '{{ default .name (dig "namespace" "" .) }}'
+      ignoreDifferences:
+      - group: apiextensions.k8s.io
+        kind: CustomResourceDefinition
+        jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+        FIXME: https://github.com/cloudnative-pg/charts/issues/426
+      - group: postgresql.cnpg.io
+        kind: Cluster
+        jqPathExpressions:
+        - .spec.postgresql.pg_hba
+        - .spec.postgresql.pg_ident
+      - group: apps
+        kind: "*"
+        jqPathExpressions:
+        - .spec.template.spec.hostUsers
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        # - RespectIgnoreDifferences=false
+        - '{{ printf "%s=%s" "ServerSideApply" (dig "serverSideApply" "false" . | toString) }}'

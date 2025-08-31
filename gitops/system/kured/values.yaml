@@ -1,0 +1,32 @@
+kured:
+  configuration:
+    startTime: "2:30"
+    endTime: "6:30"
+    timeZone: "America/Chicago"
+    lockTtl: 30m
+    drainTimeout: 90m
+    # slackChannel: <secret:secret/slack~channel>              # slack channel for reboot notifications
+    # slackHookUrl: <secret:secret/slack~webhook-url>              # slack hook URL for reboot notifications
+    slackUsername: "kured-rke2-local-manager" # slack username for reboot notifications (default "kured")
+  tolerations:
+  - key: "arm"
+    operator: "Exists"
+  - key: "arm64"
+    operator: "Exists"
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+  metrics:
+    create: true
+  service:
+    create: true
+  extraEnvVars:
+  - name: slackHookUrl
+    valueFrom:
+      secretKeyRef:
+        name: slack-webhook-url
+        key: webhook-url
+  - name: slackChannel
+    valueFrom:
+      secretKeyRef:
+        name: slack-webhook-url
+        key: channel

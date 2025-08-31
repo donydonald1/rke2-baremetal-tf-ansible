@@ -595,3 +595,24 @@ variable "vault_wait_time" {
   type        = string
   default     = "120s"
 }
+
+variable "rancher_admin_password" {
+  type        = string
+  default     = ""
+  description = "The admin password for Rancher"
+  sensitive   = true
+
+}
+
+variable "vault_admin_username" {
+  type        = string
+  default     = "admin"
+  description = "The admin username for Vault"
+}
+
+variable "vault_admin_password" {
+  type        = string
+  default     = "CHANGEME-StrongPassword123!"
+  description = "The admin password for Vault"
+  sensitive   = true
+}

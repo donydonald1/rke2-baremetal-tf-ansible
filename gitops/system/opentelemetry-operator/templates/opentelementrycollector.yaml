@@ -1,0 +1,64 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: general
+  # Add label to the collector. This label will be added to ServiceMonitor and tracked properly by Prometheus.
+  labels:
+    release: prom
+spec:
+  observability:
+    metrics:
+      enableMetrics: true
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+
+    processors:
+      k8sattributes: {}
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      batch:
+        send_batch_size: 10000
+        timeout: 10s
+
+    exporters:
+      debug: {}
+      otlp:
+        endpoint: "jaeger-operator-jaeger-collector.observability:4317"
+        tls:
+          insecure: true
+      otlp/data-prepper-traces:
+        endpoint: data-prepper.data-prepper:21890
+        tls:
+          insecure: true
+      otlp/data-prepper-metrics:
+        endpoint: data-prepper.data-prepper:21891
+        tls:
+          insecure: true
+      otlp/data-prepper-logs:
+        endpoint: data-prepper.data-prepper:21892
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch, k8sattributes]
+          exporters: [debug, otlp/data-prepper-traces]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [debug, otlp/data-prepper-metrics]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [debug, otlp/data-prepper-logs]
+      telemetry:
+        metrics:
+          address: ":8888"

@@ -1,0 +1,27 @@
+apiVersion: v2
+name: harbor-ha
+description: A Helm chart for Harbor with HA
+
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+type: application
+
+# The chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 1.16.2
+
+# Version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: "1.10.2"
+
+dependencies:
+- name: harbor
+  version: 1.16.2
+  repository: https://helm.goharbor.io
+- name: redis
+  version: 20.11.5
+  repository: https://charts.bitnami.com/bitnami
+
+# - name: minio
+#   # version: 14.10.1
+#   repository: https://charts.bitnami.com/bitami

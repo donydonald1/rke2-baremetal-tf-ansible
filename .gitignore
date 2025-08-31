@@ -31,6 +31,7 @@ override.tf.json
 *ops-dev-dc-bm-rke2-kubeconfig.yaml
 *providers.tf
 *provider.tf
+*versions.tf
 # Ignore transient lock info files created by terraform apply
 .terraform.tfstate.lock.info
 

@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        kubernetes.io/ingress.class: nginx
+    labels:
+        app.kubernetes.io/instance: kroki
+        app.kubernetes.io/name: kroki
+        app.kubernetes.io/version: 0.25.0
+    name: kroki
+
+spec:
+    ingressClassName: nginx
+    rules:
+      - host: kroki.dev.techsecoms.com
+        http:
+            paths:
+              - backend:
+                    service:
+                        name: kroki
+                        port:
+                            number: 8000
+                path: /
+                pathType: ImplementationSpecific
+    tls:
+      - hosts:
+          - kroki.dev.techsecoms.com
+        secretName: kroki-tls

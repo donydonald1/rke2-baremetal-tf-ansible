@@ -1,0 +1,25 @@
+apiVersion: edp.epam.com/v1alpha1
+kind: Sonar
+metadata:
+  name: sonar
+spec:
+  url: {{ .Values.sonarUrl }}
+  secret: {{.Values.sonarSecret}}
+  defaultPermissionTemplate: edp-default
+  settings:
+    - key: sonar.dbcleaner.hoursBeforeKeepingOnlyOneSnapshotByDay
+      value: "20"
+    - key: sonar.auth.oidc.enabled
+      value: "{{ .Values.oidc.enabled }}"
+{{- if .Values.oidc.enabled }}
+    - key: sonar.auth.oidc.issuerUri
+      value: "{{ .Values.oidc.keycloakUrl }}/auth/realms/{{ .Values.oidc.keycloakRealm }}"
+    - key: sonar.auth.oidc.clientId.secured
+      value: "sonar"
+    - key: sonar.core.serverBaseURL
+      value: {{ .Values.sonarUrl }}
+    - key: sonar.auth.oidc.groupsSync.claimName
+      value: "roles"
+    - key: sonar.auth.oidc.groupsSync
+      value: "true"
+{{- end }}

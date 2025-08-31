@@ -1,0 +1,14 @@
+apiVersion: edp.epam.com/v1alpha1
+kind: SonarUser
+metadata:
+  name: sonar-ci-user
+spec:
+  secret: ci-sonar
+  login: ci-user
+  name: ci-user
+  groups:
+    - view-group
+  permissions:
+    - scan
+  sonarRef:
+    name: sonar

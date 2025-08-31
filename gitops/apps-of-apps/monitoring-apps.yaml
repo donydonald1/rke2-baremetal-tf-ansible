@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: applications
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+  - list:
+      elements:
+      - name: uptime-kuma
+        namespace: kube-system
+        helm:
+          valueFiles:
+          - "values.yaml"
+        serverSideApply: true
+        # - name: cloudnative-pg
+        #   namespace: cnpg-system
+        #   serverSideApply: true
+        # # - name: ghost
+        # - name: go-healthcheck
+        # - name: kube-prometheus-stack
+        #   namespace: monitoring
+        #   serverSideApply: true
+
+        # - name: grafana
+        #   namespace: monitoring
+        #   # serverSideApply: true
+
+        # - name: influxdb
+        #   namespace: monitoring
+        #   serverSideApply: true
+
+        # - name: botkube
+        #   namespace: monitoring
+        #   serverSideApply: true
+
+        # - name: karma
+        #   namespace: monitoring
+        #   serverSideApply: true
+
+        # - name: eck-stack
+        #   namespace: elastic-system
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
+        #   serverSideApply: true
+        # - name: loki
+        #   namespace: monitoring
+        #   serverSideApply: true
+        # helm:
+        #   valueFiles:
+        #   - "values.yaml"
+        # - "manifest-dev.yaml"
+        # - name: eck-stack
+        #   namespace: elastic-system
+        # serverSideApply: true
+
+  template:
+    metadata:
+      name: "{{ .name }}"
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: "."
+        # notifications.argoproj.io/subscribe.on-sync-succeeded.telegram: "-1001726711150"
+        # argocd.argoproj.io/compare-options: '{{ printf "%s=%s" "ServerSideDiff" (dig "serverSideDiff" "false" . | toString) }}'
+    spec:
+      project: monitoring
+      source:
+        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        targetRevision: HEAD
+        path: "monitoring/{{ .name }}"
+        # plugin:
+        #   name: avp-directory-include
+        # env:
+        #   - name: FILE_NAME
+        #     value: "system/{{ .name }}"
+      destination:
+        name: in-cluster
+        namespace: '{{ default .name (dig "namespace" "" .) }}'
+      # ignoreDifferences:
+      #   - group: apiextensions.k8s.io
+      #     kind: CustomResourceDefinition
+      #     jqPathExpressions:
+      #       - .spec.conversion.webhook.clientConfig.caBundle
+      #   # FIXME: https://github.com/cloudnative-pg/charts/issues/426
+      #   # - group: postgresql.cnpg.io
+      #   #   kind: Cluster
+      #   #   jqPathExpressions:
+      #   #     - .spec.postgresql.pg_hba
+      #   #     - .spec.postgresql.pg_ident
+      #   - group: apps
+      #     kind: "*"
+      #     jqPathExpressions:
+      #       - .spec.template.spec.hostUsers
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        # - RespectIgnoreDifferences=false
+        - '{{ printf "%s=%s" "ServerSideApply" (dig "serverSideApply" "true" . | toString) }}'

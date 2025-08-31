@@ -221,35 +221,35 @@ resource "kubernetes_config_map" "cmp-plugin" {
   depends_on = [null_resource.kustomization]
 }
 
-# resource "kubectl_manifest" "argocd_apps-of-apps" {
-#   yaml_body  = <<YAML
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: app-of-apps
-#   namespace: argocd
-#   annotations:
-#     argocd.argoproj.io/sync-wave: "1"
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io
-# spec:
-#   project: main
-#   source:
-#     repoURL: ${var.argocd_tamplate_repo_url}
-#     path: apps-of-apps/
-#     targetRevision: HEAD
-#   destination:
-#     name: in-cluster
-#     namespace: argocd
-#   syncPolicy:
-#     syncOptions:
-#       - CreateNamespace=true
-#     automated:
-#       selfHeal: true
-#       prune: true
-# YAML
-#   depends_on = [kubernetes_config_map.cmp-plugin, helm_release.vault_operator]
-# }
+resource "kubectl_manifest" "argocd_apps-of-apps" {
+  yaml_body  = <<YAML
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: main
+  source:
+    repoURL: ${var.argocd_tamplate_repo_url}
+    path: gitops/apps-of-apps/
+    targetRevision: HEAD
+  destination:
+    name: in-cluster
+    namespace: argocd
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
+YAML
+  depends_on = [kubernetes_config_map.cmp-plugin, helm_release.vault_operator]
+}
 
 resource "kubectl_manifest" "vault" {
   yaml_body = <<YAML

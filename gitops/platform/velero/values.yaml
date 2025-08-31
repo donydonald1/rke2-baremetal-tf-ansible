@@ -1,0 +1,96 @@
+velero:
+  resources:
+    # https://velero.io/docs/v1.10/performance-guidance/#case-3-1062510k-files-781-directories-1000mb-per-file-total-10376gb-content
+    requests:
+      cpu: 200m
+      memory: 500Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+  initContainers:
+  - name: velero-plugin-for-aws
+    # https://github.com/vmware-tanzu/velero-plugin-for-aws#compatibility
+    image: velero/velero-plugin-for-aws:v1.11.1
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: plugins
+      mountPath: "/target"
+  - image: vsphereveleroplugin/velero-plugin-for-vsphere:v1.6.0
+    imagePullPolicy: IfNotPresent
+    name: velero-plugin-for-vsphere
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /target
+      name: plugins
+  # - name: velero-plugin-for-csi
+  #   image: velero/velero-plugin-for-csi:v0.6.0
+  #   imagePullPolicy: IfNotPresent
+  #   volumeMounts:
+  #   - mountPath: /target
+  #     name: plugins
+
+  nodeSelector:
+    kubernetes.io/arch: amd64
+
+  configuration:
+    backupStorageLocation:
+    - name: default
+      # https://velero.io/docs/v1.13/supported-providers/
+      provider: aws
+      default: true
+      bucket: velero
+      config:
+        region: minio
+        s3ForcePathStyle: true
+        s3Url: http://minio.minio.svc:9000
+        publicUrl: https://s3.dev.techsecoms.com
+
+    uploaderType: restic
+    fsBackupTimeout: 32h
+    defaultItemOperationTimeout: 32h
+    garbageCollectionFrequency: 24h
+    logLevel: debug
+  serviceAccount:
+    server:
+      create: true
+      name: velero
+      annotations:
+      labels:
+  credentials:
+    existingSecret: velero-bucket-credentials
+
+  extraVolumes: []
+
+  extraVolumeMounts: []
+  # The number of seconds to allow for graceful termination of the pod. defaults is 1h
+  terminationGracePeriodSeconds: 1800
+
+  metrics:
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: monitoring
+    prometheusRule:
+      additionalLabels:
+        release: monitoring
+      enabled: true
+      spec:
+      - alert: VeleroBackupPartialFailures
+        annotations:
+          message: Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} partialy failed backups.
+        expr: |-
+          velero_backup_partial_failure_total{schedule!=""} / velero_backup_attempt_total{schedule!=""} > 0.25
+        for: 15m
+        labels:
+          severity: warning
+      - alert: VeleroBackupFailures
+        annotations:
+          message: Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} failed backups.
+        expr: |-
+          velero_backup_failure_total{schedule!=""} / velero_backup_attempt_total{schedule!=""} > 0.25
+        for: 15m
+        labels:
+          severity: warning

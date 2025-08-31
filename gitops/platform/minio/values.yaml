@@ -1,0 +1,214 @@
+minio:
+  mode: distributed
+
+  drivesPerNode: 1
+  # Number of MinIO containers running
+  replicas: 3
+  pools: 1
+
+  existingSecret: minio-users
+
+  additionalAnnotations:
+    reloader.stakater.com/auto: "true"
+  persistence:
+    enabled: true
+    annotations: {}
+    storageClass: vsphere
+    volumeName: minio-pv
+    accessMode: ReadWriteOnce
+    size: 200Gi
+    subPath: ""
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/enabled: "true"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3601"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3601"
+      # fix timeouts uploading big files disabling proxy buffering
+      nginx.ingress.kubernetes.io/proxy-buffering: "off"
+      nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      # https://min.io/docs/minio/linux/integrations/setup-nginx-proxy-with-minio.html
+      nginx.ingress.kubernetes.io/server-snippet: |
+        ignore_invalid_headers off;
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        chunked_transfer_encoding off;
+    hosts:
+    - &host s3.dev.techsecoms.com
+    tls:
+    - hosts:
+      - *host
+      secretName: s3-tls-certificate
+
+  consoleIngress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/enabled: "true"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        chunked_transfer_encoding off;
+    hosts:
+    - &hostMC minio.dev.techsecoms.com
+    tls:
+    - hosts:
+      - *hostMC
+      secretName: mc-s3-tls-certificate
+
+  resources:
+    requests:
+      memory: 2Gi
+
+  users:
+  - accessKey: velero
+    existingSecret: minio-users
+    existingSecretKey: veleroPassword
+    policy: readwrite
+
+  - accessKey: postgres-user
+    existingSecret: minio-users
+    existingSecretKey: postgres_password
+    policy: readwrite
+
+  - accessKey: gitlab-ci
+    existingSecret: minio-users
+    existingSecretKey: gitlab-ciPassword
+    policy: readwrite
+
+  - accessKey: gitlab-registry
+    existingSecret: minio-users
+    existingSecretKey: gitlab-registryPassword
+    policy: readwrite
+
+  - accessKey: harbor
+    existingSecret: minio-users
+    existingSecretKey: harborPassword
+    policy: readwrite
+
+  - accessKey: terraform-state
+    existingSecret: minio-users
+    existingSecretKey: terraform-statePassword
+    policy: readwrite
+
+  - accessKey: gitlab-objectstore
+    existingSecret: minio-users
+    existingSecretKey: gitlab-objectstorePassword
+    policy: readwrite
+
+  - accessKey: rke2-management-clusters
+    existingSecret: minio-users
+    existingSecretKey: rke2-management-clustersPassword
+    policy: readwrite
+
+  - accessKey: rke2-downstream-clusters
+    existingSecret: minio-users
+    existingSecretKey: rke2-downstream-clustersPassword
+    policy: readwrite
+  ## Username, password and policy to be assigned to the user
+  ## Default policies are [readonly|readwrite|writeonly|consoleAdmin|diagnostics]
+  ## Add new policies as explained here https://min.io/docs/minio/kubernetes/upstream/administration/identity-access-management.html#access-management
+  ## NOTE: this will fail if LDAP is enabled in your MinIO deployment
+  ## make sure to disable this if you are using LDAP.
+  #- accessKey: console
+  #  secretKey: console123
+  #  policy: consoleAdmin
+  # Or you can refer to specific secret
+  #- accessKey: externalSecret
+  #  existingSecret: my-secret
+  #  existingSecretKey: password
+  #  policy: readonly
+
+  buckets:
+  - name: velero
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  - name: postgres
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+  #   # Name of the bucket
+
+  - name: gitlab-ci
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  - name: gitlab-registry
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: harbor
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: terraform-state
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-objectstore
+    policy: none
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  - name: rke2-management-clusters
+    policy: none
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  - name: rke2-downstream-clusters
+    policy: none
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  environment:
+    MINIO_IDENTITY_OPENID_ROLE_POLICY: consoleAdmin
+  ## OpenID Identity Management
+  ## The following section documents environment variables for enabling external identity management using an OpenID Connect (OIDC)-compatible provider.
+  ## See https://min.io/docs/minio/linux/operations/external-iam/configure-openid-external-identity-management.html for a tutorial on using these variables.
+  oidc:
+    enabled: true
+    configUrl: https://techsecoms.ui.com/gw/idp/api/v1/public/oauth/516737b6-8288-49ac-be5f-c0941167e9b6/.well-known/openid-configuration
+    existingClientSecretName: minio-oidc
+    existingClientIdKey: clientId
+    existingClientSecretKey: clientSecret
+    scopes: openid,profile,email
+    redirectUri: https://minio.dev.techsecoms.com/oauth_callback
+    displayName: Techsecom-OIDC
+
+  metrics:
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: monitoring

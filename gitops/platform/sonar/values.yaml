@@ -1,0 +1,66 @@
+sonarqube:
+  deploymentType: "Deployment"
+  nameOverride: "sonar"
+  fullnameOverride: "sonar"
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+    - name: sonar.dev.techsecoms.com
+    annotations:
+      # This property allows for reports up to a certain size to be uploaded to SonarQube
+      nginx.ingress.kubernetes.io/proxy-body-size: "64m"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      # This property allows for CORS requests to be made to SonarQube (we use it on the EDP Portal Widget)
+      nginx.ingress.kubernetes.io/enable-cors: "true"
+      nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+      nginx.ingress.kubernetes.io/cors-allow-methods: "OPTIONS, GET"
+      nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    tls:
+    - hosts:
+      - sonar.dev.techsecoms.com
+      secretName: sonar-tls
+  resources:
+    limits:
+      cpu: 700m
+      memory: 3Gi
+    requests:
+      cpu: 100m
+      memory: 1.5Gi
+
+  plugins:
+    install:
+    - "https://github.com/vaulttec/sonar-auth-oidc/releases/download/v2.1.1/sonar-auth-oidc-plugin-2.1.1.jar"
+    - "https://github.com/checkstyle/sonar-checkstyle/releases/download/10.12.1/checkstyle-sonar-plugin-10.12.1.jar"
+    - "https://github.com/spotbugs/sonar-findbugs/releases/download/4.2.9/sonar-findbugs-plugin-4.2.9.jar"
+    - "https://github.com/jborgers/sonar-pmd/releases/download/3.4.0/sonar-pmd-plugin-3.4.0.jar"
+    - "https://github.com/sbaudoin/sonar-ansible/releases/download/v2.5.1/sonar-ansible-plugin-2.5.1.jar"
+    - "https://github.com/sbaudoin/sonar-yaml/releases/download/v1.7.0/sonar-yaml-plugin-1.7.0.jar"
+    - "https://github.com/Inform-Software/sonar-groovy/releases/download/1.8/sonar-groovy-plugin-1.8.jar"
+    - "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/1.14.0/sonarqube-community-branch-plugin-1.14.0.jar"
+
+  # Community branch plugin configuration
+  jvmCeOpts: -javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-1.14.0.jar=ce
+  jvmOpts: -javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-1.14.0.jar=web
+
+  env:
+  - name: SONAR_TELEMETRY_ENABLE
+    value: "false"
+
+  prometheusExporter:
+    enabled: false
+
+  postgresql:
+    enabled: false
+
+  jdbcOverwrite:
+    enable: true
+    jdbcUrl: "jdbc:postgresql://sonar-primary.sonar:5432/sonar?socketTimeout=1500"
+    jdbcUsername: "sonar"
+    jdbcSecretName: sonar-pguser-sonar
+    jdbcSecretPasswordKey: "password"
+
+# -- Integration with keycloak
+oidc:
+  # If set to true, the OIDC resources will be created.
+  enabled: true
