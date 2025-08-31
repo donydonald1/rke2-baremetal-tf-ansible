@@ -81,6 +81,13 @@ output "kubeconfig_file" {
 #   description = "The root token for Vault"
 # }
 
+output "domain_name" {
+  value       = var.domain
+  description = "The domain name for the Kubernetes cluster"
+  sensitive   = false
+
+}
+
 output "vault_admin_password" {
   value       = var.vault_admin_password
   sensitive   = true
