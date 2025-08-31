@@ -1,12 +1,12 @@
-resource "kubernetes_namespace" "this" {
-  for_each = toset(var.namespaces)
+# resource "kubernetes_namespace" "this" {
+#   for_each = toset(var.namespaces)
 
-  metadata {
-    name = each.key
-  }
+#   metadata {
+#     name = each.key
+#   }
 
-  depends_on = [module.kubeconfig]
-}
+#   depends_on = [module.kubeconfig]
+# }
 
 # resource "kubectl_manifest" "vault_sa" {
 #   yaml_body  = <<YAML

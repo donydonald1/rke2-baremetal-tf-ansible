@@ -66,20 +66,20 @@ output "cloudflare_api_token" {
 
 }
 
-output "all_namespaces" {
-  value = data.kubernetes_all_namespaces.all.namespaces
-}
+# output "all_namespaces" {
+#   value = data.kubernetes_all_namespaces.all.namespaces
+# }
 
 output "tunnel_id" {
   value = module.cloudflare.tunnel_id
 
 }
 
-output "vault_root_token" {
-  value       = length(data.kubernetes_secret_v1.vault_seal) > 0 ? lookup(data.kubernetes_secret_v1.vault_seal.data, "vault-root", null) : null
-  sensitive   = true
-  description = "The root token for Vault"
-}
+# output "vault_root_token" {
+#   value       = length(data.kubernetes_secret_v1.vault_seal) > 0 ? lookup(data.kubernetes_secret_v1.vault_seal.data, "vault-root", null) : null
+#   sensitive   = true
+#   description = "The root token for Vault"
+# }
 
 output "vault_admin_password" {
   value       = var.vault_admin_password
