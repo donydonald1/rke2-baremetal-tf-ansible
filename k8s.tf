@@ -370,7 +370,17 @@ spec:
     value: 'true'
 
   istioEnabled: false
-#   envsConfig:
+  envsConfig:
+  - name: VAULT_ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: vault-admin-credentials
+        key: username
+  - name: VAULT_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: vault-admin-credentials
+        key: password
 #   - name: OIDC_CLIENT_SECRET
 #     valueFrom:
 #       secretKeyRef:
@@ -400,6 +410,14 @@ spec:
         policies:
           - allow_iot_pki
         ttl: 1h
+    - type: userpass
+      path: userpass
+      configuration:
+        users:
+          - name: "$${ env `VAULT_ADMIN_USERNAME` }"
+            password: "$${ env `VAULT_ADMIN_PASSWORD` }"
+            policies:
+              - admin
     - type: oidc
       path: oidc
       options:
@@ -609,6 +627,19 @@ resource "time_sleep" "sleep-wait-vault" {
   create_duration = var.vault_wait_time != null ? var.vault_wait_time : "1s"
 }
 
+resource "kubernetes_secret" "vault_admin_credentials" {
+  metadata {
+    name      = "vault-admin-credentials"
+    namespace = helm_release.vault_operator.namespace
+  }
+
+  data = {
+    username = base64encode("${var.vault_admin_username}")
+    password = base64encode("${var.vault_admin_password}")
+  }
+
+  type = "Opaque"
+}
 resource "kubernetes_secret" "vault_credentials" {
   metadata {
     name      = "avp-plugin-credentials"
