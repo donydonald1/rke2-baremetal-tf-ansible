@@ -18,7 +18,7 @@ variable "private_registry_url" {
   description = "The URL of the private registry."
 }
 
-variable "kubevip_image_tag" {
+variable "kubevip_version" {
   type        = string
   default     = "v0.9.2"
   description = "The image tag for the Kube-VIP container."

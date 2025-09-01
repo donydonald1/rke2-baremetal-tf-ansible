@@ -26,7 +26,7 @@ rke2_download_kubeconf_path: "${path.cwd}/"
 rke2_cluster_group_name: "${var.cluster_name}"
 rke2_channel: stable
 rke2_cis_profile: "cis"
-rke2_kubevip_image: ghcr.io/kube-vip/kube-vip:"${var.kubevip_image_tag}"
+rke2_kubevip_image: ghcr.io/kube-vip/kube-vip:${var.kubevip_version}
 
 rke2_loadbalancer_ip_range: 
   range-global: "${var.manager_rke2_loadbalancer_ip_range}"
@@ -37,7 +37,7 @@ rke2_loadbalancer_ip_range:
 rke2_ha_mode_kubevip: true
 rke2_kubevip_ipvs_lb_enable: true
 rke2_kubevip_cloud_provider_enable: true
-rke2_kubevip_cloud_provider_image: ghcr.io/kube-vip/kube-vip-cloud-provider:"${var.kubevip_cloud_provider_image_tag}"
+rke2_kubevip_cloud_provider_image: ghcr.io/kube-vip/kube-vip-cloud-provider:${var.kubevip_cloud_provider_image_tag}
 rke2_kubevip_svc_enable: true
 rke2_kubevip_metrics_port: 2112
 rke2_version: "${var.rke2_version}"
