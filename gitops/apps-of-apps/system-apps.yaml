@@ -11,9 +11,9 @@ spec:
       - name: pod-cleaner
         namespace: pod-cleaner
         serverSideApply: true
-      - name: eck-operator
-        namespace: elastic-system
-        serverSideApply: true
+      # - name: eck-operator
+      #   namespace: elastic-system
+      #   serverSideApply: true
 
       # - name: awx-operator
       #   namespace: awx-operator
@@ -26,8 +26,8 @@ spec:
         namespace: kured
         serverSideApply: true
 
-      - name: external-dns
-        namespace: external-dns
+      # - name: external-dns
+      #   namespace: external-dns
 
       # - name: spegel
       #   namespace: spegel
@@ -77,18 +77,17 @@ spec:
       - name: node-problem-detector
         namespace: node-problem-detector
         serverSideApply: true
-
-      - name: external-secrets
-        namespace: external-secrets
-        serverSideApply: true
+        # - name: external-secrets
+        #   namespace: external-secrets
+        #   serverSideApply: true
         # - name: couchdb
-      - name: kanboard
-        namespace: kenboard
-        serverSideApply: true
+        # - name: kanboard
+        #   namespace: kenboard
+        #   serverSideApply: true
 
-      - name: cloudnative-pg
-        namespace: cnpg-system
-        serverSideApply: true
+        # - name: cloudnative-pg
+        #   namespace: cnpg-system
+        #   serverSideApply: true
         # - name: ghost
         # - name: go-healthcheck
         # - name: kube-prometheus-stack
@@ -107,9 +106,9 @@ spec:
     spec:
       project: system
       source:
-        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
-        path: "system/{{ .name }}"
+        path: "gitops/system/{{ .name }}"
         # plugin:
         #   name: avp-directory-include
         # env:

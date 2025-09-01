@@ -39,9 +39,9 @@ spec:
     spec:
       project: main
       source:
-        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
-        path: "main/{{ .name }}"
+        path: "gitops/main/{{ .name }}"
         # plugin:
         #   name: avp-directory-include
         # env:

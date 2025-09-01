@@ -11,10 +11,9 @@ spec:
       - name: kube-cleanup-operator
         serverSideApply: true
         namespace: kube-cleanup
-
-      - name: cert-manager
-        namespace: cert-manager
-        serverSideApply: true
+      # - name: cert-manager
+      #   namespace: cert-manager
+      #   serverSideApply: true
       # - name: ingress-nginx
       #   namespace: ingress-nginx
       #   serverSideApply: true
@@ -45,9 +44,9 @@ spec:
     spec:
       project: infrastructure
       source:
-        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
-        path: "infrastructure/{{ .name }}"
+        path: "gitops/infrastructure/{{ .name }}"
         # plugin:
         #   name: avp-directory-include
         # env:

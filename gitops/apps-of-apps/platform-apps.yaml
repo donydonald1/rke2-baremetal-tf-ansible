@@ -16,30 +16,30 @@ spec:
       - name: velero
         namespace: velero
         serverSideApply: true
-      # - name: sonar
-      #   namespace: sonar
-      # - name: gitlab
-      #   namespace: gitlab
-      #   serverSideApply: true
-      #   helm:
-      #     values:
-      #     - values.yaml
-      - name: netbootxyz
-        namespace: netbootxyz
-        serverSideApply: true
+        # - name: sonar
+        #   namespace: sonar
+        # - name: gitlab
+        #   namespace: gitlab
+        #   serverSideApply: true
+        #   helm:
+        #     values:
+        #     - values.yaml
+        # - name: netbootxyz
+        #   namespace: netbootxyz
+        #   serverSideApply: true
         # helm:
         #   values:
         #   - values.yaml
-      - name: vault
-        namespace: vault
-        serverSideApply: true
+        # - name: vault
+        #   namespace: vault
+        #   serverSideApply: true
 
-      - name: minio
-        namespace: minio
-        serverSideApply: true
-        helm:
-          values:
-          - values.yaml
+        # - name: minio
+        #   namespace: minio
+        #   serverSideApply: true
+        #   helm:
+        #     values:
+        #     - values.yaml
         # - name: go-healthcheck
       - name: it-tools
         namespace: it-tools
@@ -47,13 +47,12 @@ spec:
         helm:
           values:
           - values.yaml
-
-      - name: kroki
-        namespace: kroki
-        serverSideApply: true
-        helm:
-          values:
-          - values.yaml
+      # - name: kroki
+      #   namespace: kroki
+      #   serverSideApply: true
+      #   helm:
+      #     values:
+      #     - values.yaml
 
   template:
     metadata:
@@ -65,9 +64,9 @@ spec:
     spec:
       project: platform
       source:
-        repoURL: https://github.com/Techsecom/argocd-gitops.git
+        repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
-        path: "platform/{{ .name }}"
+        path: "gitops/platform/{{ .name }}"
         # plugin:
         #   name: lovely-plugin
       destination:
