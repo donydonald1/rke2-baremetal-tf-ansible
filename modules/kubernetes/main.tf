@@ -237,7 +237,7 @@ YAML
 }
 
 resource "time_sleep" "sleep-wait-vault" {
-  depends_on      = [null_resource.kustomization, kubectl_manifest.vault, ]
+  depends_on      = [kubectl_manifest.vault, ]
   create_duration = var.vault_wait_time != null ? var.vault_wait_time : "1s"
 }
 
