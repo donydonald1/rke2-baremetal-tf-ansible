@@ -109,3 +109,9 @@ variable "argocd_repo_url" {
   description = "The URL of the ArgoCD application template repository"
   type        = string
 }
+
+variable "vault_organization" {
+  description = "The organization for the Vault deployment"
+  type        = string
+  default     = "my-org"
+}
