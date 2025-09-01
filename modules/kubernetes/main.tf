@@ -220,7 +220,7 @@ metadata:
 spec:
   project: main
   source:
-    repoURL: ${var.argocd_tamplate_repo_url}
+    repoURL: ${var.argocd_repo_url}
     path: gitops/apps-of-apps/
     targetRevision: HEAD
   destination:
@@ -244,7 +244,7 @@ resource "time_sleep" "sleep-wait-vault" {
 resource "kubernetes_secret" "vault_admin_credentials" {
   metadata {
     name      = "vault-admin-credentials"
-    namespace = helm_release.vault_operator.namespace
+    namespace = var.vault_namespace
   }
 
   data = {
@@ -284,7 +284,7 @@ metadata:
   name: "vault"
   labels:
     backup/retain: quaterly
-  namespace: "${helm_release.vault_operator.namespace}"
+  namespace: "${var.vault_namespace}"
 spec:
   size: 3
   # renovate: datasource=docker

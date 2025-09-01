@@ -104,3 +104,8 @@ variable "vault_namespace" {
   type        = string
   default     = "vault"
 }
+
+variable "argocd_repo_url" {
+  description = "The URL of the ArgoCD application template repository"
+  type        = string
+}
