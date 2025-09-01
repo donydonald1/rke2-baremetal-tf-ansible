@@ -1,7 +1,7 @@
 variable "cloudflared_namespace" {
   description = "The namespace for the Cloudflared deployment"
   type        = string
-  default     = "cloudflare"
+  default     = "cloudflared"
 }
 
 variable "tunnel_id_random_password" {
@@ -114,4 +114,18 @@ variable "vault_organization" {
   description = "The organization for the Vault deployment"
   type        = string
   default     = "my-org"
+}
+variable "namespaces" {
+  description = "Kubernetes namespaces to create"
+  type        = list(string)
+  default     = ["cloudflared", "external-dns", "cert-manager"]
+
+  validation {
+    condition = alltrue([
+      contains(var.namespaces, "external-dns"),
+      contains(var.namespaces, "cert-manager"),
+      contains(var.namespaces, "cloudflared"),
+    ])
+    error_message = "namespaces must include 'external-dns', 'cert-manager', and 'cloudflared' to create the respective secrets."
+  }
 }

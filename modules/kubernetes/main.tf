@@ -1,7 +1,17 @@
+resource "kubernetes_namespace" "this" {
+  for_each = toset(var.namespaces)
+
+  metadata {
+    name = each.key
+  }
+
+  depends_on = [module.kubeconfig]
+}
+
 resource "kubernetes_secret" "cloudflared_credentials" {
   metadata {
     name      = "cloudflared-credentials"
-    namespace = var.cloudflared_namespace
+    namespace = kubernetes_namespace.this["cloudflared"].metadata[0].name
 
     annotations = {
       "app.kubernetes.io/managed-by" = "Terraform"
