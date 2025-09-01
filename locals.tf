@@ -336,6 +336,8 @@ configs:
     policy.csv: |
       g, argocd:admin, role:admin
       g, argocd:read_all, role:readonly
+      g, oidc-admins, role:admin
+      g, oidc-readers, role:readonly
   secret:
     argocdServerAdminPassword: ${var.argocd_admin_password}
 
