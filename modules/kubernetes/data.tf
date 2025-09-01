@@ -3,7 +3,7 @@ data "kubernetes_secret_v1" "vault_seal" {
 
   metadata {
     name      = "vault-unseal-keys"
-    namespace = "vault"
+    namespace = var.vault_namespace
   }
 
   depends_on = [time_sleep.sleep-wait-vault]

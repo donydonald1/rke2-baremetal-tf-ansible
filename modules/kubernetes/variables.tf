@@ -98,3 +98,9 @@ variable "vault_oidc_client_secret" {
   description = "The Vault OIDC client secret."
   sensitive   = true
 }
+
+variable "vault_namespace" {
+  description = "The namespace for the Vault deployment"
+  type        = string
+  default     = "vault"
+}
