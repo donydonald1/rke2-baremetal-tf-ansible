@@ -259,15 +259,6 @@ resource "null_resource" "kustomization" {
     destination = "/var/post_install/argocd.yaml"
   }
 
-  # cloudflared setup
-  # provisioner "file" {
-  #   content = templatefile(
-  #     "${path.module}/templates/cloudflared.yaml.tpl",
-  #     {
-  #       values = local.cloudflared_values
-  #   })
-  #   destination = "/var/post_install/cloudflared.yaml"
-  # }
   # external-dns setup
   provisioner "file" {
     content = templatefile(

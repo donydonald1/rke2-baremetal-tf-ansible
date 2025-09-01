@@ -110,8 +110,8 @@ policy: upsert-only
 sources:
   - service
   - ingress
-# domainFilters:
-#   - ${var.domain}
+domainFilters:
+  - ${var.domain}
 triggerLoopOnEvent: true
 interval: 5m
 txtOwnerId: ${var.cluster_name}
@@ -163,14 +163,9 @@ auditLog:
   maxAge: 1
   maxBackup: 1
   maxSize: 100
-
-  # Image for collecting rancher audit logs.
-  # Important: update pkg/image/export/resolve.go when this default image is changed, so that it's reflected accordingly in rancher-images.txt generated for air-gapped setups.
   image:
     repository: "rancher/mirrored-bci-micro"
     # tag: 15.6.24.2
-    # Override imagePullPolicy image
-    # options: Always, Never, IfNotPresent
     pullPolicy: "IfNotPresent"
 
 ingress:
@@ -202,7 +197,7 @@ postDelete:
     - cattle-fleet-system
     - cattle-system
     - rancher-operator-system
-  # Number of seconds to wait for an app to be uninstalled
+
   timeout: 120
   # by default, the job will fail if it fail to uninstall any of the apps
   ignoreTimeoutError: false

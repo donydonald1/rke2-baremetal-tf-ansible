@@ -95,17 +95,17 @@ output "cloudflare_account_id" {
   sensitive   = false
 
 }
-output "vault_admin_password" {
-  value       = var.vault_admin_password
-  sensitive   = true
-  description = "The admin password for Vault"
-}
+# output "vault_admin_password" {
+#   value       = var.vault_admin_password
+#   sensitive   = true
+#   description = "The admin password for Vault"
+# }
 
-output "vault_admin_username" {
-  value       = var.vault_admin_username
-  sensitive   = false
-  description = "The admin username for Vault"
-}
+# output "vault_admin_username" {
+#   value       = var.vault_admin_username
+#   sensitive   = false
+#   description = "The admin username for Vault"
+# }
 
 output "rancher_bootstrap_password" {
   value       = length(var.rancher_bootstrap_password) > 0 ? var.rancher_bootstrap_password : random_password.rancher_bootstrap[0].result

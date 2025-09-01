@@ -200,21 +200,6 @@ variable "cloudflare_api_key" {
   default     = ""
 }
 
-variable "namespaces" {
-  description = "Kubernetes namespaces to create"
-  type        = list(string)
-  default     = ["cloudflared", "external-dns", "cert-manager"]
-
-  validation {
-    condition = alltrue([
-      contains(var.namespaces, "external-dns"),
-      contains(var.namespaces, "cert-manager"),
-      contains(var.namespaces, "cloudflared"),
-    ])
-    error_message = "namespaces must include 'external-dns', 'cert-manager', and 'cloudflared' to create the respective secrets."
-  }
-}
-
 variable "s3_backup_access_key" {
   description = "The access key for the S3 backup."
   type        = string
@@ -486,18 +471,6 @@ variable "vault_organization" {
   default     = "Techsecom Consulting Group"
 }
 
-variable "vault_hostname" {
-  type        = string
-  default     = "vault-prod.techsecoms.com"
-  description = "The hostname for the Vault server. If not set, the IP address of the first control plane node will be used."
-
-  # validation {
-  #   condition     = var.enable_vault == false || (var.enable_vault == true && var.vault_hostname != "")
-  #   error_message = "If enable_vault is set to true, vault_hostname must be provided and cannot be empty."
-  # }
-
-}
-
 variable "vault_oidc_discovery_url" {
   type        = string
   default     = ""
@@ -517,18 +490,6 @@ variable "vault_oidc_client_secret" {
   default     = ""
   description = "The Vault OIDC client secret."
   sensitive   = true
-}
-
-variable "nfs_target" {
-  type        = string
-  description = "NFS server export to mount"
-  default     = "10.1.10.11:/var/nfs/shared/rke2_prod_data"
-}
-
-variable "nfs_mountpoint" {
-  type        = string
-  description = "Local path to mount NFS"
-  default     = "/var/longhorn"
 }
 
 variable "longhorn_values" {
@@ -601,12 +562,6 @@ variable "vault_secrets" {
   }
 }
 
-variable "vault_wait_time" {
-  description = "Time to wait for vault to be ready after installation"
-  type        = string
-  default     = "120s"
-}
-
 variable "rancher_admin_password" {
   type        = string
   default     = ""
@@ -615,15 +570,4 @@ variable "rancher_admin_password" {
 
 }
 
-variable "vault_admin_username" {
-  type        = string
-  default     = "admin"
-  description = "The admin username for Vault"
-}
 
-variable "vault_admin_password" {
-  type        = string
-  default     = "CHANGEME-StrongPassword123!"
-  description = "The admin password for Vault"
-  sensitive   = true
-}
