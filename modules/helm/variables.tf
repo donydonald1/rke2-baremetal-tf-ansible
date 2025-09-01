@@ -7,7 +7,7 @@ variable "vault_operator_values" {
 variable "cloudflared_namespace" {
   description = "Namespace for Cloudflared resources"
   type        = string
-  default     = "cloudflare"
+  default     = "cloudflared"
 }
 
 variable "cloudflared_values" {
