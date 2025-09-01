@@ -5,7 +5,6 @@ resource "kubernetes_namespace" "this" {
     name = each.key
   }
 
-  depends_on = [module.kubeconfig]
 }
 
 resource "kubernetes_secret" "cloudflared_credentials" {
