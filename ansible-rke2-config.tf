@@ -91,11 +91,11 @@ rke2_disable_cloud_controller: false
 
 rke2_custom_manifests: 
   # - "${path.module}/manifest/rke2-cilium.yaml"
-  - "${path.module}/manifest/rke2-coredns.yaml"
-  - "${path.module}/manifest/rke2-multus.yaml"
-  - "${path.module}/manifest/generic-device-plugin.yaml"
-  - "${path.module}/manifest/nodelocaldns.yaml"
-  - "${path.module}/manifest/configmap-dns-proxy.yaml"
+  - "rke2-coredns.yaml"
+  - "rke2-multus.yaml"
+  - "generic-device-plugin.yaml"
+  - "nodelocaldns.yaml"
+  - "configmap-dns-proxy.yaml"
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"
