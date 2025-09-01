@@ -404,17 +404,17 @@ spec:
     value: 'true'
 
   istioEnabled: false
-  envsConfig:
-  - name: VAULT_ADMIN_USERNAME
-    valueFrom:
-      secretKeyRef:
-        name: vault-admin-credentials
-        key: username
-  - name: VAULT_ADMIN_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: vault-admin-credentials
-        key: password
+#   envsConfig:
+#   - name: VAULT_ADMIN_USERNAME
+#     valueFrom:
+#       secretKeyRef:
+#         name: vault-admin-credentials
+#         key: username
+#   - name: VAULT_ADMIN_PASSWORD
+#     valueFrom:
+#       secretKeyRef:
+#         name: vault-admin-credentials
+#         key: password
 #   - name: OIDC_CLIENT_SECRET
 #     valueFrom:
 #       secretKeyRef:
@@ -444,14 +444,14 @@ spec:
         policies:
           - allow_iot_pki
         ttl: 1h
-    - type: userpass
-      path: userpass
-      configuration:
-        users:
-          - name: "$${ env `VAULT_ADMIN_USERNAME` }"
-            password: "$${ env `VAULT_ADMIN_PASSWORD` }"
-            policies:
-              - admin
+    # - type: userpass
+    #   path: userpass
+    #   configuration:
+    #     users:
+    #       - name: "$${ env `VAULT_ADMIN_USERNAME` }"
+    #         password: "$${ env `VAULT_ADMIN_PASSWORD` }"
+    #         policies:
+    #           - admin
     - type: oidc
       path: oidc
       options:
