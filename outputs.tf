@@ -112,3 +112,4 @@ output "rancher_bootstrap_password" {
   description = "The Rancher bootstrap password, either provided or generated."
   sensitive   = true
 }
+

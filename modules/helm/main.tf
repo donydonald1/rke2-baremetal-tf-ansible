@@ -4,7 +4,7 @@ resource "helm_release" "vault_operator" {
   repository       = "oci://ghcr.io/bank-vaults/helm-charts"
   namespace        = "vault"
   create_namespace = true
-  values           = ["${var.vault_operator_values}"]
+  values           = ["${local.vault_values}"]
 
 }
 
@@ -16,5 +16,5 @@ resource "helm_release" "cloudflared" {
   repository        = "https://bjw-s-labs.github.io/helm-charts"
   namespace         = var.cloudflared_namespace
   create_namespace  = true
-  values            = [var.cloudflared_values]
+  values            = [local.cloudflared_values]
 }
