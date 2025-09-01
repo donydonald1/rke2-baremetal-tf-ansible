@@ -1,6 +1,7 @@
 variable "cloudflared_namespace" {
   description = "The namespace for the Cloudflared deployment"
   type        = string
+  default     = "cloudflare"
 }
 
 variable "tunnel_id_random_password" {
@@ -26,6 +27,7 @@ variable "cloudflare_account_id" {
 variable "external_dns_namespace" {
   description = "The namespace for the External DNS deployment"
   type        = string
+  default     = "external-dns"
 }
 
 variable "cloudflare_api_token" {
@@ -36,6 +38,7 @@ variable "cloudflare_api_token" {
 variable "cert_manager_namespace" {
   description = "The namespace for the Cert-Manager deployment"
   type        = string
+  default     = "cert-manager"
 }
 
 variable "cert_manager_issuer_token" {
