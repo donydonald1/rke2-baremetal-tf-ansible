@@ -237,7 +237,7 @@ YAML
 }
 
 resource "time_sleep" "sleep-wait-vault" {
-  depends_on      = [null_resource.kustomization, kubectl_manifest.vault, helm_release.vault_operator, ]
+  depends_on      = [null_resource.kustomization, kubectl_manifest.vault, ]
   create_duration = var.vault_wait_time != null ? var.vault_wait_time : "1s"
 }
 
@@ -254,7 +254,7 @@ resource "kubernetes_secret" "vault_admin_credentials" {
 
   type = "Opaque"
   depends_on = [
-    helm_release.vault_operator
+
   ]
 }
 resource "kubernetes_secret" "vault_credentials" {
