@@ -108,7 +108,7 @@ output "cloudflare_account_id" {
 # }
 
 output "rancher_bootstrap_password" {
-  value       = length(var.rancher_bootstrap_password) > 0 ? var.rancher_bootstrap_password : random_password.rancher_bootstrap[0].result
+  value       = random_password.rancher_bootstrap[0].result
   description = "The Rancher bootstrap password, either provided or generated."
   sensitive   = true
 }
