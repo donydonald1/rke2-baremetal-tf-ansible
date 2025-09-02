@@ -203,7 +203,7 @@ postDelete:
   ignoreTimeoutError: false
 hostname: "${var.rancher_hostname != "" ? var.rancher_hostname : var.rancher_values}"
 replicas: ${length(try(module.rke2_mater_servers.server_ips, []))}
-bootstrapPassword: "${length(var.rancher_bootstrap_password) == 0 ? resource.random_password.rancher_bootstrap[0].result : var.rancher_bootstrap_password}"
+bootstrapPassword: "${resource.random_password.rancher_bootstrap[0].result}"
 global:
   cattle:
     psp:

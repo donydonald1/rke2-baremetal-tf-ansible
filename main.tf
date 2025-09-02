@@ -49,7 +49,7 @@ resource "random_password" "rke2_token" {
 }
 
 resource "random_password" "rancher_bootstrap" {
-  count   = length(var.rancher_bootstrap_password) == 0 ? 1 : 0
+  # count   = length(var.rancher_bootstrap_password) == 0 ? 1 : 0
   length  = 48
   special = false
 }
