@@ -77,26 +77,25 @@ spec:
       destination:
         name: in-cluster
         namespace: '{{ default .name (dig "namespace" "" .) }}'
-      # ignoreDifferences:
-      #   - group: apiextensions.k8s.io
-      #     kind: CustomResourceDefinition
-      #     jqPathExpressions:
-      #       - .spec.conversion.webhook.clientConfig.caBundle
-      #   # FIXME: https://github.com/cloudnative-pg/charts/issues/426
-      #   # - group: postgresql.cnpg.io
-      #   #   kind: Cluster
-      #   #   jqPathExpressions:
-      #   #     - .spec.postgresql.pg_hba
-      #   #     - .spec.postgresql.pg_ident
-      #   - group: apps
-      #     kind: "*"
-      #     jqPathExpressions:
-      #       - .spec.template.spec.hostUsers
+      ignoreDifferences:
+      - group: apiextensions.k8s.io
+        kind: CustomResourceDefinition
+        jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+      - group: apps
+        kind: "*"
+        jqPathExpressions:
+        - .spec.template.spec.hostUsers
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
+        - ServerSideApply=true
+        - RespectIgnoreDifferences=true
+        - PruneLast=true
+        - PrunePropagationPolicy=foreground
+        - SkipDryRunOnMissingResource=true
         # - RespectIgnoreDifferences=false
         - '{{ printf "%s=%s" "ServerSideApply" (dig "serverSideApply" "true" . | toString) }}'
