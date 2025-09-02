@@ -13,9 +13,9 @@ minio:
   persistence:
     enabled: true
     annotations: {}
-    storageClass: vsphere
+    storageClass: nfs-csi
     volumeName: minio-pv
-    accessMode: ReadWriteOnce
+    accessMode: ReadWriteMany
     size: 200Gi
     subPath: ""
 
@@ -37,7 +37,7 @@ minio:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         chunked_transfer_encoding off;
     hosts:
-    - &host s3.dev.techsecoms.com
+    - &host s3.prod.techsecom.io
     tls:
     - hosts:
       - *host
@@ -52,7 +52,7 @@ minio:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         chunked_transfer_encoding off;
     hosts:
-    - &hostMC minio.dev.techsecoms.com
+    - &hostMC minio.prod.techsecom.io
     tls:
     - hosts:
       - *hostMC
@@ -209,6 +209,6 @@ minio:
 
   metrics:
     serviceMonitor:
-      enabled: true
+      enabled: false
       additionalLabels:
         release: monitoring

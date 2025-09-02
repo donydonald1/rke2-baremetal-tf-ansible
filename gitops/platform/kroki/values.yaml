@@ -8,7 +8,7 @@ ingress:
     external-dns.alpha.kubernetes.io/enabled: "true"
     # kubernetes.io/tls-acme: "true"
   hosts:
-  - host: kroki.dev.techsecoms.com
+  - host: kroki.prod.techsecom.io
     paths:
     - /
   tls:
