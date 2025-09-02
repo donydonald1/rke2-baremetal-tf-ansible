@@ -118,14 +118,14 @@ variable "vault_organization" {
 variable "namespaces" {
   description = "Kubernetes namespaces to create"
   type        = list(string)
-  default     = ["cloudflared", "external-dns", "cert-manager"]
+  default     = ["cloudflared", ]
 
-  validation {
-    condition = alltrue([
-      contains(var.namespaces, "external-dns"),
-      contains(var.namespaces, "cert-manager"),
-      contains(var.namespaces, "cloudflared"),
-    ])
-    error_message = "namespaces must include 'external-dns', 'cert-manager', and 'cloudflared' to create the respective secrets."
-  }
+  #   validation {
+  #     condition = alltrue([
+  #       contains(var.namespaces, "external-dns"),
+  #       contains(var.namespaces, "cert-manager"),
+  #       contains(var.namespaces, "cloudflared"),
+  #     ])
+  #     error_message = "namespaces must include 'external-dns', 'cert-manager', and 'cloudflared' to create the respective secrets."
+  #   }
 }
