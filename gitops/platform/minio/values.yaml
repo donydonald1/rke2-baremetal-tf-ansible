@@ -41,11 +41,11 @@ minio:
     volumeMounts:
     - name: data
       mountPath: /export
-  extraArgs:
-  - 'minio server /data --console-address :9090'
-  customCommands:
-  - /bin/bash
-  - '-c'
+  # extraArgs:
+  # - 'minio server /data --console-address :9090'
+  # customCommands:
+  # - /bin/bash
+  # - '-c'
   ingress:
     enabled: true
     ingressClassName: nginx
