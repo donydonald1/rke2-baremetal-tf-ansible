@@ -68,8 +68,8 @@ it-tools:
     data:
       enabled: true
       retain: true
-      storageClass: "vsphere"
-      accessMode: ReadWriteOnce
+      storageClass: "nfs-csi"
+      accessMode: ReadWriteMany
       size: 1Gi
 
   ingress:
@@ -98,4 +98,4 @@ it-tools:
       tls:
       - secretName: it-tools-tls
         hosts:
-        - tools.dev.techsecom.io
+        - tools.prod.techsecom.io
