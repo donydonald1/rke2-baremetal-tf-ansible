@@ -11,9 +11,9 @@ spec:
       - name: pod-cleaner
         namespace: pod-cleaner
         serverSideApply: true
-      # - name: eck-operator
-      #   namespace: elastic-system
-      #   serverSideApply: true
+      - name: eck-operator
+        namespace: elastic-system
+        serverSideApply: true
 
       # - name: awx-operator
       #   namespace: awx-operator
