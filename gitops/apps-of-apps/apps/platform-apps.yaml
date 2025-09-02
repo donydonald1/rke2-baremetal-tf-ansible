@@ -8,39 +8,39 @@ spec:
   generators:
   - list:
       elements:
-      - name: keycloak
-        namespace: security
-      - name: harbor-ha
-        namespace: harbor
-        serverSideApply: true
-      - name: velero
-        namespace: velero
-        serverSideApply: true
-        # - name: sonar
-        #   namespace: sonar
-        # - name: gitlab
-        #   namespace: gitlab
-        #   serverSideApply: true
-        #   helm:
-        #     values:
-        #     - values.yaml
-        # - name: netbootxyz
-        #   namespace: netbootxyz
-        #   serverSideApply: true
-        # helm:
-        #   values:
-        #   - values.yaml
-        # - name: vault
-        #   namespace: vault
-        #   serverSideApply: true
+      # - name: keycloak
+      #   namespace: security
+      # - name: harbor-ha
+      #   namespace: harbor
+      #   serverSideApply: true
+      # - name: velero
+      #   namespace: velero
+      #   serverSideApply: true
+      # - name: sonar
+      #   namespace: sonar
+      # - name: gitlab
+      #   namespace: gitlab
+      #   serverSideApply: true
+      #   helm:
+      #     values:
+      #     - values.yaml
+      # - name: netbootxyz
+      #   namespace: netbootxyz
+      #   serverSideApply: true
+      # helm:
+      #   values:
+      #   - values.yaml
+      # - name: vault
+      #   namespace: vault
+      #   serverSideApply: true
 
-        # - name: minio
-        #   namespace: minio
-        #   serverSideApply: true
-        #   helm:
-        #     values:
-        #     - values.yaml
-        # - name: go-healthcheck
+      # - name: minio
+      #   namespace: minio
+      #   serverSideApply: true
+      #   helm:
+      #     values:
+      #     - values.yaml
+      # - name: go-healthcheck
       - name: it-tools
         namespace: it-tools
         serverSideApply: true
