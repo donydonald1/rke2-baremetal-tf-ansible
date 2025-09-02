@@ -18,19 +18,12 @@ minio:
     accessMode: ReadWriteMany
     size: 200Gi
     # subPath: ""
-  service:
-    type: nodePort
-    clusterIP: ~
-    port: "9000"
-    nodePort: 32000
-    loadBalancerIP: ~
-    externalIPs: []
-    annotations: {}
-  consoleService:
-    type: nodePort
-    clusterIP: ~
-    port: "9001"
-    nodePort: 32001
+  securityContext:
+    enabled: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 988
+    fsGroupChangePolicy: "OnRootMismatch"
   ingress:
     enabled: true
     ingressClassName: nginx
