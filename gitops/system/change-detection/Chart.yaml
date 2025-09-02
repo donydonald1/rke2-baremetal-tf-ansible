@@ -2,6 +2,6 @@ name: change-detection
 apiVersion: v2
 version: 1.0.0
 dependencies:
-  - name: app-template
-    version: 1.5.1
-    repository: https://bjw-s.github.io/helm-charts/
+- name: app-template
+  version: 4.2.0
+  repository: "https://bjw-s-labs.github.io/helm-charts"
