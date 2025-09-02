@@ -17,14 +17,24 @@ minio:
     volumeName: minio-pv
     accessMode: ReadWriteMany
     size: 200Gi
-    subPath: "data"
+    subPath: ""
+    volumeMode: Filesystem
   securityContext:
     enabled: true
     runAsUser: 1000
     runAsGroup: 1000
     fsGroup: 988
     fsGroupChangePolicy: "OnRootMismatch"
-
+  ## Additional volumeMounts to minio container
+  extraVolumeMounts:
+  - name: minio-ocp
+    mountPath: /data
+  extraContainers: []
+  extraArgs:
+  - 'minio server /data --console-address :9090'
+  customCommands:
+  - /bin/bash
+  - '-c'
   ingress:
     enabled: true
     ingressClassName: nginx
