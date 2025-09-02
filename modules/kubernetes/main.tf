@@ -218,29 +218,57 @@ resource "kubernetes_config_map" "cmp-plugin" {
 resource "kubectl_manifest" "argocd_apps-of-apps" {
   yaml_body  = <<YAML
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
   name: app-of-apps
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: main
-  source:
-    repoURL: ${var.argocd_repo_url}
-    path: gitops/apps-of-apps/
-    targetRevision: HEAD
-  destination:
-    name: in-cluster
-    namespace: argocd
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    automated:
-      selfHeal: true
-      prune: true
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+  - list:
+      elements:
+      - name: apps
+        serverSideApply: true
+        namespace: argocd
+  template:
+    metadata:
+      name: "{{ .name }}"
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: "."
+        # notifications.argoproj.io/subscribe.on-sync-succeeded.telegram: "-1001726711150"
+        # argocd.argoproj.io/compare-options: '{{ printf "%s=%s" "ServerSideDiff" (dig "serverSideDiff" "false" . | toString) }}'
+    spec:
+      project: app-of-apps
+      source:
+        repoURL: ${var.argocd_repo_url}
+        targetRevision: HEAD
+        path: "gitops/apps-of-apps/{{ .name }}"
+      destination:
+        name: in-cluster
+        namespace: '{{ default .name (dig "namespace" "" .) }}'
+      ignoreDifferences:
+      - group: apiextensions.k8s.io
+        kind: CustomResourceDefinition
+        jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+      - group: apps
+        kind: "*"
+        jqPathExpressions:
+        - .spec.template.spec.hostUsers
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+        - RespectIgnoreDifferences=true
+        - PruneLast=true
+        - PrunePropagationPolicy=foreground
+        - SkipDryRunOnMissingResource=true
+        # - RespectIgnoreDifferences=false
+        - '{{ printf "%s=%s" "ServerSideApply" (dig "serverSideApply" "true" . | toString) }}'
+
 YAML
   depends_on = [kubernetes_config_map.cmp-plugin]
 }
