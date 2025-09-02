@@ -17,7 +17,7 @@ minio:
     volumeName: minio-pv
     accessMode: ReadWriteMany
     size: 200Gi
-    # subPath: ""
+    subPath: "export"
   securityContext:
     enabled: true
     runAsUser: 1000
