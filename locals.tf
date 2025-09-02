@@ -105,14 +105,14 @@ env:
 extraArgs:
   - --annotation-filter=external-dns.alpha.kubernetes.io/enabled in (true)
 # policy sync for fully handle the domain
-policy: upsert-only
+# policy: upsert-only
 
 sources:
   - service
   - ingress
-domainFilters:
-  - ${var.domain}
-triggerLoopOnEvent: true
+# domainFilters:
+#   - ${var.domain}
+# triggerLoopOnEvent: true
 interval: 5m
 txtOwnerId: ${var.cluster_name}
 serviceMonitor:
