@@ -49,7 +49,7 @@ variable "cert_manager_issuer_token" {
 variable "argocd_projects" {
   description = "A list of ArgoCD projects"
   type        = list(string)
-  default     = ["system", "platform", "infrastructure", "monitoring", "main"]
+  default     = ["system", "platform", "infrastructure", "monitoring", "main", "app-of-apps"]
 }
 
 variable "vault_wait_time" {
