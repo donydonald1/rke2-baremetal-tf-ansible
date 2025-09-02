@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: app-of-apps
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+  - list:
+      elements:
+      - name: apps
+        serverSideApply: true
+        namespace: argocd
+  template:
+    metadata:
+      name: "{{ .name }}"
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: "."
+        # notifications.argoproj.io/subscribe.on-sync-succeeded.telegram: "-1001726711150"
+        # argocd.argoproj.io/compare-options: '{{ printf "%s=%s" "ServerSideDiff" (dig "serverSideDiff" "false" . | toString) }}'
+    spec:
+      project: app-of-apps
+      source:
+        repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
+        targetRevision: HEAD
+        path: "gitops/apps-of-apps/{{ .name }}"
+      destination:
+        name: in-cluster
+        namespace: '{{ default .name (dig "namespace" "" .) }}'
+      ignoreDifferences:
+      - group: apiextensions.k8s.io
+        kind: CustomResourceDefinition
+        jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+      - group: apps
+        kind: "*"
+        jqPathExpressions:
+        - .spec.template.spec.hostUsers
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+        - RespectIgnoreDifferences=true
+        - PruneLast=true
+        - PrunePropagationPolicy=foreground
+        - SkipDryRunOnMissingResource=true
+        # - RespectIgnoreDifferences=false
+        - '{{ printf "%s=%s" "ServerSideApply" (dig "serverSideApply" "true" . | toString) }}'
