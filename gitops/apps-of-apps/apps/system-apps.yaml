@@ -32,7 +32,7 @@ spec:
       # - name: spegel
       #   namespace: spegel
 
-      - name: jaeger-operator
+      # - name: jaeger-operator
 
       - name: keycloak-operator
         namespace: keycloak-operator
