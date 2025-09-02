@@ -17,7 +17,7 @@ minio:
     volumeName: minio-pv
     accessMode: ReadWriteMany
     size: 200Gi
-    subPath: "data"
+    subPath: ""
   securityContext:
     enabled: true
     runAsUser: 1000
@@ -66,7 +66,13 @@ minio:
 
   resources:
     requests:
-      memory: 2Gi
+      cpu: 200m
+      memory: 256Mi
+      ephemeral-storage: 500Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+      ephemeral-storage: 500Mi
 
   users:
   - accessKey: velero
