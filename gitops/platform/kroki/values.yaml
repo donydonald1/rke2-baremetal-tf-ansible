@@ -14,7 +14,7 @@ ingress:
   tls:
   - secretName: kroki-tls
     hosts:
-    - kroki.dev.techsecoms.com
+    - kroki.prod.techsecom.io
 
 resources:
   limits:
