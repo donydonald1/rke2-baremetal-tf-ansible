@@ -1,0 +1,192 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kibana-space-role-rolemapping
+  namespace: elastic-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: kibana-space-role-rolemapping
+        image: lucashalbert/curl:latest
+        command: [ "sh", "-c" ]
+        args:
+        - |
+          until curl --insecure --user $ES_USER:$ES_PASSWORD --fail https://kibana-kb-http.elastic-system.svc.cluster.local:5601/api/status; do
+            echo 'Waiting for Kibana...'
+            sleep 3
+          done
+          until curl --insecure --user $ES_USER:$ES_PASSWORD --fail https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200; do
+            echo 'Waiting for Elasticsearch...'
+            sleep 3
+          done
+
+          echo "Creating ILM Policy for Audit Logs"
+          curl --insecure -u $ES_USER:$ES_PASSWORD -X PUT "https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200/_ilm/policy/hot_warm_delete-audit-logs" -H 'Content-Type: application/json' -d '
+          {
+            "policy": {
+              "phases": {
+                "hot": {
+                  "min_age": "0ms",
+                  "actions": {
+                    "rollover": {
+                      "max_age": "5m",
+                      "min_docs": 1000,
+                      "max_primary_shard_docs": 5000
+                    }
+                  }
+                },
+                "warm": {
+                  "min_age": "5m",
+                  "actions": {
+                    "migrate": {},
+                    "forcemerge": {
+                      "max_num_segments": 1
+                    },
+                    "set_priority": {
+                      "priority": 50
+                    }
+                  }
+                },
+                "cold": {
+                  "min_age": "10m",
+                  "actions": {
+                    "allocate": {
+                      "require": {
+                        "box_type": "cold"
+                      }
+                    },
+                    "set_priority": {
+                      "priority": 0
+                    }
+                  }
+                },
+                "delete": {
+                  "min_age": "15m",
+                  "actions": {
+                    "delete": {}
+                  }
+                }
+              }
+            }
+          }'
+
+          echo "Creating ILM Policy for Container Logs"
+          curl --insecure -u $ES_USER:$ES_PASSWORD -X PUT "https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200/_ilm/policy/hot_warm_delete-container-logs" -H 'Content-Type: application/json' -d '
+          {
+            "policy": {
+              "phases": {
+                "hot": {
+                  "min_age": "0ms",
+                  "actions": {
+                    "rollover": {
+                      "max_age": "5m",
+                      "min_docs": 1000,
+                      "max_primary_shard_docs": 5000
+                    }
+                  }
+                },
+                "warm": {
+                  "min_age": "5m",
+                  "actions": {
+                    "migrate": {},
+                    "forcemerge": {
+                      "max_num_segments": 1
+                    },
+                    "set_priority": {
+                      "priority": 50
+                    }
+                  }
+                },
+                "cold": {
+                  "min_age": "10m",
+                  "actions": {
+                    "set_priority": {
+                      "priority": 0
+                    }
+                  }
+                },
+                "delete": {
+                  "min_age": "15m",
+                  "actions": {
+                    "delete": {}
+                  }
+                }
+              }
+            }
+          }'
+          echo "Creating Index Templates for Audit Logs"
+          curl --insecure -u $ES_USER:$ES_PASSWORD -X PUT "https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200/_index_template/audit-logs-template" -H 'Content-Type: application/json' -d '
+          {
+            "index_patterns": ["audit-logs-*"],
+            "template": {
+              "settings": {
+                "index.routing.allocation.require.box_type":"hot",
+                "index.number_of_replicas": 0,
+                "index.number_of_shards": 1,
+                "index.lifecycle.name": "hot_warm_delete-audit-logs",
+                "index.lifecycle.rollover_alias": "audit-logs"
+              }
+            }
+          }'
+
+          echo "Creating Index Templates for Container Logs"
+          curl --insecure -u $ES_USER:$ES_PASSWORD -X PUT "https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200/_index_template/container-logs-template" -H 'Content-Type: application/json' -d '
+          {
+            "index_patterns": ["container-logs-*"],
+            "template": {
+              "settings": {
+                "index.routing.allocation.require.box_type":"hot",
+                "index.number_of_replicas": 0,
+                "index.number_of_shards": 1,
+                "index.lifecycle.name": "hot_warm_delete-container-logs",
+                "index.lifecycle.rollover_alias": "container-logs"
+              }
+            }
+          }'
+
+          echo "Creating Index Aliases"
+          curl --insecure -u $ES_USER:$ES_PASSWORD -X PUT "https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200/container-logs-000001" -H 'Content-Type: application/json' -d '
+          {
+            "aliases": {
+              "container-logs": {
+                "is_write_index": true
+              }
+            }
+          }'
+
+          curl --insecure -u $ES_USER:$ES_PASSWORD -X PUT "https://elasticsearch-es-http.elastic-system.svc.cluster.local:9200/audit-logs-000001" -H 'Content-Type: application/json' -d '
+          {
+            "aliases": {
+              "audit-logs": {
+                "is_write_index": true
+              }
+            }
+          }'
+          echo "Creating Audit Logs Data View"
+          curl --insecure --user $ES_USER:$ES_PASSWORD -X POST "https://kibana-kb-http.elastic-system.svc.cluster.local:5601/api/data_views/data_view" -H "kbn-xsrf: true" -H 'Content-Type: application/json' -d '
+          {
+            "data_view": {
+              "title": "audit-logs",
+              "timeFieldName": "@timestamp"
+            }
+          }'
+
+          echo "Creating Container Logs Data View"
+          curl --insecure --user $ES_USER:$ES_PASSWORD -X POST "https://kibana-kb-http.elastic-system.svc.cluster.local:5601/api/data_views/data_view" -H "kbn-xsrf: true" -H 'Content-Type: application/json' -d '
+          {
+            "data_view": {
+              "title": "container-logs",
+              "timeFieldName": "@timestamp"
+            }
+          }'
+
+        env:
+        - name: ES_USER
+          value: "elastic"
+        - name: ES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-es-elastic-user
+              key: elastic
+      restartPolicy: OnFailure

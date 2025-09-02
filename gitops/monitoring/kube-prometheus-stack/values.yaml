@@ -1,0 +1,239 @@
+kube-prometheus-stack:
+  cleanPrometheusOperatorObjectNames: true
+  customRules:
+    KubePersistentVolumeFillingUp:
+      #      for: 1h
+      severity: "warning"
+  grafana:
+    enabled: false
+    # forceDeployDatasources: true
+    # additionalDataSources:
+    # - name: Loki
+    #   type: loki
+    #   url: http://loki.loki:3100
+
+  prometheusOperator:
+    createCustomResource: true
+    prometheusConfigReloader:
+      resources:
+        limits:
+          cpu: 200m
+    admissionWebhooks:
+      enabled: true
+  prometheus:
+    thanosService:
+      enabled: true
+    thanosServiceMonitor:
+      enabled: true
+    prometheusSpec:
+      serviceMonitorSelector: {}
+      externalUrl: https://prometheus.dev.techsecoms.com
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      probeSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+      enableRemoteWriteReceiver: true
+      enableFeatures:
+      - exemplar-storage
+      retention: 30d
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: vsphere
+            resources:
+              requests:
+                storage: 100Gi
+    ingress:
+      enabled: true
+      pathType: Prefix
+      ingressClassName: nginx
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/revision-history-limit: "3"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+
+      hosts: [ prometheus.dev.techsecoms.com ]
+      tls:
+      - hosts:
+        - prometheus.dev.techsecoms.com
+        secretName: prom-server-cert-tls
+
+    server:
+      additionalScrapeConfigs:
+      - job_name: opencost
+        honor_labels: true
+        scrape_interval: 1m
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        scheme: http
+        dns_sd_configs:
+        - names:
+          - opencost.opencost
+          type: "A"
+          port: 9003
+      retention: 30d
+
+  alertmanager:
+    enabled: true
+    config:
+      global:
+        resolve_timeout: 5m
+      route:
+        group_by: [ 'alertname', 'job' ]
+        group_wait: 45s
+        group_interval: 10m
+        repeat_interval: 12h
+        routes:
+        - receiver: "null"
+          matchers:
+          - alertname =~ "InfoInhibitor|RebootScheduled|NodeMemoryHighUtilization|NodeMemoryMajorPagesFaults|CPUThrottlingHigh"
+        - receiver: "healthcheck"
+        - receiver: "null" # quote
+          matchers:
+          - alertname =~ "InfoInhibitor"
+        - receiver: "msteams"
+          match:
+            severity: critical
+          continue: true
+        - receiver: "msteams"
+      inhibit_rules:
+      - source_matchers:
+        - severity = "critical"
+        target_matchers:
+        - severity = "warning"
+        equal: [ "alertname", "namespace" ]
+      - target_match_re:
+          alertname: '.+Overcommit'
+        source_match:
+          alertname: 'Watchdog'
+        equal: [ 'prometheus' ]
+      receivers:
+      - name: "null"
+      - name: "msteams"
+        msteams_configs:
+        - send_resolved: true
+          webhook_url: <path:secret/data/msteams#webhook-url>
+          title: |-
+            🚨 [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] 
+            (Cluster: {{ .CommonLabels.cluster }})
+
+            **📢 Alert Notification - Techsecoms Monitoring**
+
+            {{ if eq .Status "firing" }}🔥 **Action Required Immediately!** 🔥{{ else }}✅ **Issue Resolved** ✅{{ end }}
+
+          text: |-
+            **🔔 Alert Details:**
+            {{ range $index, $alert := .Alerts -}}{{ if $index }}---{{ end }}
+            {{ if $alert.Labels.alertname }}
+            **🆘 Alert Name**: {{ $alert.Labels.alertname }}
+            {{ end }}
+
+            **🛑 Labels:**
+            {{ if $alert.Labels.severity }}
+            - **Severity**: {{ $alert.Labels.severity }}
+            {{ end }}
+            {{ if $alert.Labels.instance }}
+            - **Instance**: {{ $alert.Labels.instance }}
+            {{ end }}
+            {{ if $alert.Labels.namespace }}
+            - **Namespace**: {{ $alert.Labels.namespace }}
+            {{ end }}
+            {{ if $alert.Labels.pod }}
+            - **Pod**: {{ $alert.Labels.pod }}
+            {{ end }}
+
+            **📄 Annotations:**
+            {{ if $alert.Annotations.description }}
+            - **Description**: {{ $alert.Annotations.description }}
+            {{ end }}
+            {{ if $alert.Annotations.summary }}
+            - **Summary**: {{ $alert.Annotations.summary }}
+            {{ end }}
+
+            {{ if $alert.GeneratorURL }}
+            🔗 **Source**: [View in AlertManager]({{ $alert.GeneratorURL }})
+            {{ end }}
+
+            **📌 Additional Notes:**
+            - Ensure the affected service is reviewed immediately.
+            - Escalate to the **on-call team** if required.
+            - Check related metrics and logs for further debugging.
+
+            {{ end }}
+    alertmanagerSpec:
+      replicas: 1
+      # podAntiAffinity: hard
+
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: vsphere
+            resources:
+              requests:
+                storage: 5Gi
+      tolerations:
+      - key: "arm64"
+        operator: "Exists"
+  kubeProxy:
+    enabled: false
+
+  kubeApiServer:
+    enabled: true
+
+  kubeControllerManager:
+    enabled: true
+
+  kubeScheduler:
+    enabled: true
+
+  kubelet:
+    enabled: true
+    serviceMonitor:
+      metricRelabelings:
+      - action: replace
+        sourceLabels: [ "node" ]
+        targetLabel: instance
+
+  kube-state-metrics:
+    metricLabelsAllowlist: [ "persistentvolumeclaims=[*]" ]
+    prometheus:
+      monitor:
+        enabled: true
+        relabelings:
+        - action: replace
+          regex: (.*)
+          replacement: $1
+          sourceLabels: [ "__meta_kubernetes_pod_node_name" ]
+          targetLabel: kubernetes_node
+  nodeExporter:
+    enabled: true
+
+  prometheus-node-exporter:
+    prometheus:
+      monitor:
+        enabled: true
+    tolerations:
+    - key: "arm64"
+      operator: "Exists"
+    - key: "arm1"
+      operator: "Exists"
+    - key: "armhf"
+      operator: "Exists"
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+
+# Configure components of the External Secrets Operator (ESO).
+eso:
+  # -- Install components of the ESO.
+  enabled: true
+  # -- Defines provider type. One of `aws` or `generic`.
+  type: "vault"
+  # -- Defines Secret Store name.
+  secretStoreName: "vault"
+  # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
+  secretName: "secret/grafana"
+
+# oidc:
+#   enabled: false

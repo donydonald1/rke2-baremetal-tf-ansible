@@ -1,0 +1,104 @@
+prometheus-blackbox-exporter:
+  fullnameOverride: blackbox-exporter
+#  image:
+ #   repository: quay.io/prometheus/blackbox-exporter
+#    tag: v0.22.0
+
+  config:
+    modules:
+      icmp:
+        prober: icmp
+        timeout: 30s
+        icmp:
+          preferred_ip_protocol: "ip4"
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Monitoring
+      gethomepage.dev/icon: prometheus
+      gethomepage.dev/name: Blackbox
+#      kubernetes.io/ingress.class: nginx
+      cert-manager.io/issuer: step-issuer
+      cert-manager.io/issuer-kind: StepClusterIssuer
+      cert-manager.io/issuer-group: certmanager.step.sm
+      cert-manager.io/revision-history-limit: "3"
+      cert-manager.io/duration: "2160h"
+      cert-manager.io/renew-before: "720h"
+    hosts:
+      - host: blackbox.rsr.net
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - blackbox.rsr.net
+        secretName: blackbox-cert-tls
+
+  pspEnabled: false
+
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      add: [ "NET_RAW" ]
+
+  serviceMonitor:
+    enabled: true
+    defaults:
+      labels:
+        release: prometheus
+      interval: 2m
+      scrapeTimeout: 30s
+    targets:
+      - name: router
+        url: 192.168.1.1
+        module: icmp
+      - name: home-lb
+        url: 192.168.1.232
+        module: icmp
+      - name: home-lb-pihole
+        url: 192.168.1.237
+        module: icmp
+      - name: home-vpn-0-pi3
+        url: 192.168.1.190
+        module: icmp
+      - name: home-vpn-1-pi0
+        url: 192.168.1.191
+        module: icmp
+#      - name: garage
+#        url: 192.168.1.19
+#        module: icmp
+#      - name: vacuum
+#        url: 192.168.1.28
+#        module: icmp
+      - name: home-nas
+        url: 192.168.1.115
+        module: icmp
+
+  prometheusRule:
+    enabled: true
+    additionalLabels:
+      app: prometheus-operator
+      release: prometheus
+    rules:
+      - alert: HostDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          description: |-
+            The host {{ $labels.target }} is currently unreachable
+
+      - alert: SlowResponseTime
+        annotations:
+          description: |-
+            The response time for {{ $labels.target }} has been greater than 30 seconds for 5 minutes.
+        expr: probe_duration_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+

@@ -1,0 +1,81 @@
+minio:
+
+  mode: standalone
+
+  environment:
+    MINIO_PROMETHEUS_URL: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090"
+#    MINIO_SERVER_URL: "https://s3.rsr.net"
+#    MINIO_BROWSER_REDIRECT_URL: "https://minio.rsr.net"
+    MINIO_PROMETHEUS_JOB_ID: minio
+  #    MINIO_PROMETHEUS_AUTH_TYPE: public
+
+  persistence:
+    existingClaim: "nas-data-pvc"
+    subPath: "minio-2023"
+
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/issuer: step-issuer
+      cert-manager.io/issuer-kind: StepClusterIssuer
+      cert-manager.io/issuer-group: certmanager.step.sm
+      cert-manager.io/revision-history-limit: "3"
+      cert-manager.io/duration: "2160h"
+      cert-manager.io/renew-before: "720h"
+    hosts: [ s3.rsr.net ]
+    tls:
+      - hosts:
+          - s3.rsr.net
+        secretName: s3-cert-tls
+
+  consoleIngress:
+    enabled: true
+
+    annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: Infrastructure
+      gethomepage.dev/icon: minio
+      gethomepage.dev/name: Minio
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/issuer: step-issuer
+      cert-manager.io/issuer-kind: StepClusterIssuer
+      cert-manager.io/issuer-group: certmanager.step.sm
+      cert-manager.io/revision-history-limit: "3"
+      cert-manager.io/duration: "2160h"
+      cert-manager.io/renew-before: "720h"
+    hosts: [ minio.rsr.net ]
+    tls:
+      - hosts:
+          - minio.rsr.net
+        secretName: minio-cert-tls
+
+
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: release
+                operator: In
+                values:
+                  - minio
+          topologyKey: "kubernetes.io/hostname"
+
+  resources:
+    requests:
+      memory: 350Mi
+      cpu: 25m
+    limits:
+      memory: 1000Mi
+  securityContext:
+    enabled: false
+  metrics:
+    serviceMonitor:
+      enabled: true
+
+  existingSecret: minio-secret
+
+  podAnnotations:
+    secret.reloader.stakater.com/reload: "minio"

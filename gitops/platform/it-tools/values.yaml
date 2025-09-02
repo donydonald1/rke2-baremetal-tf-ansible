@@ -84,11 +84,11 @@ it-tools:
         gethomepage.dev/description: Various tools for IT
         gethomepage.dev/group: Services
         gethomepage.dev/icon: it-tools-light.png
-        gethomepage.dev/href: https://tools.dev.techsecoms.com
-        gethomepage.dev/siteMonitor: https://tools.dev.techsecoms.com
+        gethomepage.dev/href: https://tools.prod.techsecom.io
+        gethomepage.dev/siteMonitor: https://tools.dev.techsecom.io
         cert-manager.io/cluster-issuer: letsencrypt-prod
       hosts:
-      - host: tools.dev.techsecoms.com
+      - host: tools.prod.techsecom.io
         paths:
         - path: /
           pathType: Prefix
@@ -98,4 +98,4 @@ it-tools:
       tls:
       - secretName: it-tools-tls
         hosts:
-        - tools.dev.techsecoms.com
+        - tools.dev.techsecom.io

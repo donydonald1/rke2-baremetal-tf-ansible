@@ -1,0 +1,111 @@
+homepage:
+  image:
+    repository: ghcr.io/gethomepage/homepage
+    tag: v0.10.9
+
+  resources:
+    requests:
+      cpu: 15m
+      memory: 127M
+    limits:
+      memory: 308M
+
+  podAnnotations:
+    reloader.stakater.com/auto: "true"
+    configmap.reloader.stakater.com/reload: "homepage-config"
+    secret.reloader.stakater.com/reload: "gethomepage-secret"
+
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/revision-history-limit: "3"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        gethomepage.dev/enabled: 'false'
+        # nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: https://auth.rsr.net/oauth2/start
+      hosts:
+      - host: home.prod.techsecom.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - home.prod.techsecom.io
+        secretName: home-cert-tls
+
+  # The service account is necessary to allow discovery of other services
+  serviceAccount:
+    create: true
+    name: gethomepage
+
+  # This enables the service account to access the necessary resources
+  enableRbac: true
+
+  persistence:
+    data:
+      enabled: false
+
+  config:
+    bookmarks:
+    - Developer:
+      - Github:
+        - abbr: GH
+          href: https://github.com/
+    services:
+    - Infrastructure:
+      - HomeDashboard:
+          href: https://grafana.prod.techsecom.io/goto/ub9IH-GNR?orgId=1
+          icon: https://raw.githubusercontent.com/rogerrum/icons/refs/heads/main/images/rsr-logo.png
+    widgets:
+    # show the kubernetes widget, with the cluster summary and individual nodes
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank
+    #      - unifi_console:
+    #          url:
+    #          username: "{{HOMEPAGE_VAR_UNIFI_USERNAME}}"
+    #          password: "{{HOMEPAGE_VAR_UNIFI_PASSWORD}}"
+    #          site: "{{HOMEPAGE_VAR_UNIFI_SITE}}"
+    kubernetes:
+      mode: cluster
+    settings:
+      layout:
+        Home:
+          style: row
+          columns: 6
+        Tools:
+          style: row
+          columns: 6
+        Infrastructure:
+          style: row
+          columns: 3
+        Monitoring:
+          style: row
+          columns: 3
+      background:
+        image: https://images.unsplash.com/photo-1502790671504-542ad42d5189?auto=format&fit=crop&w=2560&q=80
+        blur: sm # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+        saturate: 50 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
+        brightness: 50 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
+        opacity: 50 # 0-100
+  #  envFrom:
+  #    - secretRef:
+  #        name: "gethomepage-secret"
+  env:
+    TZ: America/Chicago

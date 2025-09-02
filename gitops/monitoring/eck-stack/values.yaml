@@ -1,0 +1,579 @@
+eck-stack:
+  elasticPassword: "Techsecoms-@rke2"
+  eck-elasticsearch:
+    version: 8.17.1
+    fullnameOverride: elasticsearch
+    auth:
+      # disableElasticUser: true
+      roles:
+      - secretName: elasticsearch-admin
+    ingress:
+      enabled: true
+      className: nginx
+      annotations:
+        my: annotation
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      labels:
+        my: label
+      pathType: Prefix
+      hosts:
+      - host: "elasticsearch.dev.techsecoms.com"
+        path: "/"
+    http:
+      tls:
+        selfSignedCertificate:
+          disabled: true
+        certificate:
+          secretName: elasticsearch-es-cert
+    nodeSets:
+    - name: masters
+      count: 3
+      config:
+        node.roles: [ "master", "remote_cluster_client" ]
+        node.store.allow_mmap: false
+        # xpack.security.enabled: true
+        # xpack.security.transport.ssl.enabled: true
+        # xpack.security.http.ssl.enabled: true
+        # xpack.monitoring.enabled: false
+        xpack.graph.enabled: false
+        xpack.watcher.enabled: false
+        xpack.security.enrollment.enabled: true
+        # xpack.ml.enabled: false
+      podTemplate:
+        spec:
+          containers:
+          - name: elasticsearch
+            resources:
+              limits:
+                memory: 2Gi
+                cpu: 2
+            volumeMounts:
+            - name: certs
+              mountPath: /usr/share/elasticsearch/config/certs
+              readOnly: true
+          volumes:
+          - name: certs
+            secret:
+              secretName: elasticsearch-es-cert
+          securityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+      volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 15Gi
+          storageClassName: vsphere
+
+    - name: hot
+      count: 3
+      config:
+        node.roles: [ "data_hot", "data_content", "ingest", "remote_cluster_client" ]
+        node.store.allow_mmap: false
+        # xpack.security.enabled: true
+        # xpack.security.transport.ssl.enabled: true
+        # xpack.security.http.ssl.enabled: true
+        # xpack.monitoring.enabled: false
+        xpack.graph.enabled: false
+        xpack.watcher.enabled: false
+        xpack.security.enrollment.enabled: true
+        # xpack.ml.enabled: false
+        node.attr.data: hot
+        node.attr.box_type: hot
+      podTemplate:
+        spec:
+          containers:
+          - name: elasticsearch
+            resources:
+              limits:
+                memory: 1.5Gi
+                cpu: 2
+            volumeMounts:
+            - name: certs
+              mountPath: /usr/share/elasticsearch/config/certs
+              readOnly: true
+          volumes:
+          - name: certs
+            secret:
+              secretName: elasticsearch-es-cert
+          securityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+      volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 15Gi
+          storageClassName: vsphere
+    - name: warm
+      count: 3
+      config:
+        node.roles: [ "data_warm", "remote_cluster_client" ]
+        node.store.allow_mmap: false
+        # xpack.security.enabled: true
+        # xpack.security.transport.ssl.enabled: true
+        # xpack.security.http.ssl.enabled: true
+        # xpack.monitoring.enabled: false
+        xpack.graph.enabled: false
+        xpack.watcher.enabled: false
+        xpack.security.enrollment.enabled: true
+        # xpack.ml.enabled: false
+        node.attr.data: warm
+        node.attr.box_type: warm
+      podTemplate:
+        spec:
+          containers:
+          - name: elasticsearch
+            resources:
+              limits:
+                memory: 1.5Gi
+                cpu: 2
+            volumeMounts:
+            - name: certs
+              mountPath: /usr/share/elasticsearch/config/certs
+              readOnly: true
+          volumes:
+          - name: certs
+            secret:
+              secretName: elasticsearch-es-cert
+          securityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+      volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: vsphere
+    - name: cold
+      count: 3
+      config:
+        node.roles: [ "data_cold", "remote_cluster_client" ]
+        node.store.allow_mmap: false
+        # xpack.security.enabled: true
+        # xpack.security.transport.ssl.enabled: true
+        # xpack.security.http.ssl.enabled: true
+        # xpack.monitoring.enabled: false
+        xpack.security.enrollment.enabled: true
+        xpack.graph.enabled: false
+        xpack.watcher.enabled: false
+        # xpack.ml.enabled: false
+        node.attr.data: cold
+        node.attr.box_type: cold
+      podTemplate:
+        spec:
+          containers:
+          - name: elasticsearch
+            resources:
+              limits:
+                memory: 1.5Gi
+                cpu: 2
+            volumeMounts:
+            - name: certs
+              mountPath: /usr/share/elasticsearch/config/certs
+              readOnly: true
+          volumes:
+          - name: certs
+            secret:
+              secretName: elasticsearch-es-cert
+          securityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+      volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+          storageClassName: vsphere
+  eck-kibana:
+    enabled: true
+    version: 8.17.1
+    # Name of the Kibana instance.
+    #
+    fullnameOverride: kibana
+
+    spec:
+      count: 1
+      elasticsearchRef:
+        name: elasticsearch
+
+      config:
+        elasticsearch.requestHeadersWhitelist:
+        - authorization
+        server.publicBaseUrl: https://kibana.dev.techsecoms.com
+      http:
+        tls:
+          certificate:
+            secretName: elasticsearch-es-cert # Use the cert-manager generated secret
+
+      podTemplate:
+        metadata:
+          labels:
+            scrape: kob-r1-lab-kb
+        spec:
+          containers:
+          - name: kibana
+            resources:
+              requests:
+                memory: 1Gi
+                cpu: 400m
+              limits:
+                memory: 1.5Gi
+                cpu: 1
+            env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=2048"
+            - name: SERVER_PUBLICBASEURL
+              value: "https://kibana.dev.techsecoms.com"
+
+            volumeMounts:
+            - name: certs
+              mountPath: /usr/share/kibana/config/certs
+              readOnly: true
+          volumes:
+          - name: certs
+            secret:
+              secretName: elasticsearch-es-cert
+
+    ingress:
+      enabled: true
+      className: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        nginx.ingress.kubernetes.io/proxy-body-size: 20m
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      pathType: Prefix
+      hosts:
+      - host: "kibana.dev.techsecoms.com"
+        path: "/"
+      tls:
+        enabled: true
+        secretName: kibana-tls
+  eck-beats:
+    enabled: true
+    version: 8.17.1
+    spec:
+      type: filebeat
+      # daemonSet:
+      daemonSet:
+        podTemplate:
+          # Metadata so that Metricbeat can scrape metrics from these pods
+          metadata:
+            labels:
+              scrape: kob-r1-lab-fb
+          spec:
+            serviceAccountName: filebeat
+            automountServiceAccountToken: true
+            terminationGracePeriodSeconds: 30
+            dnsPolicy: ClusterFirstWithHostNet
+            tolerations:
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/control-plane
+              operator: Exists
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/master
+              operator: Exists
+            # hostNetwork: true
+            containers:
+            - name: filebeat
+              resources:
+                # -- Pod resource limits
+                limits:
+                  memory: 2Gi
+                  cpu: 1000m
+                # -- Pod resource requests
+                requests:
+                  cpu: 700m
+                  memory: 1000Mi
+              securityContext:
+                runAsUser: 0
+              volumeMounts:
+              - name: varlogcontainers
+                mountPath: /var/log/containers
+              - name: auditlog
+                mountPath: /var/log/rancher
+              - name: varlogpods
+                mountPath: /var/log/pods
+              env:
+              - name: NODE_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
+            volumes:
+            - name: varlogcontainers
+              hostPath:
+                path: /var/log/containers
+            - name: varlogpods
+              hostPath:
+                path: /var/log/pods
+            - name: auditlog
+              hostPath:
+                path: /var/log/rancher
+            - name: data
+              emptydir: {}
+            - name: beat-data
+              emptydir: {}
+      config:
+        http.enabled: true
+        http.host: 0.0.0.0
+        http.port: 5066
+        # queue.mem:
+        #   events: 2048
+        #   flush.min_events: 50
+        #   flush.timeout: 5s
+        enabled: true
+        filebeat.autodiscover:
+          providers:
+          - type: kubernetes
+            hints.enabled: true
+            include_labels: [ "app.kubernetes.io/name" ]
+            labels.dedot: true
+            node: ${NODE_NAME}
+            hints.default_config:
+              type: container
+              paths:
+              - /var/log/containers/*-${data.container.id}.log
+              exclude_lines: [ "^\\s+[\\-`('.|_]" ]
+              processors:
+              - add_kubernetes_metadata:
+                  host: ${NODE_NAME}
+                  matchers:
+                  - logs_path:
+                      logs_path: "/var/log/containers/"
+        filebeat.inputs:
+        - type: filestream
+          id: audit-logs
+          enabled: true
+          # max_bytes: "1048576"
+          paths:
+          - /var/log/rancher/*.log
+          scan_frequency: 10s
+          json.keys_under_root: true
+          json.add_error_key: true
+          tags: [ "audit" ]
+          tail_files: true
+          parsers:
+          - multiline:
+              type: pattern
+              pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}"
+              negate: false
+              match: after
+              max_lines: 1000
+              timeout: 5s
+        filebeat.config.modules:
+          path: ${path.config}/modules.d/*.yml
+          reload.enabled: true
+          reload.period: 10s
+        setup.template.settings:
+          index.number_of_shards: 1
+        processors:
+        - add_host_metadata: {}
+        - add_cloud_metadata: {}
+        output.logstash:
+          # This needs to be {{logstash-name}}-ls-beats:5044
+          hosts: [ "eck-stack-eck-logstash-ls-beats.elastic-system.svc:5044" ]
+      # deployment: null
+
+  eck-logstash:
+    enabled: true
+    version: 8.17.1
+    config:
+      log.level: info
+      queue.type: persisted
+      path.queue: /usr/share/logstash/dp
+      dead_letter_queue.max_bytes: 10gb
+      # pipeline.buffer.type: heap
+
+    podTemplate:
+      spec:
+        containers:
+        - name: logstash
+          resources:
+            # requests:
+            #     memory: 1200Mi
+            #     cpu: 700m
+            limits:
+              memory: 4Gi
+              cpu: 2
+          env:
+          - name: ES_USER
+            value: "elastic"
+          - name: ES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: elasticsearch-es-elastic-user
+                key: elastic
+          # - name: LS_JAVA_OPTS
+          #   value: "-Xms3g -Xmx3g -Dio.netty.allocator.maxOrder=13"
+          volumeMounts:
+          - mountPath: /usr/share/logstash/pq
+            name: pq
+            readOnly: false
+          - mountPath: /usr/share/logstash/dlq
+            name: dlq
+            readOnly: false
+          - mountPath: /etc/logstash/config/certs
+            name: certs
+            readOnly: true
+        volumes:
+        - name: certs
+          secret:
+            secretName: elasticsearch-es-cert
+    pipelines:
+    - pipeline.id: main
+      dead_letter_queue.enable: true
+      path.dead_letter_queue: /usr/share/logstash/dlq
+      config.reload.automatic: true
+      config.reload.interval: 30s
+      # dead_letter_queue.max_bytes: 5333mb
+      dead_letter_queue.storage_policy: drop_older
+      dead_letter_queue.max_bytes: 5gb
+      dead_letter_queue.retain.age: 10m
+      pipeline.ecs_compatibility: disabled
+      # pipeline.workers: 1
+      config.string: |
+        input {
+          beats {
+            port => 5044
+          }
+        }
+
+        filter {
+          if "audit" in [tags] {
+            json {
+              source => "message"
+              target => "auditdata"
+              skip_on_invalid_json => true
+              remove_field => [ "[auditdata][annotations]", "[auditdata][apiVersion]", "[auditdata][kind]", "[auditdata][level]", "[auditdata][responseStatus][message]", "[auditdata][stage]", "[auditdata][stageTimestamp]", "[auditdata][userAgent]" ]
+            }
+            mutate {
+              add_field => { "[@metadata][target_index]" => "audit-logs" }
+            }
+          } else if "audit" not in [tags] {
+            grok {
+              match => { "message" => "%{SYSLOG5424LINE}" }
+            }
+            if [syslog5424_sd] {
+              mutate {
+                gsub => [ "syslog5424_sd", "[\[\]]", "" ]
+              }
+              kv {
+                source => "syslog5424_sd"
+                field_split => " "
+                value_split => "="
+                target => "kv_data"
+                remove_field => [ "syslog5424_sd" ]
+              }
+            }
+            ruby {
+              code => '
+                event.to_hash.each { |k, v|
+                  event.remove(k)
+                  newE = k.sub(/app\..*\/(\w+)/, "k8_\\1")
+                  event.set(newE, v)
+                }
+              '
+            }
+            if [istio.io/rev] {
+              mutate {
+                rename => { "istio.io/rev" =>  "istio_k8_rev" }
+              }
+            }
+            if [kubernetes] {
+              mutate {
+                add_field => {
+                  "container_name" => "%{[kubernetes][container][name]}"
+                  "namespace" => "%{[kubernetes][namespace]}"
+                  "pod" => "%{[kubernetes][pod][name]}"
+                }
+                replace => { "host" => "%{[kubernetes][node][name]}" }
+              }
+            }
+            mutate {
+              add_field => { "[@metadata][target_index]" => "container-logs" }
+            }
+          }
+        }
+
+        output {
+          if [@metadata][target_index] == "container-logs" {
+              elasticsearch {
+              hosts => [ "https://elasticsearch-es-http.elastic-system.svc:9200" ]
+              user => "${ES_USER}"
+              password => "${ES_PASSWORD}"
+              ilm_rollover_alias => "container-logs"
+              ilm_pattern => "000001"
+              ilm_enabled => true
+              ilm_policy => "hot_warm_delete-container-logs"
+              data_stream => auto
+              ssl_enabled => true
+              ssl_certificate_authorities => ["/etc/logstash/config/certs/ca.crt"]
+            }
+          } else if [@metadata][target_index] == "audit-logs" {
+            elasticsearch {
+              hosts => [ "https://elasticsearch-es-http.elastic-system.svc:9200" ]
+              user => "${ES_USER}"
+              password => "${ES_PASSWORD}"
+              ilm_enabled => true
+              ilm_rollover_alias => "audit-logs"
+              ilm_pattern => "000001"
+              ilm_policy => "hot_warm_delete-audit-logs"
+              ssl_enabled => true
+              data_stream => auto
+              ssl_certificate_authorities => ["/etc/logstash/config/certs/ca.crt"]
+            }
+          }
+        }
+    volumeClaimTemplates:
+    - metadata:
+        name: pq
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 15Gi
+    - metadata:
+        name: dlq
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+
+    elasticsearchRefs:
+    - clusterName: eck
+      name: elasticsearch
+    secureSettings:
+    - secretName: elasticsearch-es-cert
+    services:
+    - name: beats
+      service:
+        spec:
+          type: ClusterIP
+          ports:
+          - port: 5044
+            name: "filebeat"
+            protocol: TCP
+            targetPort: 5044

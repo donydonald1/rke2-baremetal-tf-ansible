@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  labels:
+    app.kubernetes.io/instance: frigate
+    app.kubernetes.io/name: frigate
+  name: frigate-noauth
+  namespace: default
+spec:
+  rules:
+  - host: "frigate.dev.techsecoms.com"
+    http:
+      paths:
+      - path: /api/events/.*/clip\.mp4
+        pathType: Prefix
+        backend:
+          service:
+            name: frigate
+            port:
+              name: http
+      - path: /api/events/.*/thumbnail\.jpg
+        pathType: Prefix
+        backend:
+          service:
+            name: frigate
+            port:
+              name: http
+      - path: /api/events/.*/snapshot\.jpg
+        pathType: Prefix
+        backend:
+          service:
+            name: frigate
+            port:
+              name: http
+      - path: /api/events/.*/preview\.gif
+        pathType: Prefix
+        backend:
+          service:
+            name: frigate
+            port:
+              name: http
+  tls:
+  - hosts:
+    - "frigate.dev.techsecoms.com"

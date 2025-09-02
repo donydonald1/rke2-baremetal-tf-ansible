@@ -1,0 +1,67 @@
+app-template:
+  image:
+    repository: nodered/node-red
+    tag: 4.0.8-18-minimal
+
+  service:
+    main:
+      enabled: true
+      ports:
+        http:
+          port: &port 1880
+  env:
+    TZ: "America/Chicago"
+    FLOWS: "flows.json"
+    NODE_RED_ENABLE_PROJECTS: "true"
+    NODE_RED_ENABLE_SAFE_MODE: "false"
+    NODE_OPTIONS: null
+
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Home
+        gethomepage.dev/icon: node-red
+        gethomepage.dev/name: Node-Red
+        cert-manager.io/issuer: step-issuer
+        cert-manager.io/issuer-kind: StepClusterIssuer
+        cert-manager.io/issuer-group: certmanager.step.sm
+        cert-manager.io/revision-history-limit: "3"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        kubernetes.io/ingress.class: nginx
+        #nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+        #nginx.ingress.kubernetes.io/auth-signin: https://auth.rsr.net/oauth2/start
+      hosts:
+        - host: node-red.rsr.net
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - "node-red.rsr.net"
+          secretName: node-red-cert
+  persistence:
+    data:
+      enabled: true
+      storageClass: "longhorn"
+      accessMode: ReadWriteOnce
+      size: "5Gi"
+      skipuninstall: true
+  tolerations:
+    - key: "arm"
+      operator: "Exists"
+    - key: "arm64"
+      operator: "Exists"
+  resources:
+    requests:
+      memory: 350Mi
+      cpu: 25m
+    limits:
+      memory: 500Mi
+
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000

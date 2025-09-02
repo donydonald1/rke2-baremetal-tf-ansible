@@ -1,0 +1,164 @@
+app-template:
+  image:
+    repository: ghcr.io/home-assistant/home-assistant
+    tag: 2024.12.5
+  env:
+    TZ: "America/Chicago"
+
+#  envFrom:
+#    - secretRef:
+#        name: home-assistant-secret
+
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+
+  securityContext:
+    privileged: true
+
+  service:
+    main:
+      type: LoadBalancer
+      loadBalancerIP: 192.168.100.55
+      ports:
+        http:
+          port: 8123
+
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Home
+        gethomepage.dev/icon: home-assistant
+        gethomepage.dev/name: Home Assistant Ext
+        kubernetes.io/ingress.class: "nginx"
+    internal:
+      enabled: true
+      nameSuffix: "internal"
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Home
+        gethomepage.dev/icon: home-assistant
+        gethomepage.dev/name: Home Assistant Int
+        nginx.org/websocket-services: home-assistant
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/issuer: step-issuer
+        cert-manager.io/issuer-kind: StepClusterIssuer
+        cert-manager.io/issuer-group: certmanager.step.sm
+        cert-manager.io/revision-history-limit: "3"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+      hosts:
+        - host: ha.rsr.net
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - "ha.rsr.net"
+          secretName: ha-cert-int-tls
+#  metrics:
+#    enabled: true
+
+  probes:
+    liveness:
+      enabled: false
+    readiness:
+      enabled: false
+    startup:
+      enabled: true
+  persistence:
+    config:
+      enabled: true
+#      existingClaim: home-assistant-pvc
+      storageClass: "longhorn"
+      accessMode: ReadWriteOnce
+      skipuninstall: true
+      size: "10Gi"
+
+    tts-fix:
+      enabled: true
+      type: emptyDir
+      sizeLimit: 2Mi
+      mountPath: /usr/src/homeassistant/homeassistant/components/media_player/browse_media.py
+      subPath: tts.py
+
+
+
+  # additionalVolumeMounts:
+  #   - name: zigbee-usb
+  #     mountPath: /dev/serial/by-id/usb-Silicon_Labs_HubZ_Smart_Home_Controller_C130101F-if01-port0
+
+  # additionalVolumes:
+  #   - name: zigbee-usb
+  #     hostPath:
+  #       path: /dev/serial/by-id/usb-Silicon_Labs_HubZ_Smart_Home_Controller_C130101F-if01-port0
+  addons:
+    codeserver:
+      enabled: true
+      image:
+        repository: codercom/code-server
+        tag: 4.96.2
+      workingDir: "/config"
+      args:
+        - --user-data-dir
+        - "/config/.vscode"
+        - --auth
+        - "none"
+      env:
+        TZ: America/Chicago
+        HASS_SERVER: http://localhost:8123
+      ingress:
+        enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Tools
+          gethomepage.dev/icon: code-server
+          gethomepage.dev/name: Home Assistant
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/issuer: step-issuer
+          cert-manager.io/issuer-kind: StepClusterIssuer
+          cert-manager.io/issuer-group: certmanager.step.sm
+          cert-manager.io/revision-history-limit: "3"
+          cert-manager.io/duration: "2160h"
+          cert-manager.io/renew-before: "720h"
+          nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: https://auth.rsr.net/oauth2/start
+        hosts:
+          - host: ha-config.rsr.net
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - ha-config.rsr.net
+            secretName: ha-config-cert-tls
+      volumeMounts:
+        - name: config
+          mountPath: /config
+
+  # affinity:
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #         - matchExpressions:
+  #             - { key: "nortek.feature.node.kubernetes.io/zigbee", operator: In, values: [ "true" ] }
+#  tolerations:
+#    - key: "arm"
+#      operator: "Exists"
+#    - key: "arm64"
+#      operator: "Exists"
+#  resources:
+#    limits:
+#      memory: 2500Mi
+#    requests:
+#      cpu: 100m
+#      memory: 1000Mi
+
+  initContainers:
+    fix-tts:
+      image: ghcr.io/home-assistant/home-assistant:2024.12.5
+      command: [ 'sh', '-c', 'sed  "s/base_url = get_url(hass)/base_url = get_url(hass,prefer_external=True)/g" /usr/src/homeassistant/homeassistant/components/media_player/browse_media.py > /ttsFix/tts.py' ]
+      volumeMounts:
+        - mountPath: /ttsFix
+          name: tts-fix

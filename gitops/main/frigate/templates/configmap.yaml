@@ -1,0 +1,215 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frigate-configmap
+  namespace: frigate
+data:
+  config.yml: |
+    auth:
+      enabled: False
+    mqtt:
+      host: emqx.default.svc
+      topic_prefix: frigate
+      user: mqtt
+      password: '{FRIGATE_MQTT_PASSWORD}'
+
+    database:
+      path: /config/frigate.db
+
+    detectors:
+      coral:
+        type: edgetpu
+        device: usb
+
+    birdseye:
+      enabled: true
+      # restream: true
+      mode: continuous
+
+    ffmpeg:
+      hwaccel_args: preset-intel-qsv-h264
+      #output_args:
+      #  record: preset-record-generic-audio-aac
+
+    objects:
+      track:
+        - person
+        - car
+        - bird
+      filters:
+        person:
+          min_area: 3000
+          max_area: 100000
+          threshold: 0.75
+
+    detect:
+      height: 480
+      width: 704
+      fps: 5
+
+    record:
+      enabled: true
+      retain:
+        days: 1
+        mode: motion
+      alerts:
+        retain:
+          days: 14
+          mode: active_objects
+
+    review:
+      alerts:
+        labels:
+          - person
+          - dog
+          - car
+      detections:
+        labels:
+          - person
+          - dog
+          - cat
+          
+    snapshots:
+      enabled: true
+      timestamp: false
+      bounding_box: true
+      crop: false
+      retain:
+        default: 7
+
+    genai:
+      enabled: True
+      provider: ollama
+      base_url: http://192.168.1.16::11434
+      model: llava:7b
+
+
+    cameras:
+      basement_room:
+        ffmpeg:
+          inputs:
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=1&subtype=1'
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=1&subtype=0'
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+
+
+        objects:
+          track:
+            - person
+          filters:
+            person:
+              min_area: 1500
+              max_area: 100000
+              threshold: 0.80
+              min_score: 0.60
+        live:
+          stream_name: basement_room_record
+
+      basement_main:
+        ffmpeg:
+          inputs:
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=2&subtype=1'
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=2&subtype=0'
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+        live:
+          stream_name: basement_main_record
+
+      deck:
+        ffmpeg:
+          inputs:
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=3&subtype=1'
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=3&subtype=0'
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+        live:
+          stream_name: deck_record
+
+      porch:
+        ffmpeg:
+          inputs:
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=4&subtype=1'
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=4&subtype=0'
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+        live:
+          stream_name: porch_record
+
+
+      driveway:
+        motion:
+          mask:
+            - 91,168,283,62,438,0,0,0,0,0,0,92,0,247
+        objects:
+          filters:
+            bird:
+              mask:
+            car:
+              mask:
+                - 91,168,283,62,438,0,0,0,0,0,0,92,0,247
+            person:
+              mask:
+        ffmpeg:
+          inputs:
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=5&subtype=1'
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=5&subtype=0'
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+        live:
+          stream_name: driveway_record
+
+      server:
+        ffmpeg:
+          inputs:
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=6&subtype=1'
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: '{FRIGATE_LOREX_HOST}/cam/realmonitor?channel=6&subtype=0'
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+        live:
+          stream_name: server_record
+
+
+      living_room:
+        enabled: False
+        ffmpeg:
+          inputs:
+            - path: rtsp://{FRIGATE_WYZE_AUTH}@192.168.1.233/live
+              #input_args: preset-rtsp-restream
+              roles:
+                - detect
+            - path: rtsp://{FRIGATE_WYZE_AUTH}@192.168.1.233/live
+              #input_args: preset-rtsp-restream
+              roles:
+                - record
+        live:
+          stream_name: living_room
+
+        objects:
+          # Optional: list of objects to track from labelmap.txt (default: shown below)
+          track:
+            - car

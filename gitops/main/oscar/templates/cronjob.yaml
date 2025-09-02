@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oscar-downloader
+spec:
+  schedule: "{{ .Values.cron.schedule }}"
+  concurrencyPolicy: {{ .Values.cron.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.cron.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cron.failedJobsHistoryLimit }}
+  timeZone: America/Chicago
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: oscar-cron
+              image: "{{ .Values.cron.image.repository }}:{{ .Values.cron.image.tag }}"
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                privileged: true
+              volumeMounts:
+                - name: backup
+                  mountPath: /config
+                  subPath: oscar
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: nas-data-pvc
+
+          restartPolicy: OnFailure
+          tolerations:
+            - key: "arm"
+              operator: "Exists"
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/arch
+                        operator: In
+                        values:
+                          - "arm"
+
