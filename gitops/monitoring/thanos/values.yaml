@@ -9,16 +9,14 @@ thanos:
       sidecarsNamespace: monitoring
     ingress:
       enabled: true
-      hostname: thanos.rsr.net
+      hostname: thanos.prod.techsecom.io
       annotations:
         gethomepage.dev/enabled: 'true'
         gethomepage.dev/group: Monitoring
         gethomepage.dev/icon: prometheus
         gethomepage.dev/name: Thanos
         kubernetes.io/ingress.class: "nginx"
-
         cert-manager.io/issuer-kind: le
-
         external-dns.alpha.kubernetes.io/enabled: "true"
         cert-manager.io/revision-history-limit: "3"
         cert-manager.io/duration: "2160h"
@@ -45,7 +43,7 @@ thanos:
       tls: true
   compactor:
     enabled: true
-    extraFlags: [ "--compact.concurrency", "4" ]
+    # extraFlags: [ "--compact.concurrency", "4" ]
     retentionResolutionRaw: 7d
     retentionResolution5m: 14d
     retentionResolution1h: 30d
