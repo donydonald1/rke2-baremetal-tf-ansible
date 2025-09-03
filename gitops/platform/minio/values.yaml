@@ -14,7 +14,7 @@ minio:
     enabled: true
     annotations: {}
     storageClass: nfs-csi
-    volumeName: minio-pv
+    # volumeName: minio-pv
     accessMode: ReadWriteMany
     size: 200Gi
     # subPath: ""
