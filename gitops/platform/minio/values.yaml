@@ -19,7 +19,7 @@ minio:
     size: 200Gi
     subPath: ""
   securityContext:
-    enabled: true
+    enabled: false
     runAsUser: 1000
     runAsGroup: 1000
     fsGroup: 988
