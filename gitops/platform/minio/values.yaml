@@ -198,15 +198,15 @@ minio:
 
   environment:
     MINIO_IDENTITY_OPENID_ROLE_POLICY: consoleAdmin
-    MINIO_IDENTITY_OPENID_SCOPES: 'openid,profile,email,groups'
-    MINIO_IDENTITY_OPENID_REDIRECT_URI: 'https://minio.prod.techsecom.io/oauth_callback'
-    MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC: 'off'
-    MINIO_IDENTITY_OPENID_DISPLAY_NAME: 'Techsecom-OIDC'
-    MINIO_IDENTITY_OPENID_CLAIM_NAME: 'groups'
-    MINIO_IDENTITY_OPENID_CLAIM_USERINFO: 'on'
-  ## OpenID Identity Management
-  ## The following section documents environment variables for enabling external identity management using an OpenID Connect (OIDC)-compatible provider.
-  ## See https://min.io/docs/minio/linux/operations/external-iam/configure-openid-external-identity-management.html for a tutorial on using these variables.
+    # MINIO_IDENTITY_OPENID_SCOPES: 'openid,profile,email,groups'
+    # MINIO_IDENTITY_OPENID_REDIRECT_URI: 'https://minio.prod.techsecom.io/oauth_callback'
+    # MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC: 'off'
+    # MINIO_IDENTITY_OPENID_DISPLAY_NAME: 'Techsecom-OIDC'
+    # MINIO_IDENTITY_OPENID_CLAIM_NAME: 'groups'
+    # MINIO_IDENTITY_OPENID_CLAIM_USERINFO: 'on'
+    ## OpenID Identity Management
+    ## The following section documents environment variables for enabling external identity management using an OpenID Connect (OIDC)-compatible provider.
+    ## See https://min.io/docs/minio/linux/operations/external-iam/configure-openid-external-identity-management.html for a tutorial on using these variables.
   oidc:
     enabled: true
     configUrl: https://techsecoms.ui.com/gw/idp/api/v1/public/oauth/516737b6-8288-49ac-be5f-c0941167e9b6/.well-known/openid-configuration
