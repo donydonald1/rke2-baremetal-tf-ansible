@@ -3,7 +3,7 @@ minio:
 
   drivesPerNode: 1
   # Number of MinIO containers running
-  replicas: 3
+  replicas: 1
   pools: 1
 
   existingSecret: minio-users
@@ -17,39 +17,8 @@ minio:
     volumeName: minio-pv
     accessMode: ReadWriteMany
     size: 200Gi
-    subPath: ""
-  securityContext:
-    enabled: false
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 988
-    fsGroupChangePolicy: "OnRootMismatch"
-  ## Additional volumeMounts to minio container
-  extraVolumeMounts:
-  - name: export-minio
-    mountPath: /data
-  extraVolumes:
-  - name: export-minio
-    persistentVolumeClaim:
-      claimName: export-minio
-  extraContainers:
-  - name: nfs-perms
-    image: busybox:1.36
-    command:
-    - sh
-    - -c
-    - >
-      echo "Fixing group perms + setgid under /export..."; find /export -type d -exec chmod g+rwxs {} + ; find /export -type f -exec chmod g+rw {} + ; echo "Done."
-    securityContext:
-      runAsUser: 0
-    volumeMounts:
-    - name: export-minio
-      mountPath: /export
-  # extraArgs:
-  # - 'minio server /data --console-address :9090'
-  # customCommands:
-  # - /bin/bash
-  # - '-c'
+    # subPath: ""
+
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -91,13 +60,7 @@ minio:
 
   resources:
     requests:
-      cpu: 200m
-      memory: 256Mi
-      ephemeral-storage: 500Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-      ephemeral-storage: 500Mi
+      memory: 2Gi
 
   users:
   - accessKey: velero
