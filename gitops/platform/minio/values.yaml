@@ -1,9 +1,9 @@
 minio:
-  mode: standalone
+  mode: distributed
 
   drivesPerNode: 1
   # Number of MinIO containers running
-  replicas: 1
+  replicas: 3
   pools: 1
 
   existingSecret: minio-users
@@ -18,7 +18,11 @@ minio:
     accessMode: ReadWriteMany
     size: 200Gi
     # subPath: ""
-
+  securityContext:
+    enabled: true
+    runAsUser: 0
+    runAsGroup: 0
+    fsGroup: 0
   ingress:
     enabled: true
     ingressClassName: nginx
