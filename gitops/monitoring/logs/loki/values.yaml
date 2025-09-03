@@ -6,7 +6,15 @@ loki:
 
     analytics:
       reporting_enabled: false
-
+    storage:
+      s3:
+        endpoint: minio.minio.svc:9000
+        secretAccessKey: <path:secret/data/minio#postgres_user>
+        accessKeyId: <path:secret/data/minio#postgres_password>
+        bucketnames: loki
+        region: us-east-1
+        insecure: true
+        s3ForcePathStyle: true
     compactor:
       working_directory: /var/loki/compactor/retention
       delete_request_store: s3

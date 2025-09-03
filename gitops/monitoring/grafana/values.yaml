@@ -33,7 +33,7 @@ grafana:
     GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel,grafana-lokiexplore-app
     GF_SECURITY_ALLOW_EMBEDDING: true
     # GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: true
-    GF_SERVER_ROOT_URL: https://grafana.dev.techsecoms.com
+    GF_SERVER_ROOT_URL: https://grafana.prod.techsecom.io
     GF_SECURITY_COOKIE_SAMESITE: grafana
     TZ: America/Chicago
     # envFromSecrets:
@@ -46,13 +46,14 @@ grafana:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
       cert-manager.io/revision-history-limit: "3"
+      external-dns.alpha.kubernetes.io/enabled: "true"
       cert-manager.io/duration: "2160h"
       cert-manager.io/renew-before: "720h"
 
-    hosts: [ grafana.dev.techsecoms.com ]
+    hosts: [ grafana.prod.techsecom.io ]
     tls:
     - hosts:
-      - grafana.dev.techsecoms.com
+      - grafana.prod.techsecom.io
       secretName: grafana-cert-tls
   plugins:
   - pr0ps-trackmap-panel
@@ -398,12 +399,12 @@ grafana:
   persistence:
     enabled: true
     type: statefulset
-    storageClassName: vsphere
+    storageClassName: nfs-csi
     size: 5Gi
 
   grafana.ini:
     server:
-      root_url: https://grafana.dev.techsecoms.com
+      root_url: https://grafana.prod.techsecom.io
     analytics:
       check_for_updates: true
     auth:

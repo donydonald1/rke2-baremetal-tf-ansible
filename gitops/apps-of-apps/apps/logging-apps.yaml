@@ -8,27 +8,16 @@ spec:
   generators:
   - list:
       elements:
-      # - name: uptime-kuma
-      #   namespace: kube-system
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
-      #   serverSideApply: true
-      # - name: cloudnative-pg
-      #   namespace: cnpg-system
-      #   serverSideApply: true
-      # # - name: ghost
-      # - name: go-healthcheck
-      - name: kube-prometheus-stack
-        namespace: monitoring
+
+      - name: loki
+        namespace: logging
         serverSideApply: true
       - name: thanos
         namespace: monitoring
         serverSideApply: true
-      - name: grafana
+      - name: promtail
         namespace: monitoring
-        # serverSideApply: true
-
+        serverSideApply: true
         # - name: influxdb
         #   namespace: monitoring
         #   serverSideApply: true
@@ -70,7 +59,7 @@ spec:
       source:
         repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
-        path: "gitops/monitoring/{{ .name }}"
+        path: "gitops/logs/{{ .name }}"
         # plugin:
         #   name: avp-directory-include
         # env:
