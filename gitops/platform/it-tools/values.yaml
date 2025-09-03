@@ -85,7 +85,8 @@ it-tools:
         gethomepage.dev/group: Services
         gethomepage.dev/icon: it-tools-light.png
         gethomepage.dev/href: https://tools.prod.techsecom.io
-        gethomepage.dev/siteMonitor: https://tools.dev.techsecom.io
+        gethomepage.dev/siteMonitor: https://tools.prod.techsecom.io
+        external-dns.alpha.kubernetes.io/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
       hosts:
       - host: tools.prod.techsecom.io

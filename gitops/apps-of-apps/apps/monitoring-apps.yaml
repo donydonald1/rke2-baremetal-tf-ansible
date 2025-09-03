@@ -22,6 +22,9 @@ spec:
       - name: kube-prometheus-stack
         namespace: monitoring
         serverSideApply: true
+      - name: thanos
+        namespace: monitoring
+        serverSideApply: true
       # - name: grafana
       #   namespace: monitoring
       #   # serverSideApply: true
