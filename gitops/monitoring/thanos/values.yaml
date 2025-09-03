@@ -5,7 +5,7 @@ thanos:
     replicaLabels:
     - replica
     dnsDiscovery:
-      sidecarsService: kube-prometheus-stack-thanos-discovery
+      sidecarsService: kube-prometheus-stack-prometheus
       sidecarsNamespace: monitoring
     ingress:
       enabled: true
@@ -89,6 +89,18 @@ thanos:
     enabled: true
     serviceMonitor:
       enabled: true
+  receive:
+    ## @param receive.enabled Enable/disable Thanos Receive component
+    ##
+    enabled: false
+    ## @param receive.mode Mode to run receiver in. Valid options are "standalone" or "dual-mode"
+    ## ref: https://github.com/thanos-io/thanos/blob/release-0.22/docs/proposals-accepted/202012-receive-split.md
+    ## Enables running the Thanos Receiver in dual mode. Setting this to "dual-mode" will create a deployment for
+    ## the stateless thanos distributor.
+    mode: standalone
+    ## @param receive.logLevel Thanos Receive log level
+    ##
+    logLevel: info
   objstoreConfig: |
     type: s3
     config:
