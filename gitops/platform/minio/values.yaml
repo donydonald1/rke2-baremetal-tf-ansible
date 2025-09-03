@@ -16,7 +16,7 @@ minio:
     storageClass: nfs-csi
     # volumeName: minio-pv
     accessMode: ReadWriteMany
-    size: 500Gi
+    size: 800Gi
     # subPath: ""
   securityContext:
     enabled: true
