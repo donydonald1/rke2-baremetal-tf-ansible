@@ -7,10 +7,10 @@ kube-prometheus-stack:
   grafana:
     enabled: false
     # forceDeployDatasources: true
-    # additionalDataSources:
-    # - name: Loki
-    #   type: loki
-    #   url: http://loki.loki:3100
+    additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki.loki:3100
 
   prometheusOperator:
     createCustomResource: true
@@ -27,22 +27,42 @@ kube-prometheus-stack:
       enabled: true
     prometheusSpec:
       serviceMonitorSelector: {}
-      externalUrl: https://prometheus.dev.techsecoms.com
+      externalUrl: https://prometheus.prod.techsecom.io
       serviceMonitorSelectorNilUsesHelmValues: false
       podMonitorSelectorNilUsesHelmValues: false
       probeSelectorNilUsesHelmValues: false
       ruleSelectorNilUsesHelmValues: false
       enableRemoteWriteReceiver: true
+      enableAdminAPI: true
+      walCompression: true
       enableFeatures:
-      - exemplar-storage
-      retention: 30d
+      - auto-gomemlimit
+      - memory-snapshot-on-shutdown
+      - new-service-discovery-manager
+      retention: 14d
+      retentionSize: 15GB
+      externalLabels:
+        cluster: apps
+      resources:
+        requests:
+          cpu: 100m
+        limits:
+          memory: 1500Mi
       storageSpec:
         volumeClaimTemplate:
           spec:
-            storageClassName: vsphere
+            storageClassName: nfs-csi
             resources:
               requests:
-                storage: 100Gi
+                storage: 60Gi
+      remoteWrite:
+      - url: "http://thanos-receive:19291/api/v1/receive"
+        name: thanos-receiver
+        # enableHttp2: true
+      additionalRulesForClusterRole:
+      - apiGroups: [ "" ]
+        resources: [ "services/k6-operator-controller-manager-metrics-service" ]
+        verbs: [ "get", "list", "watch" ]
     ingress:
       enabled: true
       pathType: Prefix
@@ -54,10 +74,10 @@ kube-prometheus-stack:
         cert-manager.io/duration: "2160h"
         cert-manager.io/renew-before: "720h"
 
-      hosts: [ prometheus.dev.techsecoms.com ]
+      hosts: [ prometheus.prod.techsecom.io ]
       tls:
       - hosts:
-        - prometheus.dev.techsecoms.com
+        - prometheus.prod.techsecom.io
         secretName: prom-server-cert-tls
 
     server:
@@ -85,11 +105,11 @@ kube-prometheus-stack:
         group_wait: 45s
         group_interval: 10m
         repeat_interval: 12h
+        receiver: "msteams"
         routes:
-        - receiver: "null"
+        - receiver: "null" # quote
           matchers:
-          - alertname =~ "InfoInhibitor|RebootScheduled|NodeMemoryHighUtilization|NodeMemoryMajorPagesFaults|CPUThrottlingHigh"
-        - receiver: "healthcheck"
+          - alertname =~ "Watchdog"
         - receiver: "null" # quote
           matchers:
           - alertname =~ "InfoInhibitor"
@@ -169,15 +189,15 @@ kube-prometheus-stack:
       storage:
         volumeClaimTemplate:
           spec:
-            storageClassName: vsphere
+            storageClassName: nfs-csi
             resources:
               requests:
-                storage: 5Gi
+                storage: 10Gi
       tolerations:
       - key: "arm64"
         operator: "Exists"
   kubeProxy:
-    enabled: false
+    enabled: true
 
   kubeApiServer:
     enabled: true
