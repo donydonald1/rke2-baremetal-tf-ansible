@@ -1,5 +1,5 @@
 minio:
-  mode: distributed
+  mode: standalone
 
   drivesPerNode: 1
   # Number of MinIO containers running
