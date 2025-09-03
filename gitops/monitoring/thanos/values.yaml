@@ -97,5 +97,5 @@ thanos:
       bucket: thanos
       endpoint: "minio.dminio.svc:9000"
       access_key: <path:secret/data/minio#postgres_user>
-      secret_key: <path:secret/data/msteams#postgres_password>
+      secret_key: <path:secret/data/minio#postgres_password>
       insecure: true
