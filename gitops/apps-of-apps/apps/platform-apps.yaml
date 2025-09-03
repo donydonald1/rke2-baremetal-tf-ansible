@@ -34,12 +34,12 @@ spec:
       #   namespace: vault
       #   serverSideApply: true
 
-      # - name: minio
-      #   namespace: minio
-      #   serverSideApply: true
-      #   helm:
-      #     values:
-      #     - values.yaml
+      - name: minio
+        namespace: minio
+        serverSideApply: true
+        helm:
+          values:
+          - values.yaml
       # - name: go-healthcheck
       - name: it-tools
         namespace: it-tools
