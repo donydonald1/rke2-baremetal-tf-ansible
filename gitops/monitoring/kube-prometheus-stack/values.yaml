@@ -60,14 +60,14 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 60Gi
-      remoteWrite:
-      - url: "http://thanos-receive:19291/api/v1/receive"
-        name: thanos-receiver
-        # enableHttp2: true
-      additionalRulesForClusterRole:
-      - apiGroups: [ "" ]
-        resources: [ "services/k6-operator-controller-manager-metrics-service" ]
-        verbs: [ "get", "list", "watch" ]
+      # remoteWrite:
+      # - url: "http://thanos-receive:19291/api/v1/receive"
+      #   name: thanos-receiver
+      #   # enableHttp2: true
+      # additionalRulesForClusterRole:
+      # - apiGroups: [ "" ]
+      #   resources: [ "services/k6-operator-controller-manager-metrics-service" ]
+      #   verbs: [ "get", "list", "watch" ]
     ingress:
       enabled: true
       pathType: Prefix

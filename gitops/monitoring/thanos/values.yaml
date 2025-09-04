@@ -89,21 +89,21 @@ thanos:
     enabled: true
     serviceMonitor:
       enabled: true
-  receive:
-    ## @param receive.enabled Enable/disable Thanos Receive component
-    ##
-    enabled: true
-    ## @param receive.mode Mode to run receiver in. Valid options are "standalone" or "dual-mode"
-    ## ref: https://github.com/thanos-io/thanos/blob/release-0.22/docs/proposals-accepted/202012-receive-split.md
-    ## Enables running the Thanos Receiver in dual mode. Setting this to "dual-mode" will create a deployment for
-    ## the stateless thanos distributor.
-    mode: standalone
-    ## @param receive.logLevel Thanos Receive log level
-    ##
-    logLevel: info
-    resources:
-      limits:
-        memory: 1000Mi
+  # receive:
+  #   ## @param receive.enabled Enable/disable Thanos Receive component
+  #   ##
+  #   enabled: true
+  #   ## @param receive.mode Mode to run receiver in. Valid options are "standalone" or "dual-mode"
+  #   ## ref: https://github.com/thanos-io/thanos/blob/release-0.22/docs/proposals-accepted/202012-receive-split.md
+  #   ## Enables running the Thanos Receiver in dual mode. Setting this to "dual-mode" will create a deployment for
+  #   ## the stateless thanos distributor.
+  #   mode: standalone
+  #   ## @param receive.logLevel Thanos Receive log level
+  #   ##
+  #   logLevel: info
+  #   resources:
+  #     limits:
+  #       memory: 1000Mi
   objstoreConfig: |
     type: s3
     config:
