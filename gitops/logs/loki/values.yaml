@@ -46,45 +46,51 @@ loki:
           directory: /rules
       rule_path: /rules/fake
 
-    schemaConfig:
-      configs:
-      - from: "2024-04-01"
-        store: tsdb
-        object_store: s3
-        schema: v13
-        index:
-          prefix: loki_index_
-          period: 24h
+    # schemaConfig:
+    #   configs:
+    #   - from: "2024-04-01"
+    #     store: tsdb
+    #     object_store: s3
+    #     schema: v13
+    #     index:
+    #       prefix: loki_index_
+    #       period: 24h
 
     server:
       log_level: info
       grpc_server_max_recv_msg_size: 8388608
       grpc_server_max_send_msg_size: 8388608
+    config:
+      schema_config:
+        configs:
+        - from: "2025-04-01"
+          store: boltdb-shipper
+          object_store: s3
+          schema: v11
+          index:
+            prefix: loki_index_
+            period: 24h
 
-    # storage:
-    #   type: s3
-    #   bucketNames:
-    #     chunks: loki-chunks
-    #     ruler: loki-ruler
-    #     admin: loki-admin
-    #   s3:
-    #     s3ForcePathStyle: true
-    #     insecure: true
-    #     endpoint: http://minio.minio.svc.cluster.local:9000
-    #     secretAccessKey: <path:secret/data/minio#postgres_user>
-    #     accessKeyId: <path:secret/data/minio#postgres_password>
-    storage_config:
-      aws:
-        endpoint: http://minio.minio.svc.cluster.local:9000
-        insecure: true
-        bucketnames: loki
-        access_key_id: <path:secret/data/minio#postgres_user>
-        secret_access_key: <path:secret/data/minio#postgres_password>
-        s3forcepathstyle: true
-      tsdb_shipper:
-        active_index_directory: /loki/index
-        cache_location: /loki/index_cache
-        cache_ttl: 24h
+      storage_config:
+        aws:
+          endpoint: http://minio.minio.svc.cluster.local:9000
+          insecure: true
+          bucketnames: loki
+          access_key_id: <path:secret/data/minio#postgres_user>
+          secret_access_key: <path:secret/data/minio#postgres_password>
+          s3forcepathstyle: true
+        tsdb_shipper:
+          active_index_directory: /loki/index
+          cache_location: /loki/index_cache
+          cache_ttl: 24h
+      # ruler:
+      #   storage:
+      #     type: s3
+      #     s3:
+      #       bucketnames: kosmos-observability-sbx-wl-01
+      #       region: us-east-2
+      #       s3forcepathstyle: true
+
   gateway:
     replicas: 2
     enabled: true
