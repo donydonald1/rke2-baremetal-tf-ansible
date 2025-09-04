@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: applications
+  name: monitoring-apps
 spec:
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ]
