@@ -25,9 +25,9 @@ spec:
       - name: thanos
         namespace: monitoring
         serverSideApply: true
-      - name: grafana
-        namespace: monitoring
-        # serverSideApply: true
+        # - name: grafana
+        #   namespace: monitoring
+        #   serverSideApply: true
 
         # - name: influxdb
         #   namespace: monitoring
