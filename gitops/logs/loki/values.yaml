@@ -39,7 +39,7 @@ loki:
     rulerConfig:
       enable_api: true
       enable_alertmanager_v2: true
-      alertmanager_url: http://kube-prometheus-stack-alertmanager:9093
+      alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring:9093
       storage:
         type: local
         local:
@@ -74,6 +74,9 @@ loki:
         secretAccessKey: <path:secret/data/minio#postgres_user>
         accessKeyId: <path:secret/data/minio#postgres_password>
         region: us-east-1
+      boltdb_shipper:
+        shared_store: s3
+        cache_ttl: 24h
   gateway:
     replicas: 2
     enabled: true

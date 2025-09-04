@@ -8,7 +8,7 @@ promtail:
     operator: "Exists"
   config:
     clients:
-    - url: http://loki-gateway/loki/api/v1/push
+    - url: http://loki-gateway/logging/api/v1/push
     snippets:
       extraScrapeConfigs: |
         - job_name: journal
