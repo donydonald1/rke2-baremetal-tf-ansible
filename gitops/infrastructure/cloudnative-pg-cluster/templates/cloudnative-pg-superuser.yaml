@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/basic-auth
+metadata:
+    name: postgres-superuser-secret
+    namespace: {{ .Release.Namespace }}
+    labels:
+        cnpg.io/reload: ""
+stringData:
+    username: "postgres"
+    password: "kosmos@admin"
