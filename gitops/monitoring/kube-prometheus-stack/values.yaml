@@ -35,6 +35,9 @@ kube-prometheus-stack:
       enableRemoteWriteReceiver: true
       enableAdminAPI: true
       walCompression: true
+      replicaExternalLabelName: "replica"
+      replicas: 3
+      thanos: {}
       enableFeatures:
       - auto-gomemlimit
       - memory-snapshot-on-shutdown
