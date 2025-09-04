@@ -12,11 +12,8 @@ spec:
       - name: loki
         namespace: logging
         serverSideApply: true
-      - name: thanos
-        namespace: monitoring
-        serverSideApply: true
       - name: promtail
-        namespace: monitoring
+        namespace: logging
         serverSideApply: true
         # - name: influxdb
         #   namespace: monitoring
