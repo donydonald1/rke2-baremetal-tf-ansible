@@ -28,16 +28,18 @@ kube-prometheus-stack:
     prometheusSpec:
       serviceMonitorSelector: {}
       externalUrl: https://prometheus.prod.techsecom.io
-      serviceMonitorSelectorNilUsesHelmValues: false
-      podMonitorSelectorNilUsesHelmValues: false
-      probeSelectorNilUsesHelmValues: false
-      ruleSelectorNilUsesHelmValues: false
+      # serviceMonitorSelectorNilUsesHelmValues: false
+      # podMonitorSelectorNilUsesHelmValues: false
+      # probeSelectorNilUsesHelmValues: false
+      # ruleSelectorNilUsesHelmValues: false
       enableRemoteWriteReceiver: true
       enableAdminAPI: true
       walCompression: true
       replicaExternalLabelName: "replica"
       replicas: 3
-      thanos: {}
+      thanos:
+        baseImage: quay.io/thanos/thanos
+        version: v0.39.2
       enableFeatures:
       - auto-gomemlimit
       - memory-snapshot-on-shutdown
