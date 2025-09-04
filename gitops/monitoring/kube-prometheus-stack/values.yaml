@@ -36,7 +36,7 @@ kube-prometheus-stack:
       enableAdminAPI: true
       walCompression: true
       replicaExternalLabelName: "replica"
-      replicas: 3
+      replicas: 2
       thanos:
         baseImage: quay.io/thanos/thanos
         version: v0.39.2
@@ -49,10 +49,10 @@ kube-prometheus-stack:
       externalLabels:
         cluster: apps
       resources:
-        requests:
-          cpu: 100m
+        # requests:
+        #   cpu: 100m
         limits:
-          memory: 1000Mi
+          memory: 1500Mi
       storageSpec:
         volumeClaimTemplate:
           spec:
