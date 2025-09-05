@@ -440,12 +440,6 @@ grafana:
     passwordKey: password
   assertNoLeakedSecrets: false
 
-replicas: 1
-liveCluster: grafana-pg-db
-previousCluster: grafana-pg-db
-storage:
-  size: 1Gi
-  storageClass: "vsphere"
 superuserSecret: postgres-superuser-secret
 # Configure components of the External Secrets Operator (ESO).
 eso:
