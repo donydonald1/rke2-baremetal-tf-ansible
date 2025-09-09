@@ -601,7 +601,8 @@ clusterResourceNamespace: cert-manager
     #     csi.storage.k8s.io/provisioner-secret-namespace: "default"
       reclaimPolicy: Delete
       volumeBindingMode: Immediate
+      allowVolumeExpansion: true
       mountOptions:
-        - nfsvers=3
+        - nfsvers=4.1
   EOT
 }

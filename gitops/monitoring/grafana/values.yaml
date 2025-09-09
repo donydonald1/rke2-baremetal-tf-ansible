@@ -357,7 +357,7 @@ grafana:
       - name: loki
         type: loki
         access: proxy
-        url: http://loki-gateway.logs.svc.cluster.local:80
+        url: http://loki-gateway.logging.svc.cluster.local:80
       - name: Alertmanager
         type: alertmanager
         access: proxy
