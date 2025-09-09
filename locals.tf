@@ -603,6 +603,7 @@ clusterResourceNamespace: cert-manager
       volumeBindingMode: Immediate
       allowVolumeExpansion: true
       mountOptions:
-        - nfsvers=4.1
+        - nfsvers=4
+        - sec=sys
   EOT
 }
