@@ -594,16 +594,27 @@ clusterResourceNamespace: cert-manager
       parameters:
         server: 10.1.10.11
         share: /var/nfs/shared/rke2_prod_data
-        subDir:
+        subDir: $${pvc.metadata.namespace}
         mountPermissions: "0"
     #     csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
-    #     csi.storage.k8s.io/provisioner-secret-name: "mount-options"
-    #     csi.storage.k8s.io/provisioner-secret-namespace: "default"
+        csi.storage.k8s.io/provisioner-secret-name: "mount-options"
+        csi.storage.k8s.io/provisioner-secret-namespace: "default"
       reclaimPolicy: Delete
       volumeBindingMode: Immediate
       allowVolumeExpansion: true
       mountOptions:
-        - nfsvers=3
+        - nolock
+        # - nfsvers=3
+        - tcp
+        - soft
         - sec=sys
+        - dir_mode=0777
+        - file_mode=0777
+        - uid=1001
+        - gid=1001
+        - noperm
+        - mfsymlinks
+        - cache=strict
+        - noserverino
   EOT
 }
