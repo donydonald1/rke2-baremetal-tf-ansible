@@ -604,6 +604,9 @@ clusterResourceNamespace: cert-manager
       allowVolumeExpansion: true
       mountOptions:
         - nfsvers=4.1
-
+        - nolock
+        # - nfsvers=3
+        - tcp
+        - soft
   EOT
 }
