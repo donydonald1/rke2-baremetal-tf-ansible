@@ -603,11 +603,7 @@ clusterResourceNamespace: cert-manager
       volumeBindingMode: Immediate
       allowVolumeExpansion: true
       mountOptions:
-        - nolock
         - nfsvers=4.1
-        - tcp
-        - soft
-        - sec=sys
         - dir_mode=0777
         - file_mode=0777
         - uid=1001
