@@ -593,8 +593,8 @@ clusterResourceNamespace: cert-manager
         storageclass.kubernetes.io/is-default-class: "true"
       parameters:
         server: 10.1.10.11
-        share: /var/nfs/shared
-        subDir: rke2_prod_data/$${pvc.namespace}/$${pvc.name}
+        share: /var/nfs/shared/rke2_prod_data
+        subDir: /$${pvc.namespace}/$${pvc.name}
         mountPermissions: "0"
     #     csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
         # csi.storage.k8s.io/provisioner-secret-name: "mount-options"
