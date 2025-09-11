@@ -604,10 +604,6 @@ clusterResourceNamespace: cert-manager
       allowVolumeExpansion: true
       mountOptions:
         - nfsvers=4.1
-        - proto=tcp
-        - hard
-        - timeo=600
-        - retrans=2
-        - sec=sys
+
   EOT
 }
