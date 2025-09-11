@@ -604,13 +604,10 @@ clusterResourceNamespace: cert-manager
       allowVolumeExpansion: true
       mountOptions:
         - nfsvers=4.1
-        - dir_mode=0777
-        - file_mode=0777
-        - uid=1001
-        - gid=1001
-        - noperm
-        - mfsymlinks
-        - cache=strict
-        - noserverino
+        - proto=tcp
+        - hard
+        - timeo=600
+        - retrans=2
+        - sec=sys
   EOT
 }
