@@ -2,7 +2,7 @@ resource "kubernetes_namespace" "this" {
   for_each = {
     for ns in var.namespaces :
     ns => ns
-    if !contains(keys(data.kubernetes_namespace.existing), ns)
+    if !contains(keys(data.kubernetes_namespace.ns), ns)
   }
 
   metadata {
