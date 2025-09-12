@@ -1,16 +1,19 @@
 resource "kubernetes_namespace" "this" {
-  for_each = toset(var.namespaces)
+  for_each = {
+    for ns in var.namespaces :
+    ns => ns
+    if !contains(keys(data.kubernetes_namespace.existing), ns)
+  }
 
   metadata {
     name = each.key
   }
-
 }
 
 resource "kubernetes_secret" "cloudflared_credentials" {
   metadata {
     name      = "cloudflared-credentials"
-    namespace = "cloudflared"
+    namespace = kubernetes_namespace.this["cloudflared"].metadata[0].name
 
     annotations = {
       "app.kubernetes.io/managed-by" = "Terraform"
