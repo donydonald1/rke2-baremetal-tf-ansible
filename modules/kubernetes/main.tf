@@ -13,8 +13,7 @@ resource "kubernetes_namespace" "this" {
 resource "kubernetes_secret" "cloudflared_credentials" {
   metadata {
     name      = "cloudflared-credentials"
-    namespace = kubernetes_namespace.this["cloudflared"].metadata[0].name
-
+    namespace = "cloudflared"
     annotations = {
       "app.kubernetes.io/managed-by" = "Terraform"
     }
