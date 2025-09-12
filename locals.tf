@@ -606,5 +606,6 @@ clusterResourceNamespace: cert-manager
         - nfsvers=3
         - tcp
         - soft
+        - nolock
   EOT
 }
