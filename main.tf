@@ -8,6 +8,9 @@ module "rke2_mater_servers" {
   dockerhub_registry_auth_username      = var.dockerhub_registry_auth_username
   dockerhub_registry_auth_password      = var.dockerhub_registry_auth_password
   ssh_user                              = var.ssh_user
+  is_rhel                               = var.is_rhel
+  rhsm_username                         = var.rhsm_username
+  rhsm_password                         = var.rhsm_password
   ssh_private_key_file                  = var.ssh_private_key_file
 }
 

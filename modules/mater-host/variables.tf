@@ -68,3 +68,20 @@ variable "ssh_private_key_file" {
   type        = string
   default     = ""
 }
+
+variable "is_rhel" {
+  type    = bool
+  default = true
+}
+
+variable "rhsm_username" {
+  description = "Red Hat Subscription Manager username"
+  type        = string
+  default     = ""
+}
+variable "rhsm_password" {
+  description = "Red Hat Subscription Manager password"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
