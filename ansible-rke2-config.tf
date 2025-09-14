@@ -1,8 +1,8 @@
 locals {
   ansible_hosts_group = var.ansible_hosts_group != "" ? var.ansible_hosts_group : "all"
   all_sans = concat(
-    flatten([module.rke2_mater_servers.server_ips]),
-    flatten([module.rke2_mater_servers.server_names]),
+    flatten([module.rke2_metalhost_servers.server_ips]),
+    flatten([module.rke2_metalhost_servers.server_names]),
     flatten([var.manager_rke2_api_dns]),
     flatten([var.manager_rke2_api_ip]),
   )
@@ -123,7 +123,7 @@ rke2_ingress_nginx_values:
       enabled: enable
       timeoutSeconds: 30
 
-    replicaCount: ${length(try(module.rke2_mater_servers.server_ips, []))}
+    replicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
     extraArgs:
       # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
       enable-annotation-validation: "false"
