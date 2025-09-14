@@ -15,6 +15,7 @@ resource "null_resource" "rhel_rh_enable" {
       "sudo subscription-manager register --username '${var.rhsm_username}' --password '${var.rhsm_password}' || true",
       "sudo dnf clean all && sudo dnf makecache",
       "sudo dnf install -y nfs-utils",
+      "sudo systemctl enable --now rpcbind rpc-statd"
     ]
   }
 }
