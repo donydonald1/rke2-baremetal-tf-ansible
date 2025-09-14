@@ -1,5 +1,5 @@
-module "rke2_mater_servers" {
-  source                                = "./modules/mater-host/"
+module "rke2_metalhost_servers" {
+  source                                = "./modules/metalhost/"
   baremetal_servers                     = var.baremetal_servers
   private_registry_url                  = var.private_registry_url
   private_registry_username             = var.private_registry_username
@@ -15,7 +15,7 @@ module "rke2_mater_servers" {
 }
 
 resource "null_resource" "control_plane_config" {
-  for_each = { for idx, ip in module.rke2_mater_servers.server_ips : idx => ip }
+  for_each = { for idx, ip in module.rke2_metalhost_servers.server_ips : idx => ip }
 
   connection {
     user        = "root"
@@ -59,7 +59,7 @@ resource "random_password" "rancher_bootstrap" {
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/templates/ansible_inventory.tftpl", {
-    hosts           = zipmap(module.rke2_mater_servers.server_names, module.rke2_mater_servers.server_ips)
+    hosts           = zipmap(module.rke2_metalhost_servers.server_names, module.rke2_metalhost_servers.server_ips)
     vm_user         = "root"
     ssh_port        = var.ssh_port
     ssh_private_key = var.ssh_private_key_file
@@ -67,7 +67,7 @@ resource "local_file" "ansible_inventory" {
   })
   filename = "${path.module}/${var.cluster_name}-inventory.ini"
 
-  depends_on = [module.rke2_mater_servers]
+  depends_on = [module.rke2_metalhost_servers]
 }
 
 resource "local_file" "ansible_rke2_playbook" {
@@ -120,7 +120,7 @@ resource "null_resource" "run_ansible_playbook" {
 }
 
 resource "null_resource" "rke2_selinux_labels" {
-  for_each = toset(module.rke2_mater_servers.server_ips)
+  for_each = toset(module.rke2_metalhost_servers.server_ips)
 
   connection {
     type        = "ssh"
@@ -177,7 +177,7 @@ resource "null_resource" "kustomization" {
   connection {
     user        = "root"
     private_key = file(var.ssh_private_key_file)
-    host        = module.rke2_mater_servers.server_ips[0]
+    host        = module.rke2_metalhost_servers.server_ips[0]
     port        = var.ssh_port
     script_path = "/root/terraform_%RAND%.sh"
   }
@@ -344,7 +344,7 @@ resource "null_resource" "kustomization" {
 
 # resource "null_resource" "uninstall_rke2" {
 #   # (typo fix) master, not mater
-#   for_each = { for idx, ip in module.rke2_mater_servers.server_ips : idx => ip }
+#   for_each = { for idx, ip in module.rke2_metalhost_servers.server_ips : idx => ip }
 
 #   # Store all external refs ON the resource so we can use self.triggers.* at destroy-time
 #   triggers = {
@@ -381,7 +381,7 @@ resource "null_resource" "kustomization" {
 #     ]
 #   }
 #   depends_on = [
-#     module.rke2_mater_servers,
+#     module.rke2_metalhost_servers,
 #     null_resource.run_ansible_playbook,
 #     helm_release.cloudflared,
 #     helm_release.vault_operator,
@@ -403,5 +403,5 @@ resource "null_resource" "kustomization" {
 #     kubernetes_config_map.cmp-plugin
 
 #   ]
-#   # depends_on = [module.rke2_mater_servers]
+#   # depends_on = [module.rke2_metalhost_servers]
 # }

@@ -37,4 +37,5 @@ resource "null_resource" "write_rke2_registries" {
       "sudo chmod 0644 /etc/rancher/rke2/registries.yaml",
     ]
   }
+  depends_on = [null_resource.rhel_rh_enable]
 }

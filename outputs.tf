@@ -1,18 +1,18 @@
 output "server_names" {
-  value = module.rke2_mater_servers.server_names
+  value = module.rke2_metalhost_servers.server_names
 }
 
 output "servers_ips" {
-  value = module.rke2_mater_servers.server_ips
+  value = module.rke2_metalhost_servers.server_ips
 }
 
 output "servers_by_name" {
-  value = { for server in module.rke2_mater_servers.servers_by_name : server.name => server.ip }
+  value = { for server in module.rke2_metalhost_servers.servers_by_name : server.name => server.ip }
 }
 
 output "rke2_private_registries" {
   description = "Decoded registries.yaml content"
-  value       = module.rke2_mater_servers.rke2_private_registries
+  value       = module.rke2_metalhost_servers.rke2_private_registries
   sensitive   = true
 
 }
