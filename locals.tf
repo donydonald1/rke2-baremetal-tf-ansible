@@ -202,7 +202,7 @@ postDelete:
   # by default, the job will fail if it fail to uninstall any of the apps
   ignoreTimeoutError: false
 hostname: "${var.rancher_hostname != "" ? var.rancher_hostname : var.rancher_values}"
-replicas: ${length(try(module.rke2_mater_servers.server_ips, []))}
+replicas: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
 bootstrapPassword: "${resource.random_password.rancher_bootstrap.result}"
 global:
   cattle:
@@ -567,7 +567,7 @@ clusterResourceNamespace: cert-manager
     defaultBackupStore:
       backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
     persistence:
-        defaultClassReplicaCount: ${length(try(module.rke2_mater_servers.server_ips, []))}
+        defaultClassReplicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
         defaultClass: true
         defaultFsType: ext4
     ingress:
