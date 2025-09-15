@@ -586,3 +586,9 @@ variable "rhsm_password" {
   default     = ""
   sensitive   = true
 }
+
+variable "csi_driver_nfs_subdir" {
+  type        = string
+  default     = "$${pvc.metadata.namespace}/$${pvc.metadata.name}/$${pv.metadata.name}"
+  description = "The subdirectory on the NFS server to use for the CSI Driver NFS."
+}
