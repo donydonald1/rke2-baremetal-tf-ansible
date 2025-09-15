@@ -2,6 +2,6 @@ name: node-problem-detector
 apiVersion: v2
 version: 1.0.0
 dependencies:
-  - name: node-problem-detector
-    version: 2.3.14
-    repository: https://charts.deliveryhero.io/
+- name: node-problem-detector
+  version: 2.3.22
+  repository: https://charts.deliveryhero.io/
