@@ -243,7 +243,7 @@ spec:
     spec:
       project: app-of-apps
       source:
-        repoURL: ${var.argocd_repo_url}
+        repoURL: "${var.argocd_repo_url}"
         targetRevision: HEAD
         path: "gitops/apps-of-apps/{{ .name }}"
       destination:
