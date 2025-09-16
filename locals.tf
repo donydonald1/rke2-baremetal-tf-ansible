@@ -582,32 +582,32 @@ clusterResourceNamespace: cert-manager
             cert-manager.io/cluster-issuer: letsencrypt-prod
   EOT
   csi-driver-nfs_values = var.csi-driver-nfs_values != "" ? var.csi-driver-nfs_values : <<EOT
-feature:
-  enableFSGroupPolicy: true
-  enableInlineVolume: true
-  propagateHostMountOptions: false
-storageClass:
-  create: true
-  name: nfs-csi
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-  parameters:
-    server: 10.1.10.11
-    share: /var/nfs/shared/rke2_prod_data
-    subDir: ${var.csi_driver_nfs_subdir}
-    mountPermissions: "0"
-    #     csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
-    # csi.storage.k8s.io/provisioner-secret-name: "mount-options"
-    # csi.storage.k8s.io/provisioner-secret-namespace: "default"
-  reclaimPolicy: Delete
-  volumeBindingMode: WaitForFirstConsumer
-  allowVolumeExpansion: true
-  mountOptions:
-  - nfsvers=3
-  # - tcp
-  # - hard
-  # - timeo=600
-  # - retrans=2
-  # - async
+    feature:
+      enableFSGroupPolicy: true
+      enableInlineVolume: true
+      propagateHostMountOptions: false
+    storageClass:
+      create: true
+      name: nfs-csi
+      annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+      parameters:
+        server: 10.1.10.11
+        share: /var/nfs/shared/rke2_prod_data
+        subDir: ${var.csi_driver_nfs_subdir}
+        mountPermissions: "0"
+        #     csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
+        # csi.storage.k8s.io/provisioner-secret-name: "mount-options"
+        # csi.storage.k8s.io/provisioner-secret-namespace: "default"
+      reclaimPolicy: Delete
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      mountOptions:
+      - nfsvers=3
+      # - tcp
+      # - hard
+      # - timeo=600
+      # - retrans=2
+      # - async
   EOT
 }
