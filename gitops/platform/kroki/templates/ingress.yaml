@@ -14,7 +14,7 @@ metadata:
 spec:
     ingressClassName: nginx
     rules:
-      - host: kroki.dev.techsecoms.com
+      - host: kroki.prod.techsecom.io
         http:
             paths:
               - backend:
@@ -26,5 +26,5 @@ spec:
                 pathType: ImplementationSpecific
     tls:
       - hosts:
-          - kroki.dev.techsecoms.com
+          - kroki.prod.techsecom.io
         secretName: kroki-tls
