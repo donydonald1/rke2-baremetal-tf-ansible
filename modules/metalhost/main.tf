@@ -18,6 +18,17 @@ resource "null_resource" "rhel_rh_enable" {
       "sudo systemctl enable --now rpcbind rpc-statd"
     ]
   }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      ssh ${local.ssh_args} -i ${var.ssh_private_key_file} -o ConnectTimeout=2 -p ${var.ssh_port} ${var.ssh_user}@${var.baremetal_servers[0].ip} '(sleep 5; reboot)&'; sleep 10
+      until ssh ${local.ssh_args} -i ${var.ssh_private_key_file} -o ConnectTimeout=2 -p ${var.ssh_port} ${var.ssh_user}@${var.baremetal_servers[0].ip} true 2> /dev/null
+      do
+        echo "Waiting for OS to reboot and become available..."
+        sleep 30
+      done
+    EOT
+  }
 }
 
 resource "null_resource" "write_rke2_registries" {

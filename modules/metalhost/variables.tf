@@ -85,3 +85,9 @@ variable "rhsm_password" {
   default     = ""
   sensitive   = true
 }
+
+variable "ssh_port" {
+  description = "SSH port for bare-metal servers"
+  type        = number
+  default     = 22
+}

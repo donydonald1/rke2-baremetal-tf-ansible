@@ -25,5 +25,7 @@ locals {
     }
   })
   rke2_registries_b64 = base64encode(local.rke2_registries_yaml)
+  # shared flags for ssh to ignore host keys for all connections during provisioning.
+  ssh_args = "-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o PubkeyAuthentication=yes"
 }
 
