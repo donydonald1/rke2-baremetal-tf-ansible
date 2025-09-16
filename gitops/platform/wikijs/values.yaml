@@ -73,11 +73,11 @@ controllers:
         # -- Run container as a non-root user
         runAsNonRoot: true
         # -- Run as `nobody` user
-        runAsUser: 65534
+        runAsUser: 100
         # -- Run as `nobody` group
-        runAsGroup: 65534
+        runAsGroup: 100
         # -- Volume binds will be granted to `nobody` group
-        fsGroup: 65534
+        fsGroup: 100
 
     # -- Set the resource requests / limits for the container.
     resources:
