@@ -27,6 +27,7 @@ resource "kubernetes_secret" "cloudflared_credentials" {
       TunnelSecret = base64encode(var.tunnel_id_random_password)
     })
   }
+  depends_on = [data.kubernetes_namespace.ns, kubernetes_namespace.this]
 }
 
 resource "kubernetes_secret" "external_dns_token" {
