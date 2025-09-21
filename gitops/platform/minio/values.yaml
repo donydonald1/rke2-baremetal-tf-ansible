@@ -144,6 +144,23 @@ minio:
     versioning: true
     objectlocking: false
   #   # Name of the bucket
+  - name: thanos
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  - name: loki
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
 
   - name: gitlab-ci
     # Policy to be set on the
