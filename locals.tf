@@ -625,6 +625,6 @@ clusterResourceNamespace: cert-manager
       pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}"
       volumeNamePattern: "{{ .PVC.Annotations.volumeName }}"
     nodePathMap: []
-    sharedFileSystemPath: "${var.nfs_mount_point}"
+    sharedFileSystemPath: "/mnt/nfs/"
   EOT
 }
