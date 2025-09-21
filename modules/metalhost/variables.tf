@@ -112,10 +112,10 @@ variable "nfs_mount_point" {
 
 variable "nfsver" {
   description = "NFS protocol version to use (3 or 4.1)"
-  type        = string
-  default     = "3"
+  type        = number
+  default     = 3
   validation {
-    condition     = contains(["3", "4.1"], var.nfsver)
-    error_message = "nfsver must be \"3\" or \"4.1\"."
+    condition     = contains([3, 4.1], var.nfsver)
+    error_message = "nfsver must be 3 or 4.1."
   }
 }
