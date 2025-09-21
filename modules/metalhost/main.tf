@@ -67,7 +67,7 @@ resource "null_resource" "nfs_host_mapping" {
       <<-EOT
         set -euo pipefail
 
-        MOUNT_SRC="${var.nfs_server_ip}:/var/nfs/shared/${var.csi_driver_nfs_subdir}"
+        MOUNT_SRC="${var.nfs_server_ip}:/var/nfs/shared/${var.nfs_shared_dir}"
         MOUNT_POINT="${var.nfs_mount_point}"
 
         # Use type 'nfs' for both, and pin version via nfsvers=

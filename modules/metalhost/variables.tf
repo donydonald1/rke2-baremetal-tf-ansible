@@ -98,10 +98,10 @@ variable "nfs_server_ip" {
   default     = ""
 }
 
-variable "csi_driver_nfs_subdir" {
-  description = "NFS subdirectory for the CSI driver"
+variable "nfs_shared_dir" {
+  description = "NFS subdirectory for the shared directory"
   type        = string
-  default     = ""
+  default     = "rke2_prod_data"
 }
 
 variable "nfs_mount_point" {

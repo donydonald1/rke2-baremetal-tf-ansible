@@ -594,7 +594,7 @@ clusterResourceNamespace: cert-manager
         storageclass.kubernetes.io/is-default-class: "true"
       parameters:
         server: "${var.nfs_server_ip}"
-        share: /var/nfs/shared/rke2_prod_data
+        share: /var/nfs/shared/${var.nfs_shared_dir}
         subDir: ${var.csi_driver_nfs_subdir}
         mountPermissions: "0"
         #     csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
@@ -624,6 +624,6 @@ clusterResourceNamespace: cert-manager
         ## Set a path pattern, if unset the default will be used
         pathPattern: ${var.csi_driver_nfs_subdir}
       nodePathMap: []
-      sharedFileSystemPath: "/mnt/nfs/rke2_prod_data"
+      sharedFileSystemPath: "${var.nfs_mount_point}/${var.nfs_shared_dir}"
   EOT
 }

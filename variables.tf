@@ -614,3 +614,15 @@ variable "csi_driver_nfs_localpath_values" {
   type        = string
   default     = ""
 }
+
+variable "nfs_mount_point" {
+  description = "Where to mount the NFS export on the host"
+  type        = string
+  default     = "/mnt/nfs"
+}
+
+variable "nfs_shared_dir" {
+  description = "NFS subdirectory for the shared directory"
+  type        = string
+  default     = ""
+}

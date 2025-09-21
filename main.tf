@@ -12,6 +12,10 @@ module "rke2_metalhost_servers" {
   rhsm_username                         = var.rhsm_username
   rhsm_password                         = var.rhsm_password
   ssh_private_key_file                  = var.ssh_private_key_file
+  nfs_server_ip                         = var.nfs_server_ip
+  nfs_shared_dir                        = var.nfs_shared_dir
+  nfsver                                = var.nfsver
+  nfs_mount_point                       = var.nfs_mount_point
 }
 
 resource "null_resource" "control_plane_config" {
