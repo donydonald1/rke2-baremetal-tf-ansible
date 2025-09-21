@@ -591,7 +591,7 @@ clusterResourceNamespace: cert-manager
       create: true
       name: nfs-csi
       annotations:
-        storageclass.kubernetes.io/is-default-class: "true"
+        storageclass.kubernetes.io/is-default-class: "false"
       parameters:
         server: "${var.nfs_server_ip}"
         share: /var/nfs/shared/${var.nfs_shared_dir}
