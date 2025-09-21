@@ -592,7 +592,7 @@ clusterResourceNamespace: cert-manager
       annotations:
         storageclass.kubernetes.io/is-default-class: "true"
       parameters:
-        server: 10.1.10.11
+        server: "${var.nfs_server_ip}"
         share: /var/nfs/shared/rke2_prod_data
         subDir: ${var.csi_driver_nfs_subdir}
         mountPermissions: "0"
@@ -603,7 +603,7 @@ clusterResourceNamespace: cert-manager
       volumeBindingMode: WaitForFirstConsumer
       allowVolumeExpansion: true
       mountOptions:
-      - nfsvers=3
+      - nfsvers="${var.nfsver}"
       # - tcp
       # - hard
       # - timeo=600

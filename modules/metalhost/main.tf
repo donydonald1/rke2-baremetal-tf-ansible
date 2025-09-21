@@ -14,7 +14,6 @@ resource "null_resource" "rhel_rh_enable" {
     inline = [
       "sudo subscription-manager register --username '${var.rhsm_username}' --password '${var.rhsm_password}' || true",
       "sudo dnf clean all && sudo dnf makecache",
-      "sudo dnf install -y nfs-utils",
       "sudo systemctl enable --now rpcbind rpc-statd"
     ]
   }
@@ -29,6 +28,7 @@ resource "null_resource" "rhel_rh_enable" {
       done
     EOT
   }
+  depends_on = [null_resource.nfs_host_mapping]
 }
 
 resource "null_resource" "write_rke2_registries" {
@@ -51,3 +51,51 @@ resource "null_resource" "write_rke2_registries" {
   }
   depends_on = [null_resource.rhel_rh_enable]
 }
+
+resource "null_resource" "nfs_host_mapping" {
+  for_each = { for s in var.baremetal_servers : s.name => s }
+
+  connection {
+    type        = "ssh"
+    host        = each.value.ip
+    user        = var.ssh_user
+    private_key = file(var.ssh_private_key_file)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      <<-EOT
+        set -euo pipefail
+
+        MOUNT_SRC="${var.nfs_server_ip}:${var.csi_driver_nfs_subdir}"
+        MOUNT_POINT="${var.nfs_mount_point}"
+
+        # Use type 'nfs' for both, and pin version via nfsvers=
+        FSTYPE="nfs"
+        COMMON_OPTS="defaults,_netdev,noatime,nofail,x-systemd.automount"
+        OPTS="$${COMMON_OPTS},nfsvers=${var.nfsver},proto=tcp"
+        FSTAB_LINE="$${MOUNT_SRC} $${MOUNT_POINT} $${FSTYPE} $${OPTS} 0 0"
+
+        # Prep mount point
+        sudo mkdir -p "$${MOUNT_POINT}"
+
+        # Add or update /etc/fstab entry idempotently
+        if grep -Eq "^[^#]*[[:space:]]$${MOUNT_POINT}[[:space:]]+nfs" /etc/fstab; then
+          # Replace any existing line for this mount point
+          sudo sed -i "s|^[^#]*[^[:space:]]\+[[:space:]]\+$${MOUNT_POINT}[[:space:]]\+nfs.*|$${FSTAB_LINE}|" /etc/fstab
+        elif grep -Eq "^[^#]*$${MOUNT_SRC}[[:space:]]+$${MOUNT_POINT}[[:space:]]+nfs" /etc/fstab; then
+          sudo sed -i "s|^[^#]*$${MOUNT_SRC}[[:space:]]\+$${MOUNT_POINT}[[:space:]]\+nfs.*|$${FSTAB_LINE}|" /etc/fstab
+        else
+          echo "$${FSTAB_LINE}" | sudo tee -a /etc/fstab >/dev/null
+        fi
+
+        # Reload systemd units (automount) and mount now
+        sudo systemctl daemon-reload || true
+        sudo mount -a -t nfs
+      EOT
+    ]
+  }
+
+  depends_on = [null_resource.rhel_rh_enable]
+}
+

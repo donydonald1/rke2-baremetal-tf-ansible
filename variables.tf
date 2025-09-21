@@ -592,3 +592,19 @@ variable "csi_driver_nfs_subdir" {
   default     = "$${pvc.metadata.namespace}/$${pvc.metadata.name}/$${pv.metadata.name}"
   description = "The subdirectory on the NFS server to use for the CSI Driver NFS."
 }
+
+variable "nfs_server_ip" {
+  description = "NFS server IP address"
+  type        = string
+  default     = ""
+}
+
+variable "nfsver" {
+  description = "NFS protocol version to use (3 or 4.1)"
+  type        = string
+  default     = "3"
+  validation {
+    condition     = contains(["3", "4.1"], var.nfsver)
+    error_message = "nfsver must be \"3\" or \"4.1\"."
+  }
+}
