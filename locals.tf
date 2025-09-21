@@ -622,7 +622,8 @@ clusterResourceNamespace: cert-manager
       reclaimPolicy: Delete
       volumeBindingMode: WaitForFirstConsumer
       ## Set a path pattern, if unset the default will be used
-      pathPattern: ${var.csi_driver_nfs_subdir}
+      pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}"
+      volumeNamePattern: "{{ .PVC.Annotations.volumeName }}"
     nodePathMap: []
     sharedFileSystemPath: "${var.nfs_mount_point}"
   EOT
