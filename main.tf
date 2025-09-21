@@ -163,6 +163,7 @@ resource "null_resource" "kustomization" {
       local.argocd_values,
       local.external_dns_values,
       local.csi-driver-nfs_values,
+      local.csi_driver_nfs_localpath_values,
       # local.cloudflared_values,
       local.external_dns_values
     ])
@@ -247,6 +248,15 @@ resource "null_resource" "kustomization" {
     destination = "/var/post_install/csi-driver-nfs.yaml"
   }
 
+  # Upload the CSI Driver NFS LocalPath config
+  provisioner "file" {
+    content = templatefile(
+      "${path.module}/templates/csi-driver-nfs-localpath.yaml.tpl",
+      {
+        values = indent(4, trimspace(local.csi_driver_nfs_localpath_values))
+    })
+    destination = "/var/post_install/csi-driver-nfs-localpath.yaml"
+  }
   # argocd setup
   provisioner "file" {
     content = templatefile(

@@ -608,3 +608,9 @@ variable "nfsver" {
     error_message = "nfsver must be \"3\" or \"4.1\"."
   }
 }
+
+variable "csi_driver_nfs_localpath_values" {
+  description = "YAML configuration for the CSI Driver NFS Local Path Provisioner"
+  type        = string
+  default     = ""
+}
