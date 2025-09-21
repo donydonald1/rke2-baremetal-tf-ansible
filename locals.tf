@@ -613,17 +613,17 @@ clusterResourceNamespace: cert-manager
   EOT
 
   csi_driver_nfs_localpath_values = var.csi_driver_nfs_localpath_values != "" ? var.csi_driver_nfs_localpath_values : <<EOT
-      replicaCount: 1
-      storageClass:
-        create: true
-        defaultClass: false
-        defaultVolumeType: hostPath
-        name: nfs-local-path
-        reclaimPolicy: Delete
-        volumeBindingMode: WaitForFirstConsumer
-        ## Set a path pattern, if unset the default will be used
-        pathPattern: ${var.csi_driver_nfs_subdir}
-      nodePathMap: []
-      sharedFileSystemPath: "${var.nfs_mount_point}"
+    replicaCount: 1
+    storageClass:
+      create: true
+      defaultClass: false
+      defaultVolumeType: hostPath
+      name: nfs-local-path
+      reclaimPolicy: Delete
+      volumeBindingMode: WaitForFirstConsumer
+      ## Set a path pattern, if unset the default will be used
+      pathPattern: ${var.csi_driver_nfs_subdir}
+    nodePathMap: []
+    sharedFileSystemPath: "${var.nfs_mount_point}"
   EOT
 }

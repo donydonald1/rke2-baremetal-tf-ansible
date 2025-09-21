@@ -100,7 +100,7 @@ service:
 # -- Configure persistent storage for Wiki.js data.
 # @default -- See [values.yaml](./values.yaml)
 data:
-  storageClass: "nfs-csi"
+  storageClass: "nfs-local-path"
   accessMode: ReadWriteOnce
   size: 8Gi
 
