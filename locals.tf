@@ -624,6 +624,6 @@ clusterResourceNamespace: cert-manager
         ## Set a path pattern, if unset the default will be used
         pathPattern: ${var.csi_driver_nfs_subdir}
       nodePathMap: []
-      sharedFileSystemPath: "${var.nfs_mount_point}/${var.nfs_shared_dir}"
+      sharedFileSystemPath: "${var.nfs_mount_point}"
   EOT
 }
