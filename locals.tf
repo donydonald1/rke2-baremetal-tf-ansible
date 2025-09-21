@@ -604,7 +604,7 @@ clusterResourceNamespace: cert-manager
       volumeBindingMode: WaitForFirstConsumer
       allowVolumeExpansion: true
       mountOptions:
-      - nfsvers="${var.nfsver}"
+      - nfsvers=${var.nfsver}
       # - tcp
       # - hard
       # - timeo=600
@@ -625,6 +625,6 @@ clusterResourceNamespace: cert-manager
       pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}"
       volumeNamePattern: "{{ .PVC.Annotations.volumeName }}"
     nodePathMap: []
-    sharedFileSystemPath: "/mnt/nfs/"
+    sharedFileSystemPath: "${var.nfs_mount_point}"
   EOT
 }

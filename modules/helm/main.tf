@@ -16,5 +16,6 @@ resource "helm_release" "cloudflared" {
   repository        = "https://bjw-s-labs.github.io/helm-charts"
   namespace         = var.cloudflared_namespace
   create_namespace  = true
+  wait              = false
   values            = [local.cloudflared_values]
 }
