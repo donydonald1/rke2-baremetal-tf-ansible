@@ -22,41 +22,20 @@ wikijs:
             # -- Image pull policy
             pullPolicy: IfNotPresent
             # -- Image tag
-            # tag: 2.5.306
+            tag: 2.5.307
 
-            # -- Environment variables.
-            #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
-            # @default -- See [values.yaml](./values.yaml)
+          # -- Environment variables.
+          #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
+          # @default -- See [values.yaml](./values.yaml)
           env:
             # -- Set container timezone
             TZ: America/Chicago
             # DB_TYPE: postgres
             # DB_HOST:
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: cnpg-wikijs-app
-            #       key: host
             # DB_PORT:
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: cnpg-wikijs-app
-            #       key: port
             # DB_NAME:
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: cnpg-wikijs-app
-            #       key: dbname
             # DB_USER:
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: cnpg-wikijs-app
-            #       key: user
             # DB_PASS:
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: cnpg-wikijs-app
-            #       key: password
-            NODE_EXTRA_CA_CERTS: /certs/techsecom-root.crt
 
           securityContext:
             # -- Mount the container's root filesystem as read-only
@@ -73,20 +52,20 @@ wikijs:
           # -- Run container as a non-root user
           runAsNonRoot: true
           # -- Run as `nobody` user
-          runAsUser: 1001
+          runAsUser: 65534
           # -- Run as `nobody` group
-          runAsGroup: 1001
+          runAsGroup: 65534
           # -- Volume binds will be granted to `nobody` group
-          fsGroup: 1001
+          fsGroup: 65534
 
       # -- Set the resource requests / limits for the container.
-      resources:
-        limits:
-          cpu: 100m
-          memory: 128Mi
-        requests:
-          cpu: 100m
-          memory: 128Mi
+      resources: {}
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
 
   # -- Configure the services for the chart here.
   # @default -- See [values.yaml](./values.yaml)
@@ -100,39 +79,24 @@ wikijs:
   # -- Configure persistent storage for Wiki.js data.
   # @default -- See [values.yaml](./values.yaml)
   data:
-    storageClass: "nfs-local-path"
+    storageClass: nfs-local-path
     accessMode: ReadWriteOnce
     size: 8Gi
-
-  persistence:
-    certs:
-      enabled: true
-      type: configMap
-      name: techsecom-ca
-      advancedMounts:
-        main:
-          app:
-          - path: /certs/techsecom-root.crt
-            subPath: techsecom-root.crt
 
   ingress:
     # -- Enable and configure ingress settings for the chart under this key.
     # @default -- See [values.yaml](./values.yaml)
     main:
       enabled: true
-      className: "nginx"
+      className: nginx
       annotations:
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/name: Wiki.js
-        gethomepage.dev/description: Documentation
-        gethomepage.dev/group: Services
-        gethomepage.dev/icon: https://raw.githubusercontent.com/plcnk/charts/master/charts/wikijs/icon.svg
-        gethomepage.dev/href: https://wiki.prod.techsecom.io
-        gethomepage.dev/siteMonitor: https://wiki.prod.techsecom.io
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        cert-manager.io/revision-history-limit: "3"
         external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
       hosts:
-      - host: wiki.prod.techsecom.io
+      - host: &host-main "wiki.prod.techsecom.io"
         paths:
         - path: /
           pathType: Prefix
@@ -140,29 +104,26 @@ wikijs:
             identifier: main
             port: http
       tls:
-      - secretName: wikijs-tls
+      - secretName: wiki-tls
         hosts:
-        - wiki.prod.techsecom.io
-
-  # -- Enable and configure postgresql database subchart under this key.
-  #    For more options see [postgresql chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
-  # @default -- See [values.yaml](./values.yaml)
+        - *host-main
+      # -- Enable and configure postgresql database subchart under this key.
+      #    For more options see [postgresql chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+      # @default -- See [values.yaml](./values.yaml)
   postgresql:
     # -- Set this to `false` if you want to use your own database.
     enabled: true
-    global:
-      storageClass: nfs-local-path
-
+    architecture: standalone
     primary:
       persistence:
         enabled: true
-        size: 8Gi # keep aligned with your PVC expectation
         storageClass: nfs-local-path
-
-      podSecurityContext:
-        fsGroup: 1001
-        fsGroupChangePolicy: OnRootMismatch
-
-      containerSecurityContext:
-        runAsUser: 1001
-        runAsNonRoot: true
+        size: 8Gi
+    auth:
+      enablePostgresUser: false
+      username: wikijs
+      password: changeme
+      database: wikijs
+      existingSecret: ""
+      secretKeys:
+        userPasswordKey: ""
