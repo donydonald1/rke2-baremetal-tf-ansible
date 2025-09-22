@@ -5,148 +5,148 @@
 # This chart inherits from our common library chart. You can check the default values/options here:
 # https://github.com/bjw-s/helm-charts/blob/main/charts/library/common/values.yaml
 #
-
-controllers:
-  main:
-    # -- Controller type
-    type: deployment
-    # -- Number of desired pods
-    #    **WARNING**: Set this to 1 when you first deploy Wiki.js.
-    #    You can increase the number of replicas after the initial deployment.
-    replicas: 1
-    containers:
-      app:
-        image:
-          # -- Image repository
-          repository: ghcr.io/requarks/wiki
-          # -- Image pull policy
-          pullPolicy: IfNotPresent
-          # -- Image tag
-          # tag: 2.5.306
-
-          # -- Environment variables.
-          #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
-          # @default -- See [values.yaml](./values.yaml)
-        env:
-          # -- Set container timezone
-          TZ: America/Chicago
-          # DB_TYPE: postgres
-          # DB_HOST:
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: cnpg-wikijs-app
-          #       key: host
-          # DB_PORT:
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: cnpg-wikijs-app
-          #       key: port
-          # DB_NAME:
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: cnpg-wikijs-app
-          #       key: dbname
-          # DB_USER:
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: cnpg-wikijs-app
-          #       key: user
-          # DB_PASS:
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: cnpg-wikijs-app
-          #       key: password
-          NODE_EXTRA_CA_CERTS: /certs/techsecom-root.crt
-
-        securityContext:
-          # -- Mount the container's root filesystem as read-only
-          readOnlyRootFilesystem: true
-          # -- Disable privilege escalations
-          allowPrivilegeEscalation: false
-          # -- Drop all capabilities
-          capabilities:
-            drop:
-            - ALL
-
-    pod:
-      securityContext:
-        # -- Run container as a non-root user
-        runAsNonRoot: true
-        # -- Run as `nobody` user
-        runAsUser: 1001
-        # -- Run as `nobody` group
-        runAsGroup: 1001
-        # -- Volume binds will be granted to `nobody` group
-        fsGroup: 1001
-
-    # -- Set the resource requests / limits for the container.
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-
-# -- Configure the services for the chart here.
-# @default -- See [values.yaml](./values.yaml)
-service:
-  main:
-    controller: main
-    ports:
-      http:
-        port: 3000
-
-# -- Configure persistent storage for Wiki.js data.
-# @default -- See [values.yaml](./values.yaml)
-data:
-  storageClass: "nfs-local-path"
-  accessMode: ReadWriteOnce
-  size: 8Gi
-
-persistence:
-  certs:
-    enabled: true
-    type: configMap
-    name: techsecom-ca
-    advancedMounts:
-      main:
+wikijs:
+  controllers:
+    main:
+      # -- Controller type
+      type: deployment
+      # -- Number of desired pods
+      #    **WARNING**: Set this to 1 when you first deploy Wiki.js.
+      #    You can increase the number of replicas after the initial deployment.
+      replicas: 1
+      containers:
         app:
-        - path: /certs/techsecom-root.crt
-          subPath: techsecom-root.crt
+          image:
+            # -- Image repository
+            repository: ghcr.io/requarks/wiki
+            # -- Image pull policy
+            pullPolicy: IfNotPresent
+            # -- Image tag
+            # tag: 2.5.306
 
-ingress:
-  # -- Enable and configure ingress settings for the chart under this key.
+            # -- Environment variables.
+            #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
+            # @default -- See [values.yaml](./values.yaml)
+          env:
+            # -- Set container timezone
+            TZ: America/Chicago
+            # DB_TYPE: postgres
+            # DB_HOST:
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: cnpg-wikijs-app
+            #       key: host
+            # DB_PORT:
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: cnpg-wikijs-app
+            #       key: port
+            # DB_NAME:
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: cnpg-wikijs-app
+            #       key: dbname
+            # DB_USER:
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: cnpg-wikijs-app
+            #       key: user
+            # DB_PASS:
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: cnpg-wikijs-app
+            #       key: password
+            NODE_EXTRA_CA_CERTS: /certs/techsecom-root.crt
+
+          securityContext:
+            # -- Mount the container's root filesystem as read-only
+            readOnlyRootFilesystem: true
+            # -- Disable privilege escalations
+            allowPrivilegeEscalation: false
+            # -- Drop all capabilities
+            capabilities:
+              drop:
+              - ALL
+
+      pod:
+        securityContext:
+          # -- Run container as a non-root user
+          runAsNonRoot: true
+          # -- Run as `nobody` user
+          runAsUser: 1001
+          # -- Run as `nobody` group
+          runAsGroup: 1001
+          # -- Volume binds will be granted to `nobody` group
+          fsGroup: 1001
+
+      # -- Set the resource requests / limits for the container.
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+  # -- Configure the services for the chart here.
   # @default -- See [values.yaml](./values.yaml)
-  main:
-    enabled: true
-    className: "nginx"
-    annotations:
-      gethomepage.dev/enabled: "true"
-      gethomepage.dev/name: Wiki.js
-      gethomepage.dev/description: Documentation
-      gethomepage.dev/group: Services
-      gethomepage.dev/icon: https://raw.githubusercontent.com/plcnk/charts/master/charts/wikijs/icon.svg
-      gethomepage.dev/href: https://wiki.prod.techsecom.io
-      gethomepage.dev/siteMonitor: https://wiki.prod.techsecom.io
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-      external-dns.alpha.kubernetes.io/enabled: "true"
-    hosts:
-    - host: wiki.prod.techsecom.io
-      paths:
-      - path: /
-        pathType: Prefix
-        service:
-          identifier: main
-          port: http
-    tls:
-    - secretName: wikijs-tls
-      hosts:
-      - wiki.prod.techsecom.io
+  service:
+    main:
+      controller: main
+      ports:
+        http:
+          port: 3000
 
-# -- Enable and configure postgresql database subchart under this key.
-#    For more options see [postgresql chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
-# @default -- See [values.yaml](./values.yaml)
-postgresql:
-  # -- Set this to `false` if you want to use your own database.
-  enabled: true
+  # -- Configure persistent storage for Wiki.js data.
+  # @default -- See [values.yaml](./values.yaml)
+  data:
+    storageClass: "nfs-local-path"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  persistence:
+    certs:
+      enabled: true
+      type: configMap
+      name: techsecom-ca
+      advancedMounts:
+        main:
+          app:
+          - path: /certs/techsecom-root.crt
+            subPath: techsecom-root.crt
+
+  ingress:
+    # -- Enable and configure ingress settings for the chart under this key.
+    # @default -- See [values.yaml](./values.yaml)
+    main:
+      enabled: true
+      className: "nginx"
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: Wiki.js
+        gethomepage.dev/description: Documentation
+        gethomepage.dev/group: Services
+        gethomepage.dev/icon: https://raw.githubusercontent.com/plcnk/charts/master/charts/wikijs/icon.svg
+        gethomepage.dev/href: https://wiki.prod.techsecom.io
+        gethomepage.dev/siteMonitor: https://wiki.prod.techsecom.io
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        external-dns.alpha.kubernetes.io/enabled: "true"
+      hosts:
+      - host: wiki.prod.techsecom.io
+        paths:
+        - path: /
+          pathType: Prefix
+          service:
+            identifier: main
+            port: http
+      tls:
+      - secretName: wikijs-tls
+        hosts:
+        - wiki.prod.techsecom.io
+
+  # -- Enable and configure postgresql database subchart under this key.
+  #    For more options see [postgresql chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+  # @default -- See [values.yaml](./values.yaml)
+  postgresql:
+    # -- Set this to `false` if you want to use your own database.
+    enabled: true
