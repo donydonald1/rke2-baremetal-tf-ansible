@@ -150,3 +150,19 @@ wikijs:
   postgresql:
     # -- Set this to `false` if you want to use your own database.
     enabled: true
+    global:
+      storageClass: nfs-local-path
+
+    primary:
+      persistence:
+        enabled: true
+        size: 8Gi # keep aligned with your PVC expectation
+        storageClass: nfs-local-path
+
+      podSecurityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+      containerSecurityContext:
+        runAsUser: 1001
+        runAsNonRoot: true
