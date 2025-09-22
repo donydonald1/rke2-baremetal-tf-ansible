@@ -69,15 +69,15 @@ controllers:
             - ALL
 
     pod:
-      # securityContext:
-      #   # -- Run container as a non-root user
-      #   runAsNonRoot: true
-      #   # -- Run as `nobody` user
-      #   runAsUser: 100
-      #   # -- Run as `nobody` group
-      #   runAsGroup: 100
-      #   # -- Volume binds will be granted to `nobody` group
-      #   fsGroup: 100
+      securityContext:
+        # -- Run container as a non-root user
+        runAsNonRoot: true
+        # -- Run as `nobody` user
+        runAsUser: 1001
+        # -- Run as `nobody` group
+        runAsGroup: 1001
+        # -- Volume binds will be granted to `nobody` group
+        fsGroup: 1001
 
     # -- Set the resource requests / limits for the container.
     resources:
