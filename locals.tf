@@ -564,9 +564,9 @@ clusterResourceNamespace: cert-manager
         kubernetesClusterAutoscalerEnabled: true
         defaultDataPath: "${var.nfs_mount_point}"
         deletingConfirmationFlag: true
-        backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
-    defaultBackupStore:
-      backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
+    #     backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
+    # defaultBackupStore:
+    #   backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
     persistence:
         defaultClassReplicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
         defaultClass: true
