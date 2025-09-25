@@ -16,7 +16,7 @@ resource "helm_release" "cloudflared" {
   dependency_update = true
   version           = "4.2.0"
   repository        = "https://bjw-s-labs.github.io/helm-charts"
-  namespace         = kubernetes_namespace.this["cloudflared"].metadata[0].name
+  namespace         = local.namespaces["cloudflared"]
   create_namespace  = false
   wait              = false
   values            = [local.cloudflared_values]
@@ -25,7 +25,7 @@ resource "helm_release" "cloudflared" {
 resource "kubernetes_secret" "cloudflared_credentials" {
   metadata {
     name      = "cloudflared-credentials"
-    namespace = "cloudflared"
+    namespace = local.namespaces["cloudflared"]
     annotations = {
       "app.kubernetes.io/managed-by" = "Terraform"
     }

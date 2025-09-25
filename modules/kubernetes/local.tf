@@ -45,4 +45,13 @@ persistence:
       - path: /etc/cloudflared/credentials.json
         subPath: credentials.json
   EOT
+  ns_existing = {
+    for k, v in data.kubernetes_namespace.ns :
+    k => v.metadata[0].name
+  }
+  ns_created = {
+    for k, v in kubernetes_namespace.this :
+    k => v.metadata[0].name
+  }
+  namespaces = merge(local.ns_existing, local.ns_created)
 }
