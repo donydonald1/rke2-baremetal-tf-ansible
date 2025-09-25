@@ -18,6 +18,9 @@ spec:
       - name: longhorn
         namespace: longhorn-system
         serverSideApply: true
+        helm:
+          values:
+          - values.yaml
 
       # - name: awx-operator
       #   namespace: awx-operator
@@ -113,6 +116,17 @@ spec:
         repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
         path: "gitops/system/{{ .name }}"
+        helm:
+          version: v3
+          releaseName: "{{ .name }}"
+          # Use per-app value files if provided in the generator element:
+          {{- $helm := dig "helm" (dict) . -}}
+          {{- with $helm.values }}
+          valueFiles:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          # Be forgiving if a listed values file doesn't exist for some apps:
+          ignoreMissingValueFiles: true
         # plugin:
         #   name: avp-directory-include
         # env:
