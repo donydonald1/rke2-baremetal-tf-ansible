@@ -119,10 +119,15 @@ spec:
         helm:
           version: v3
           releaseName: "{{ .name }}"
-          {{- if (dig "helm" "values" nil .) }}
+          {{- $helm := get . "helm" }}
+          {{- if $helm }}
+            {{- $vals := get $helm "values" }}
+            {{- if $vals }}
           valueFiles:
-          {{- toYaml (dig "helm" "values" nil .) | nindent 12 }}
+          {{- toYaml $vals | nindent 12 }}
+            {{- end }}
           {{- end }}
+          ignoreMissingValueFiles: true
         # plugin:
         #   name: avp-directory-include
         # env:
