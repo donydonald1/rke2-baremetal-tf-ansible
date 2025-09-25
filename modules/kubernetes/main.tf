@@ -1,12 +1,12 @@
 resource "kubernetes_namespace" "this" {
-  for_each = {
-    for ns in var.namespaces :
-    ns => ns
-    if !contains(keys(data.kubernetes_namespace.ns), ns)
-  }
+  for_each = toset(var.namespaces)
 
   metadata {
     name = each.key
+    labels = {
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "app.kubernetes.io/name"       = each.key
+    }
   }
 }
 
@@ -16,16 +16,16 @@ resource "helm_release" "cloudflared" {
   dependency_update = true
   version           = "4.2.0"
   repository        = "https://bjw-s-labs.github.io/helm-charts"
-  namespace         = local.namespaces["cloudflared"]
+  namespace         = "cloudflared"
   create_namespace  = false
   wait              = false
   values            = [local.cloudflared_values]
-  depends_on        = [data.kubernetes_namespace.ns, kubernetes_namespace.this]
+  depends_on        = [kubernetes_namespace.this]
 }
 resource "kubernetes_secret" "cloudflared_credentials" {
   metadata {
     name      = "cloudflared-credentials"
-    namespace = local.namespaces["cloudflared"]
+    namespace = helm_release.cloudflared.namespace
     annotations = {
       "app.kubernetes.io/managed-by" = "Terraform"
     }
@@ -39,7 +39,7 @@ resource "kubernetes_secret" "cloudflared_credentials" {
       TunnelSecret = base64encode(var.tunnel_id_random_password)
     })
   }
-  depends_on = [data.kubernetes_namespace.ns, kubernetes_namespace.this]
+  depends_on = [kubernetes_namespace.this]
 }
 
 resource "kubernetes_secret" "external_dns_token" {

@@ -9,9 +9,9 @@ data "kubernetes_secret_v1" "vault_seal" {
   depends_on = [time_sleep.sleep-wait-vault]
 }
 
-data "kubernetes_namespace" "ns" {
-  for_each = toset(var.namespaces)
-  metadata {
-    name = each.key
-  }
-}
+# data "kubernetes_namespace" "ns" {
+#   for_each = toset(var.namespaces)
+#   metadata {
+#     name = each.key
+#   }
+# }
