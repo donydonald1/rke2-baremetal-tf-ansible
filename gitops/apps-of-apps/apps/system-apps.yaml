@@ -116,18 +116,6 @@ spec:
         repoURL: https://github.com/donydonald1/rke2-baremetal-tf-ansible.git
         targetRevision: HEAD
         path: "gitops/system/{{ .name }}"
-        helm:
-          version: v3
-          releaseName: "{{ .name }}"
-          {{- $helm := get . "helm" }}
-          {{- if $helm }}
-            {{- $vals := get $helm "values" }}
-            {{- if $vals }}
-          valueFiles:
-          {{- toYaml $vals | nindent 12 }}
-            {{- end }}
-          {{- end }}
-          ignoreMissingValueFiles: true
         # plugin:
         #   name: avp-directory-include
         # env:
