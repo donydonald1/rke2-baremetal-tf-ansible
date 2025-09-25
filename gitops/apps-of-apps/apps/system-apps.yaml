@@ -119,14 +119,10 @@ spec:
         helm:
           version: v3
           releaseName: "{{ .name }}"
-          # Use per-app value files if provided in the generator element:
-          {{- $helm := dig "helm" (dict) . -}}
-          {{- with $helm.values }}
+          {{- if (dig "helm" "values" nil .) }}
           valueFiles:
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml (dig "helm" "values" nil .) | nindent 12 }}
           {{- end }}
-          # Be forgiving if a listed values file doesn't exist for some apps:
-          ignoreMissingValueFiles: true
         # plugin:
         #   name: avp-directory-include
         # env:
