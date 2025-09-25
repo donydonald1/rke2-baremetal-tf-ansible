@@ -15,6 +15,10 @@ spec:
         namespace: elastic-system
         serverSideApply: true
 
+      - name: longhorn
+        namespace: longhorn-system
+        serverSideApply: true
+
       # - name: awx-operator
       #   namespace: awx-operator
       #   serverSideApply: true

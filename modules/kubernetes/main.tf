@@ -10,6 +10,18 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
+resource "helm_release" "cloudflared" {
+  chart             = "app-template"
+  name              = "cloudflared"
+  dependency_update = true
+  version           = "4.2.0"
+  repository        = "https://bjw-s-labs.github.io/helm-charts"
+  namespace         = kubernetes_namespace.this["cloudflared"].metadata[0].name
+  create_namespace  = false
+  wait              = false
+  values            = [local.cloudflared_values]
+  depends_on        = [data.kubernetes_namespace.ns, kubernetes_namespace.this]
+}
 resource "kubernetes_secret" "cloudflared_credentials" {
   metadata {
     name      = "cloudflared-credentials"

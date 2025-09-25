@@ -129,3 +129,9 @@ variable "namespaces" {
   #     error_message = "namespaces must include 'external-dns', 'cert-manager', and 'cloudflared' to create the respective secrets."
   #   }
 }
+
+variable "cloudflared_values" {
+  description = "Values for the Cloudflared Helm chart"
+  type        = string
+  default     = ""
+}

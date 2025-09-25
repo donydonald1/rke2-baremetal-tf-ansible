@@ -8,14 +8,4 @@ resource "helm_release" "vault_operator" {
 
 }
 
-resource "helm_release" "cloudflared" {
-  chart             = "app-template"
-  name              = "cloudflared"
-  dependency_update = true
-  version           = "4.2.0"
-  repository        = "https://bjw-s-labs.github.io/helm-charts"
-  namespace         = var.cloudflared_namespace
-  create_namespace  = true
-  wait              = false
-  values            = [local.cloudflared_values]
-}
+

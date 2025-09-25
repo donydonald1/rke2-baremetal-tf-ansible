@@ -562,7 +562,7 @@ clusterResourceNamespace: cert-manager
   longhorn_values       = var.longhorn_values != "" ? var.longhorn_values : <<EOT
     defaultSettings:
         kubernetesClusterAutoscalerEnabled: true
-        defaultDataPath: /var/lib/longhorn
+        defaultDataPath: "${var.nfs_mount_point}"
         deletingConfirmationFlag: true
         backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
     defaultBackupStore:

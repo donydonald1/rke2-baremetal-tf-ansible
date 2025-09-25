@@ -49,13 +49,13 @@ loki:
 
     schemaConfig:
       configs:
-        - from: "2024-04-01"
-          store: tsdb
-          object_store: s3
-          schema: v13
-          index:
-            prefix: loki_index_
-            period: 24h
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
 
     server:
       log_level: info
@@ -85,13 +85,13 @@ loki:
         maxUnavailable: 50%
         maxSurge: 50%
     topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: loki
-            app.kubernetes.io/component: gateway
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: loki
+          app.kubernetes.io/component: gateway
     ingress:
       enabled: true
       ingressClassName: "nginx"
@@ -103,33 +103,33 @@ loki:
         cert-manager.io/duration: "2160h"
         cert-manager.io/renew-before: "720h"
       hosts:
-        - host: "loki.rsr.net"
-          paths:
-            - path: /
-              pathType: Prefix
+      - host: "loki.rsr.net"
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
-        - secretName: loki-gateway-tls
-          hosts:
-            - "loki.rsr.net"
+      - secretName: loki-gateway-tls
+        hosts:
+        - "loki.rsr.net"
 
   write:
     replicas: 3
     persistence:
       size: 10Gi
-      storageClass: "longhorn"
+      storageClass: ""
     tolerations:
-      - key: "arm64"
-        operator: "Exists"
+    - key: "arm64"
+      operator: "Exists"
   read:
     replicas: 2
 
   backend:
     replicas: 2
     persistence:
-      storageClass: "longhorn"
+      storageClass: ""
     tolerations:
-      - key: "arm64"
-        operator: "Exists"
+    - key: "arm64"
+      operator: "Exists"
 
   monitoring:
     dashboards:
