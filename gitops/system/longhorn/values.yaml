@@ -3,15 +3,15 @@ longhorn:
     defaultClass: true
     defaultFsType: ext4
   defaultSettings:
-    defaultDataPath: "/mnt/nfs/rke2_prod_data"
+    defaultDataPath: "var/longhorn"
     # This tells Longhorn to use the 'longhorn' bucket of our S3.
     backupTarget: s3://longhorn@us-east-1/
     # The secret where the MinIO credentials are stored.
     backupTargetCredentialSecret: minio-secret
     # Usually Longhorn does not store volumes on the node that it runs on. This setting allows that.
-    replicaSoftAntiAffinity: true
-    replicaZoneSoftAntiAffinity: true
-    nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+    # replicaSoftAntiAffinity: true
+    # replicaZoneSoftAntiAffinity: true
+    # nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
   ingress:
     enabled: true
     ingressClassName: nginx
