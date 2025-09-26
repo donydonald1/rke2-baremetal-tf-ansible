@@ -79,7 +79,7 @@ wikijs:
   # -- Configure persistent storage for Wiki.js data.
   # @default -- See [values.yaml](./values.yaml)
   data:
-    storageClass: nfs-local-path
+    storageClass: longhorn
     accessMode: ReadWriteOnce
     size: 8Gi
 
@@ -117,7 +117,7 @@ wikijs:
     primary:
       persistence:
         enabled: true
-        storageClass: nfs-local-path
+        storageClass: longhorn
         size: 8Gi
     auth:
       enablePostgresUser: false
