@@ -33,9 +33,11 @@ spec:
       # - name: vault
       #   namespace: vault
       #   serverSideApply: true
-      - name: wikijs
-        namespace: wikijs
-        serverSideApply: true
+
+      # - name: wikijs
+      #   namespace: wikijs
+      #   serverSideApply: true
+
       - name: minio
         namespace: minio
         serverSideApply: true
