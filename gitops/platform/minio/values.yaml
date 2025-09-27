@@ -171,7 +171,7 @@ minio:
     versioning: true
     objectlocking: false
 
-  - name: oki-admin
+  - name: loki-admin
     # Policy to be set on the
     # bucket [none|download|upload|public]
     policy: none
