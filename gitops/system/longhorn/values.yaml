@@ -2,10 +2,13 @@ longhorn:
   persistence:
     defaultClass: true
     defaultFsType: ext4
+  preUpgradeChecker:
+    jobEnabled: true
+    upgradeVersionCheck: true
   defaultSettings:
-    defaultDataPath: "var/longhorn"
+    defaultDataPath: "/var/longhorn"
     # This tells Longhorn to use the 'longhorn' bucket of our S3.
-    backupTarget: s3://longhorn@us-east-1/
+    backupTarget: s3://longhorn@us-east-1/longhorn
     # The secret where the MinIO credentials are stored.
     backupTargetCredentialSecret: minio-secret
     # Usually Longhorn does not store volumes on the node that it runs on. This setting allows that.

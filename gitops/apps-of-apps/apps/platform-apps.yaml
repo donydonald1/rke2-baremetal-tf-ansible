@@ -44,6 +44,7 @@ spec:
         helm:
           values:
           - values.yaml
+
       # - name: go-healthcheck
       - name: it-tools
         namespace: it-tools
@@ -51,6 +52,7 @@ spec:
         helm:
           values:
           - values.yaml
+
       - name: kroki
         namespace: kroki
         serverSideApply: true
