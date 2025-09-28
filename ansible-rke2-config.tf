@@ -127,9 +127,9 @@ rke2_ingress_nginx_values:
       timeoutSeconds: 30
     allowSnippetAnnotations: true
     replicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
-    extraArgs:
-      # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
-      enable-annotation-validation: "false"
+    # extraArgs:
+    #   # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
+    #   enable-annotation-validation: "false"
 
     service:
       enabled: true
