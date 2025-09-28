@@ -571,7 +571,7 @@ clusterResourceNamespace: cert-manager
     persistence:
         defaultClassReplicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
         defaultClass: true
-        defaultFsType: ext4
+        # defaultFsType: ext4
     ingress:
         enabled: true
         ingressClassName: nginx
@@ -582,6 +582,7 @@ clusterResourceNamespace: cert-manager
 
         annotations:
             cert-manager.io/cluster-issuer: letsencrypt-prod
+            external-dns.alpha.kubernetes.io/enabled: "true"
   EOT
   csi-driver-nfs_values = var.csi-driver-nfs_values != "" ? var.csi-driver-nfs_values : <<EOT
     feature:

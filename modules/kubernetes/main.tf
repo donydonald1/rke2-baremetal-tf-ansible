@@ -217,6 +217,38 @@ YAML
   depends_on = [kubernetes_config_map.cmp-plugin, ]
 }
 
+resource "kubectl_manifest" "external_secret_longhorn" {
+  yaml_body = <<YAML
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: minio-secret
+  namespace: longhorn-system
+  labels:
+    argocd.argoproj.io/instance: longhorn
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault
+  data:
+  - secretKey: AWS_ACCESS_KEY_ID
+    remoteRef:
+      key: secret/postgres-users/
+      property: username
+  - secretKey: AWS_SECRET_ACCESS_KEY
+    remoteRef:
+      key: secret/postgres-users/
+      property: password
+  - secretKey: AWS_ENDPOINTS
+    remoteRef:
+      key: secret/postgres-users/
+      property: minio-endpoint
+YAML
+
+  depends_on = []
+}
+
 resource "kubernetes_config_map" "cmp-plugin" {
   metadata {
     name      = "avp-cmp-plugin"

@@ -106,12 +106,15 @@ rke2_service_cidr:
   - 10.43.0.0/16
 
 rke2_etcd_snapshot_s3_options:
-  s3_endpoint: "${var.s3_backup_endpoint}" # required
-  access_key: "${var.s3_backup_access_key}" # required
-  secret_key: "${var.s3_backup_secret_key}" # required
-  bucket: "${var.s3_backup_bucketname}" # required
-  snapshot_name: "${var.snapshot_name}" # required.
-  skip_ssl_verify: ${var.s3_backup_skip_ssl_verify} # optional
+  etcd-s3: "${var.enable_rke2_etcd_s3_backup}"
+  s3_endpoint: "${var.s3_backup_endpoint}" 
+  access_key: "${var.s3_backup_access_key}" 
+  secret_key: "${var.s3_backup_secret_key}" 
+  bucket: "${var.s3_backup_bucketname}" 
+  snapshot_name: "${var.snapshot_name}" 
+  etcd-snapshot-retention: "${var.etcd_snapshot_retention}"
+  etcd-snapshot-schedule-cron: "${var.etcd_snapshot_schedule_cron}"
+  skip_ssl_verify: ${var.s3_backup_skip_ssl_verify} 
   endpoint_ca: "" 
   region: "" 
   folder: "${var.cluster_name}" 
@@ -122,12 +125,32 @@ rke2_ingress_nginx_values:
     admissionWebhooks:
       enabled: enable
       timeoutSeconds: 30
-
+    allowSnippetAnnotations: true
     replicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
     extraArgs:
       # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
       enable-annotation-validation: "false"
 
+    service:
+      enabled: true
+
+      annotations:
+        ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
+      loadBalancerClass: "kube-vip.io/kube-vip-class"
+      externalTrafficPolicy: Local
+      enableHttp: true
+      enableHttps: true
+      ports:
+        http: 80
+        https: 443
+
+      targetPorts:
+        http: http
+        https: https
+
+      type: LoadBalancer
+    addHeaders:
+      Referrer-Policy: strict-origin-when-cross-origin
     config:
       # auto value takes all nodes in cgroups v2 (dell_v2)
       worker-processes: 1
@@ -137,6 +160,25 @@ rke2_ingress_nginx_values:
         proxy_cache_key $scheme$proxy_host$request_uri;
         proxy_cache_lock on;
         proxy_cache_use_stale updating;
+      hsts-include-subdomains: "false"
+      hsts-max-age: "63072000"
+      server-name-hash-bucket-size: "256"
+      client-body-buffer-size: "${var.nginx_client_body_buffer_size}"
+      client-max-body-size: "${var.nginx_client_max_body_size}"
+      use-http2: "true"
+      ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4"
+      ssl-protocols: "TLSv1.3 TLSv1.2"
+      server-tokens: "false"
+      # Configure smaller defaults for upstream-keepalive-*, see https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration
+      upstream-keepalive-connections: 100 # Limit of 100 held-open connections
+      upstream-keepalive-time:        30s # 30 second limit for connection reuse
+      upstream-keepalive-timeout:       5 # 5 second timeout to hold open idle connections
+      upstream-keepalive-requests:   1000 # 1000 requests per connection, before recycling
+      enable-brotli: "true"
+      brotli-level: "6"
+      brotli-types: "text/xml image/svg+xml application/x-font-ttf image/vnd.microsoft.icon application/x-font-opentype application/json font/eot application/vnd.ms-fontobject application/javascript font/otf application/xml application/xhtml+xml text/javascript application/x-javascript text/plain application/x-font-truetype application/xml+rss image/x-icon font/opentype text/css image/x-win-bitmap"
+      enable-real-ip: "true"
+      ignore-invalid-headers: "false"
       use-forwarded-headers: true
       allow-snippet-annotations: true
       annotations-risk-level: Critical
@@ -158,43 +200,6 @@ rke2_ingress_nginx_values:
       requests:
         cpu: 40m
         memory: 150Mi
-
-    autoscaling:
-      enabled: true
-      minReplicas: 3
-      maxReplicas: 11
-      # when CPU == 500m
-      targetCPUUtilizationPercentage: 1250
-      targetMemoryUtilizationPercentage: 200
-    topologySpreadConstraints:
-      - maxSkew: 4
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/component: controller
-            app.kubernetes.io/instance: ingress-nginx
-            app.kubernetes.io/name: ingress-nginx
-    service:
-      enabled: true
-
-      annotations:
-        ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
-      loadBalancerClass: "kube-vip.io/kube-vip-class"
-      externalTrafficPolicy: Local
-      enableHttp: true
-      enableHttps: true
-      ports:
-        http: 80
-        https: 443
-
-      targetPorts:
-        http: http
-        https: https
-
-      type: LoadBalancer
-      # internal:
-      #   enabled: false
 
     extraVolumeMounts:
       - name: dshm
@@ -270,8 +275,12 @@ rke2_ingress_nginx_values:
             drop:
               - all
           readOnlyRootFilesystem: true
-  # tcp:
-  #   22: "gitlab/gitlab-gitlab-shell:22"
+  scope:
+    enabled: true
+  tcp:
+    22: "gitlab/gitlab-gitlab-shell:22"
+  udp:
+    ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
 EOT
 }
 # - "${path.module}/manifest/rke2-cilium.yaml"

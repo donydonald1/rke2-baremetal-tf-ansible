@@ -214,6 +214,23 @@ variable "s3_backup_secret_key" {
   sensitive   = true
 }
 
+variable "enable_rke2_etcd_s3_backup" {
+  description = "Whether to enable RKE2 etcd S3 backup."
+  type        = bool
+  default     = true
+}
+
+variable "etcd_snapshot_retention" {
+  description = "The number of snapshots to retain."
+  type        = number
+  default     = 12
+}
+
+variable "etcd_snapshot_schedule_cron" {
+  description = "The cron schedule for the etcd snapshots."
+  type        = string
+  default     = "0 */6 * * *"
+}
 variable "s3_backup_endpoint" {
   description = "The endpoint for the S3 backup."
   type        = string
@@ -625,4 +642,22 @@ variable "nfs_shared_dir" {
   description = "NFS subdirectory for the shared directory"
   type        = string
   default     = ""
+}
+
+variable "nginx_client_max_body_size" {
+  description = "The maximum body size for nginx."
+  type        = string
+  default     = "10M"
+}
+
+variable "nginx_client_body_buffer_size" {
+  description = "The client body buffer size for nginx."
+  type        = string
+  default     = "10M"
+}
+
+variable "wireguard_port" {
+  description = "The port for the wireguard"
+  type        = number
+  default     = 51820
 }
