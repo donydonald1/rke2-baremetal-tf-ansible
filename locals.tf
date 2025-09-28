@@ -561,12 +561,13 @@ clusterResourceNamespace: cert-manager
   EOT
   longhorn_values       = var.longhorn_values != "" ? var.longhorn_values : <<EOT
     defaultSettings:
-        kubernetesClusterAutoscalerEnabled: true
-        defaultDataPath: "${var.nfs_mount_point}"
-        deletingConfirmationFlag: true
-    #     backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
-    # defaultBackupStore:
-    #   backupTarget: nfs://10.1.10.11:/var/nfs/shared/rke2_prod_data
+      defaultDataPath: "/var/longhorn"
+      # This tells Longhorn to use the 'longhorn' bucket of our S3.
+      backupTarget: s3://longhorn@us-east-1/longhorn
+      deletingConfirmationFlag: true
+      # The secret where the MinIO credentials are stored.
+      backupTargetCredentialSecret: minio-secret
+      kubernetesClusterAutoscalerEnabled: true
     persistence:
         defaultClassReplicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
         defaultClass: true
