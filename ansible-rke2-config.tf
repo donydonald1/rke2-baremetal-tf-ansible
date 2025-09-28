@@ -174,7 +174,6 @@ rke2_ingress_nginx_values:
       upstream-keepalive-time:        30s # 30 second limit for connection reuse
       upstream-keepalive-timeout:       5 # 5 second timeout to hold open idle connections
       upstream-keepalive-requests:   1000 # 1000 requests per connection, before recycling
-      enable-brotli: "true"
       brotli-level: "6"
       brotli-types: "text/xml image/svg+xml application/x-font-ttf image/vnd.microsoft.icon application/x-font-opentype application/json font/eot application/vnd.ms-fontobject application/javascript font/otf application/xml application/xhtml+xml text/javascript application/x-javascript text/plain application/x-font-truetype application/xml+rss image/x-icon font/opentype text/css image/x-win-bitmap"
       enable-real-ip: "true"
@@ -182,9 +181,6 @@ rke2_ingress_nginx_values:
       use-forwarded-headers: true
       allow-snippet-annotations: true
       annotations-risk-level: Critical
-      enable-brotli: "true"
-      brotli-level: "6"
-      brotli-types: text/html and application/vnd.api+json application/xml+rss application/atom+xml application/javascript application/x-javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/svg+xml image/x-icon text/css text/plain text/x-component
 
     ingressClassResource:
       name: nginx
