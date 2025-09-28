@@ -219,15 +219,16 @@ rke2_ingress_nginx_values:
         configMap:
           name: dns-proxy-config
 
-    dnsPolicy: None
-    dnsConfig:
-      nameservers:
-        - 127.0.0.1
-      searches:
-        - rke2-ingress-nginx-controller.svc.cluster.local
-        - svc.cluster.local
-        - cluster.local
-        # - ${var.domain}
+    # dnsPolicy: None
+    # dnsConfig:
+    #   nameservers:
+    #     - 127.0.0.1
+    #     - 1.1.1.1
+    #     - 8.8.8.8
+    #   searches:
+    #     - rke2-ingress-nginx-controller.svc.cluster.local
+    #     - svc.cluster.local
+    #     - cluster.local
     extraContainers:
       - name: dns-proxy
         image: coredns/coredns:1.12.3
