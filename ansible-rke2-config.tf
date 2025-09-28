@@ -276,8 +276,8 @@ rke2_ingress_nginx_values:
     enabled: true
   tcp:
     22: "gitlab/gitlab-gitlab-shell:22"
-  udp:
-    ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
+  # udp:
+  #   ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
 EOT
 }
 # - "${path.module}/manifest/rke2-cilium.yaml"
