@@ -227,7 +227,7 @@ rke2_ingress_nginx_values:
         - rke2-ingress-nginx-controller.svc.cluster.local
         - svc.cluster.local
         - cluster.local
-        - ${var.domain}
+        # - ${var.domain}
     extraContainers:
       - name: dns-proxy
         image: coredns/coredns:1.12.3
