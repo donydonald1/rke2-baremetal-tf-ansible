@@ -33,3 +33,23 @@ variable "nginx_values" {
   type        = string
   default     = ""
 }
+
+variable "kube-vip-nginx-lb-ip" {
+  description = "The IP address for the kube-vip nginx loadbalancer."
+  type        = string
+  default     = ""
+}
+
+variable "enable_kube-vip-lb" {
+  description = "Whether to enable kube-vip load balancer"
+  type        = bool
+  default     = false
+  validation {
+    condition = (
+      !var.enable_kube-vip-lb || (
+        var.kube-vip-nginx-lb-ip != null && var.kube-vip-nginx-lb-ip != ""
+      )
+    )
+    error_message = "If enable_kube-vip-lb is true, kube-vip-nginx-lb-ip must be provided and cannot be empty."
+  }
+}

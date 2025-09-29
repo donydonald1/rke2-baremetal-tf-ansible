@@ -46,8 +46,8 @@ rke2_version: "${var.rke2_version}"
 rke2_cni:
   - multus
   - cilium
-# rke2_disable:
-#   - rke2-ingress-nginx
+rke2_disable:
+  - rke2-ingress-nginx
 
 rke2_kube_apiserver_args: [
     "audit-policy-file=/etc/rancher/rke2/audit-policy.yaml",
@@ -119,165 +119,166 @@ rke2_etcd_snapshot_s3_options:
   region: "" 
   folder: "${var.cluster_name}" 
 
-rke2_ingress_controller: ingress-nginx
-rke2_ingress_nginx_values:
-  controller:
-    admissionWebhooks:
-      enabled: enable
-      timeoutSeconds: 30
-    allowSnippetAnnotations: true
-    replicaCount: ${length(try(module.rke2_metalhost_servers.server_ips, []))}
-    # extraArgs:
-    #   # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
-    #   enable-annotation-validation: "false"
+# rke2_ingress_controller: ingress-nginx
+# rke2_ingress_nginx_values:
+#   controller:
+#     kind: Deployment
+#     admissionWebhooks:
+#       enabled: enable
+#       timeoutSeconds: 30
+#     allowSnippetAnnotations: true
+#     replicaCount: 3
+#     # extraArgs:
+#     #   # Disable until PR merged: https://github.com/kubernetes/ingress-nginx/pull/12626
+#     #   enable-annotation-validation: "false"
 
-    service:
-      enabled: true
+#     service:
+#       enabled: true
 
-      annotations:
-        ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
-      loadBalancerClass: "kube-vip.io/kube-vip-class"
-      externalTrafficPolicy: Local
-      enableHttp: true
-      enableHttps: true
-      ports:
-        http: 80
-        https: 443
+#       annotations:
+#         ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
+#       loadBalancerClass: "kube-vip.io/kube-vip-class"
+#       externalTrafficPolicy: Local
+#       enableHttp: true
+#       enableHttps: true
+#       ports:
+#         http: 80
+#         https: 443
 
-      targetPorts:
-        http: http
-        https: https
+#       targetPorts:
+#         http: http
+#         https: https
 
-      type: LoadBalancer
-    addHeaders:
-      Referrer-Policy: strict-origin-when-cross-origin
-    config:
-      # auto value takes all nodes in cgroups v2 (dell_v2)
-      worker-processes: 1
-      hsts: "true"
-      http-snippet: |
-        proxy_cache_path /dev/shm levels=1:2 keys_zone=static-cache:2m max_size=300m inactive=7d use_temp_path=off;
-        proxy_cache_key $scheme$proxy_host$request_uri;
-        proxy_cache_lock on;
-        proxy_cache_use_stale updating;
-      hsts-include-subdomains: "false"
-      hsts-max-age: "63072000"
-      server-name-hash-bucket-size: "256"
-      client-body-buffer-size: "${var.nginx_client_body_buffer_size}"
-      client-max-body-size: "${var.nginx_client_max_body_size}"
-      use-http2: "true"
-      ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4"
-      ssl-protocols: "TLSv1.3 TLSv1.2"
-      server-tokens: "false"
-      # Configure smaller defaults for upstream-keepalive-*, see https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration
-      upstream-keepalive-connections: 100 # Limit of 100 held-open connections
-      upstream-keepalive-time:        30s # 30 second limit for connection reuse
-      upstream-keepalive-timeout:       5 # 5 second timeout to hold open idle connections
-      upstream-keepalive-requests:   1000 # 1000 requests per connection, before recycling
-      brotli-level: "6"
-      brotli-types: "text/xml image/svg+xml application/x-font-ttf image/vnd.microsoft.icon application/x-font-opentype application/json font/eot application/vnd.ms-fontobject application/javascript font/otf application/xml application/xhtml+xml text/javascript application/x-javascript text/plain application/x-font-truetype application/xml+rss image/x-icon font/opentype text/css image/x-win-bitmap"
-      enable-real-ip: "true"
-      ignore-invalid-headers: "false"
-      use-forwarded-headers: true
-      allow-snippet-annotations: true
-      annotations-risk-level: Critical
+#       type: LoadBalancer
+#     addHeaders:
+#       Referrer-Policy: strict-origin-when-cross-origin
+#     config:
+#       # auto value takes all nodes in cgroups v2 (dell_v2)
+#       worker-processes: 1
+#       hsts: "true"
+#       http-snippet: |
+#         proxy_cache_path /dev/shm levels=1:2 keys_zone=static-cache:2m max_size=300m inactive=7d use_temp_path=off;
+#         proxy_cache_key $scheme$proxy_host$request_uri;
+#         proxy_cache_lock on;
+#         proxy_cache_use_stale updating;
+#       hsts-include-subdomains: "false"
+#       hsts-max-age: "63072000"
+#       server-name-hash-bucket-size: "256"
+#       client-body-buffer-size: "${var.nginx_client_body_buffer_size}"
+#       client-max-body-size: "${var.nginx_client_max_body_size}"
+#       use-http2: "true"
+#       ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4"
+#       ssl-protocols: "TLSv1.3 TLSv1.2"
+#       server-tokens: "false"
+#       # Configure smaller defaults for upstream-keepalive-*, see https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration
+#       upstream-keepalive-connections: 100 # Limit of 100 held-open connections
+#       upstream-keepalive-time:        30s # 30 second limit for connection reuse
+#       upstream-keepalive-timeout:       5 # 5 second timeout to hold open idle connections
+#       upstream-keepalive-requests:   1000 # 1000 requests per connection, before recycling
+#       brotli-level: "6"
+#       brotli-types: "text/xml image/svg+xml application/x-font-ttf image/vnd.microsoft.icon application/x-font-opentype application/json font/eot application/vnd.ms-fontobject application/javascript font/otf application/xml application/xhtml+xml text/javascript application/x-javascript text/plain application/x-font-truetype application/xml+rss image/x-icon font/opentype text/css image/x-win-bitmap"
+#       enable-real-ip: "true"
+#       ignore-invalid-headers: "false"
+#       use-forwarded-headers: true
+#       allow-snippet-annotations: true
+#       annotations-risk-level: Critical
 
-    ingressClassResource:
-      name: nginx
-      enabled: true
-      default: true
-      # controllerValue: "k8s.io/ingress-nginx"
+#     ingressClassResource:
+#       name: nginx
+#       enabled: true
+#       default: true
+#       # controllerValue: "k8s.io/ingress-nginx"
 
-    ingressClass: nginx
+#     ingressClass: nginx
 
-    resources:
-      limits:
-        memory: 328Mi
-      requests:
-        cpu: 40m
-        memory: 150Mi
+#     resources:
+#       limits:
+#         memory: 328Mi
+#       requests:
+#         cpu: 40m
+#         memory: 150Mi
 
-    extraVolumeMounts:
-      - name: dshm
-        mountPath: /dev/shm
+#     extraVolumeMounts:
+#       - name: dshm
+#         mountPath: /dev/shm
 
-    metrics:
-      enabled: false
-      serviceMonitor:
-        enabled: false
-        additionalLabels:
-          release: monitoring
+#     metrics:
+#       enabled: false
+#       serviceMonitor:
+#         enabled: false
+#         additionalLabels:
+#           release: monitoring
 
-    extraVolumes:
-      - name: dshm
-        emptyDir:
-          medium: Memory
-          # not working until v1.21? https://github.com/kubernetes/kubernetes/issues/63126
-          sizeLimit: 303Mi
+#     extraVolumes:
+#       - name: dshm
+#         emptyDir:
+#           medium: Memory
+#           # not working until v1.21? https://github.com/kubernetes/kubernetes/issues/63126
+#           sizeLimit: 303Mi
 
-      - name: dns-proxy-config-volume
-        configMap:
-          name: dns-proxy-config
+#       - name: dns-proxy-config-volume
+#         configMap:
+#           name: dns-proxy-config
 
-    # dnsPolicy: None
-    # dnsConfig:
-    #   nameservers:
-    #     - 127.0.0.1
-    #     - 1.1.1.1
-    #     - 8.8.8.8
-    #   searches:
-    #     - rke2-ingress-nginx-controller.svc.cluster.local
-    #     - svc.cluster.local
-    #     - cluster.local
-    extraContainers:
-      - name: dns-proxy
-        image: coredns/coredns:1.12.3
-        args:
-          - -conf
-          - /etc/coredns/Corefile
-        volumeMounts:
-          - mountPath: /etc/coredns
-            name: dns-proxy-config-volume
-            readOnly: true
-        livenessProbe:
-          failureThreshold: 5
-          httpGet:
-            path: /health
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /health
-            port: 8080
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        resources:
-          limits:
-            memory: 128Mi
-          requests:
-            cpu: 10m
-            memory: 13Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            add:
-              - NET_BIND_SERVICE
-            drop:
-              - all
-          readOnlyRootFilesystem: true
-  scope:
-    enabled: true
-  tcp:
-    22: "gitlab/gitlab-gitlab-shell:22"
-  # udp:
-  #   ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
+#     # dnsPolicy: None
+#     # dnsConfig:
+#     #   nameservers:
+#     #     - 127.0.0.1
+#     #     - 1.1.1.1
+#     #     - 8.8.8.8
+#     #   searches:
+#     #     - rke2-ingress-nginx-controller.svc.cluster.local
+#     #     - svc.cluster.local
+#     #     - cluster.local
+#     extraContainers:
+#       - name: dns-proxy
+#         image: coredns/coredns:1.12.3
+#         args:
+#           - -conf
+#           - /etc/coredns/Corefile
+#         volumeMounts:
+#           - mountPath: /etc/coredns
+#             name: dns-proxy-config-volume
+#             readOnly: true
+#         livenessProbe:
+#           failureThreshold: 5
+#           httpGet:
+#             path: /health
+#             port: 8080
+#             scheme: HTTP
+#           initialDelaySeconds: 60
+#           periodSeconds: 10
+#           successThreshold: 1
+#           timeoutSeconds: 5
+#         readinessProbe:
+#           failureThreshold: 3
+#           httpGet:
+#             path: /health
+#             port: 8080
+#             scheme: HTTP
+#           periodSeconds: 10
+#           successThreshold: 1
+#           timeoutSeconds: 1
+#         resources:
+#           limits:
+#             memory: 128Mi
+#           requests:
+#             cpu: 10m
+#             memory: 13Mi
+#         securityContext:
+#           allowPrivilegeEscalation: false
+#           capabilities:
+#             add:
+#               - NET_BIND_SERVICE
+#             drop:
+#               - all
+#           readOnlyRootFilesystem: true
+#   scope:
+#     enabled: true
+#   tcp:
+#     22: "gitlab/gitlab-gitlab-shell:22"
+#   # udp:
+#   #   ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
 EOT
 }
 # - "${path.module}/manifest/rke2-cilium.yaml"

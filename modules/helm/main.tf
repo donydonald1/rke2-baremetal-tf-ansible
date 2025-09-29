@@ -8,19 +8,19 @@ resource "helm_release" "vault_operator" {
 
 }
 
-# resource "helm_release" "nginx" {
-#   # depends_on = [
-#   #   kubernetes_namespace.nginx,
-#   # ]
+resource "helm_release" "nginx" {
+  # depends_on = [
+  #   kubernetes_namespace.nginx,
+  # ]
 
-#   name             = "nginx"
-#   repository       = "https://kubernetes.github.io/ingress-nginx"
-#   chart            = "ingress-nginx"
-#   version          = "4.13.2"
-#   namespace        = "ingress-nginx"
-#   create_namespace = true
-#   wait             = true
+  name             = "nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  version          = "4.13.2"
+  namespace        = "ingress-nginx"
+  create_namespace = true
+  wait             = true
 
-#   values = [local.nginx_values]
+  values = [local.nginx_values]
 
-# }
+}
