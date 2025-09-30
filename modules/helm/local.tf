@@ -49,6 +49,12 @@ controller:
     use-forwarded-headers: true
     allow-snippet-annotations: true
     annotations-risk-level: Critical
+  ingressClass: nginx
+  ingressClassResource:
+    name: nginx
+    enabled: true
+    default: true
+    # controllerValue: "k8s.io/ingress-nginx"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "10254"
