@@ -9,6 +9,7 @@ spec:
     bandwidthManager:
       enabled: true
     kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
     l2announcements:
       enabled: true
     localRedirectPolicies:
