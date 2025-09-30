@@ -90,10 +90,10 @@ disable_kube_proxy: true
 rke2_disable_cloud_controller: false
 
 rke2_custom_manifests: 
-  - "${path.root}/manifest/rke2-cilium.yaml"
-  - "${path.root}/manifest/rke2-coredns.yaml"
-  - "${path.root}/manifest/rke2-multus.yaml"
-  - "${path.root}/manifest/generic-device-plugin.yaml"
+  - "${path.root}/manifest/cilium.yaml"
+  - "${path.root}/manifest/coredns.yaml"
+  - "${path.root}/manifest/multus.yaml"
+  # - "${path.root}/manifest/generic-device-plugin.yaml"
   - "${path.root}/manifest/nodelocaldns.yaml"
   - "${path.root}/manifest/configmap-dns-proxy.yaml"
   - "${path.root}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml"

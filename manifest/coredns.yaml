@@ -7,4 +7,4 @@ spec:
     valuesContent: |-
         nodelocal:
             enabled: true
-        ipvs: true
+        # ipvs: true
