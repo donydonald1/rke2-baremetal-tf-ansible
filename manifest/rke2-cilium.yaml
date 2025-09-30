@@ -54,7 +54,7 @@ spec:
         - http
         enableOpenMetrics: true
         serviceMonitor:
-          enabled: true
+          enabled: false
         service:
           enabled: true
 
@@ -66,7 +66,7 @@ spec:
           protocol: TCP
           targetPort: 9965
           serviceMonitor:
-            enabled: true
+            enabled: false
           service:
             enabled: true
       ui:
