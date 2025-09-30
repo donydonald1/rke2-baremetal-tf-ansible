@@ -19,7 +19,9 @@ resource "helm_release" "nginx" {
   version          = "4.13.2"
   namespace        = "ingress-nginx"
   create_namespace = true
-  wait             = true
+  wait             = false
+  timeout          = 600
+  atomic           = true
 
   values = [local.nginx_values]
 
