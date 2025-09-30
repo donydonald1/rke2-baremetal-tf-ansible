@@ -35,7 +35,6 @@ rke2_loadbalancer_ip_range:
   allow-share-logging: "true"
   allow-share-monitoring: "true"
   allow-share-vpn: "true"
-  allow-share-netbootxyz: "true"
 
 rke2_ha_mode_kubevip: true
 rke2_kubevip_ipvs_lb_enable: true
