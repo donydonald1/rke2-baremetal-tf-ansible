@@ -86,7 +86,7 @@ rke2_kubelet_arg:
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: true
-disable_kube_proxy: false
+disable_kube_proxy: true
 rke2_disable_cloud_controller: false
 
 rke2_custom_manifests: 
