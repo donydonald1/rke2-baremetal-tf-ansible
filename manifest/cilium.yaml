@@ -10,11 +10,12 @@ spec:
       enabled: true
     kubeProxyReplacement: true
     kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    systemDefaultIngressClass: nginx
     l2announcements:
       enabled: true
-    localRedirectPolicies:
-      # -- Enable local redirect policies.
-      enabled: true
+    # localRedirectPolicies:
+    #   # -- Enable local redirect policies.
+    #   enabled: true
     ipam:
       mode: cluster-pool
       operator:
