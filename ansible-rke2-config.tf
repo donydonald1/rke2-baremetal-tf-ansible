@@ -38,13 +38,19 @@ rke2_loadbalancer_ip_range:
 
 rke2_ha_mode_kubevip: true
 rke2_kubevip_ipvs_lb_enable: true
+rke2_api_cidr: 24
 rke2_kubevip_cloud_provider_enable: true
 rke2_kubevip_cloud_provider_image: ghcr.io/kube-vip/kube-vip-cloud-provider:${var.kubevip_cloud_provider_image_tag}
 rke2_kubevip_svc_enable: true
-rke2_kubevip_metrics_port: 2112
+# rke2_kubevip_metrics_port: 2112
 rke2_version: "${var.rke2_version}"
 # rke2_apiserver_dest_port: 6443
 
+rke2_kubevip_args:
+  - param: lb_enable
+    value: true
+  - param: lb_port
+    value: 6443
 rke2_cni:
   - multus
   - cilium
