@@ -22,9 +22,9 @@ spec:
         - "10.42.0.0/16"
         clusterPoolIPv4MaskSize: 24
     socketLB:
-      enabled: true
+      enabled: false
       # -- Disable socket lb for non-root ns. This is used to enable Istio routing rules.
-      hostNamespaceOnly: true
+      hostNamespaceOnly: false
     # Required for multus
     cni:
       exclusive: false
