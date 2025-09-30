@@ -41,7 +41,7 @@ spec:
     - br0
     operator:
       replicas: 2
-    agent: true
+    # agent: true
     hubble:
       enabled: true
       metrics:
