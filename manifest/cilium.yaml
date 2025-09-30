@@ -16,12 +16,12 @@ spec:
     # localRedirectPolicies:
     #   # -- Enable local redirect policies.
     #   enabled: true
-    ipam:
-      mode: cluster-pool
-      operator:
-        clusterPoolIPv4PodCIDRList:
-        - "10.42.0.0/16"
-        clusterPoolIPv4MaskSize: 24
+    # ipam:
+    #   mode: cluster-pool
+    #   operator:
+    #     clusterPoolIPv4PodCIDRList:
+    #     - "10.42.0.0/16"
+    #     clusterPoolIPv4MaskSize: 24
     socketLB:
       enabled: false
       # -- Disable socket lb for non-root ns. This is used to enable Istio routing rules.
