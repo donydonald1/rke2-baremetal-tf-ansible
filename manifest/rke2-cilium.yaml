@@ -28,7 +28,7 @@ spec:
     cni:
       exclusive: false
     # Tells Cilium what the main IP is
-    k8sServiceHost: 10.10.10.2
+    k8sServiceHost: 127.0.0.1
     k8sServicePort: 6443
     externalIPs:
       enabled: true
