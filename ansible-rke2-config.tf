@@ -93,7 +93,7 @@ rke2_custom_manifests:
   - "${path.root}/manifest/cilium.yaml"
   - "${path.root}/manifest/coredns.yaml"
   - "${path.root}/manifest/multus.yaml"
-  # - "${path.root}/manifest/generic-device-plugin.yaml"
+  - "${path.root}/manifest/generic-device-plugin.yaml"
   - "${path.root}/manifest/nodelocaldns.yaml"
   - "${path.root}/manifest/configmap-dns-proxy.yaml"
   - "${path.root}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml"
