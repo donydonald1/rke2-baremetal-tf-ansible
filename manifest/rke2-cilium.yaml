@@ -38,23 +38,39 @@ spec:
     - wg0
     - enp0s31f6
     - br0
-    relay:
-      enabled: true
-      metrics:
-        enabled: true
-        port: 9965
-        protocol: TCP
-        targetPort: 9965
-        serviceMonitor:
-          enabled: false
-        service:
-          enabled: true
     operator:
       replicas: 2
     agent: true
     hubble:
       enabled: true
+      metrics:
+        enabled:
+        - dns
+        - drop
+        - tcp
+        - flow
+        - port-distribution
+        - icmp
+        - http
+        enableOpenMetrics: true
+        serviceMonitor:
+          enabled: true
+        service:
+          enabled: true
+
       relay:
         enabled: true
+        metrics:
+          enabled: true
+          port: 9965
+          protocol: TCP
+          targetPort: 9965
+          serviceMonitor:
+            enabled: true
+          service:
+            enabled: true
       ui:
         enabled: true
+        service:
+          type: NodePort
+          nodePort: 31647
