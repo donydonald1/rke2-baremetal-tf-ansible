@@ -1,3 +1,4 @@
+---
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:
@@ -5,17 +6,33 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
-    operator:
-      replicas: 1
+    bandwidthManager:
+      enabled: true
     kubeProxyReplacement: true
     l2announcements:
       enabled: true
-    # TODO the host and port are k3s-specific, generic solution is in progress
-    # https://github.com/cilium/cilium/issues/19038
-    # https://github.com/cilium/cilium/pull/28741
+    socketLB:
+      enabled: true
+      # -- Disable socket lb for non-root ns. This is used to enable Istio routing rules.
+      hostNamespaceOnly: true
+    # Required for multus
+    cni:
+      exclusive: false
+    # Tells Cilium what the main IP is
     k8sServiceHost: 127.0.0.1
     k8sServicePort: 6443
+    externalIPs:
+      enabled: true
+    devices: 
+    - enp11s0f1np1
+    - wg0
+    - enp0s31f6
+    - br0
+    - 
+    operator:
+      replicas: 2
     hubble:
+      enabled: true
       relay:
         enabled: true
       ui:

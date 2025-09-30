@@ -44,7 +44,7 @@ controller:
   metrics:
     enabled: true
     serviceMonitor:
-      enabled: true
+      enabled: ${var.enable_nginx_service_monitor ? "true" : "false"}
       additionalLabels:
         release: kube-prometheus-stack
 scope:

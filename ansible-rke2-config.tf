@@ -90,12 +90,13 @@ disable_kube_proxy: false
 rke2_disable_cloud_controller: false
 
 rke2_custom_manifests: 
-  # - "${path.root}/manifest/rke2-cilium.yaml"
+  - "${path.root}/manifest/rke2-cilium.yaml"
   - "${path.root}/manifest/rke2-coredns.yaml"
   - "${path.root}/manifest/rke2-multus.yaml"
   - "${path.root}/manifest/generic-device-plugin.yaml"
   - "${path.root}/manifest/nodelocaldns.yaml"
   - "${path.root}/manifest/configmap-dns-proxy.yaml"
+  - "${path.root}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml"
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"

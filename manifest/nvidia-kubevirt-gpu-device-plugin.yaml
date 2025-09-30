@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-kubevirt-gpu-dp-daemonset
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: nvidia-kubevirt-gpu-dp-ds
+  template:
+    metadata:
+      labels:
+        name: nvidia-kubevirt-gpu-dp-ds
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+      # Allow this pod to be rescheduled while the node is in "critical add-ons only" mode.
+      # This, along with the annotation above marks this pod as a critical add-on.
+      - key: CriticalAddonsOnly
+        operator: Exists
+      containers:
+      - name: nvidia-kubevirt-gpu-dp-ctr
+        image: nvcr.io/nvidia/kubevirt-gpu-device-plugin:v1.4.0
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ "ALL" ]
+        volumeMounts:
+        - name: device-plugin
+          mountPath: /var/lib/kubelet/device-plugins
+        - name: vfio
+          mountPath: /dev/vfio
+      volumes:
+      - name: device-plugin
+        hostPath:
+          path: /var/lib/kubelet/device-plugins
+      - name: vfio
+        hostPath:
+          path: /dev/vfio

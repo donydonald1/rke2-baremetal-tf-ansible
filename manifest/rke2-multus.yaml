@@ -6,6 +6,25 @@ metadata:
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
-    valuesContent: |-
-        rke2-whereabouts:
-            enabled: true
+  valuesContent: |-
+    rke2-whereabouts:
+      enabled: true
+    labels:
+      nodeSelector:
+        kubernetes.io/os: linux
+
+    config:
+      cni_conf:
+        confDir: /etc/cni/net.d
+        binDir: /opt/cni/bin
+        multusConfFile: auto
+        kubeconfig: /etc/cni/net.d/multus.d/multus.kubeconfig
+
+    manifests:
+      serviceAccount: true
+      clusterRole: true
+      clusterRoleBinding: true
+      configMap: false
+      daemonSet: true
+      customResourceDefinition: true
+      dhcpDaemonSet: true

@@ -53,3 +53,9 @@ variable "enable_kube-vip-lb" {
     error_message = "If enable_kube-vip-lb is true, kube-vip-nginx-lb-ip must be provided and cannot be empty."
   }
 }
+
+variable "enable_nginx_service_monitor" {
+  description = "Whether to enable the nginx service monitor"
+  type        = bool
+  default     = false
+}
