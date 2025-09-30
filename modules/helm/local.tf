@@ -9,8 +9,17 @@ controller:
     type: LoadBalancer
     # annotations:
     #   ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
-    # loadBalancerClass: "kube-vip.io/kube-vip-class"
-    externalTrafficPolicy: "Local"
+    # loadBalancerClass: kube-vip.io/kube-vip-class
+    externalTrafficPolicy: Local
+    enableHttp: true
+    enableHttps: true
+    ports:
+      http: 80
+      https: 443
+
+    targetPorts:
+      http: http
+      https: https
   replicaCount: 3
   allowSnippetAnnotations: true
   addHeaders:
@@ -37,6 +46,9 @@ controller:
     brotli-types: "text/xml image/svg+xml application/x-font-ttf image/vnd.microsoft.icon application/x-font-opentype application/json font/eot application/vnd.ms-fontobject application/javascript font/otf application/xml application/xhtml+xml text/javascript application/x-javascript text/plain application/x-font-truetype application/xml+rss image/x-icon font/opentype text/css image/x-win-bitmap"
     enable-real-ip: "true"
     ignore-invalid-headers: "false"
+    use-forwarded-headers: true
+    allow-snippet-annotations: true
+    annotations-risk-level: Critical
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "10254"
