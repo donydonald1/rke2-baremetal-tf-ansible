@@ -67,10 +67,10 @@ controller:
         release: kube-prometheus-stack
 scope:
   enabled: true
-tcp:
-  22: "gitlab/gitlab-gitlab-shell:22"
-udp:
-  ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
+# tcp:
+#   22: "gitlab/gitlab-gitlab-shell:22"
+# udp:
+#   ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
 
   EOT
 }
