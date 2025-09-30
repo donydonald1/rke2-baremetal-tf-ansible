@@ -35,6 +35,10 @@ spec:
     # externalIPs:
     #   enabled: true
     enableRuntimeDeviceDetection: true
+    hostServices:
+      enabled: true
+    nodePort:
+      enabled: true
     devices: 
     - enp11s0f1np1
     - wg0
