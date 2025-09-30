@@ -45,7 +45,7 @@ rke2_kubevip_svc_enable: true
 # rke2_kubevip_metrics_port: 2112
 rke2_version: "${var.rke2_version}"
 # rke2_apiserver_dest_port: 6443
-rke2_interface: enp0s31f6
+# rke2_interface: enp0s31f6
 rke2_kubevip_args:
   - param: lb_enable
     value: true
