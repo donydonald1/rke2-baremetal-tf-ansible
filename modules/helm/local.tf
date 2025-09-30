@@ -7,9 +7,9 @@ controller:
   kind: Deployment
   service:
     type: LoadBalancer
-    annotations:
-      ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
-    loadBalancerClass: "kube-vip.io/kube-vip-class"
+    # annotations:
+    #   ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
+    # loadBalancerClass: "kube-vip.io/kube-vip-class"
     externalTrafficPolicy: "Local"
   replicaCount: 3
   allowSnippetAnnotations: true
