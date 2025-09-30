@@ -29,7 +29,7 @@ rke2_cis_profile: "cis"
 rke2_kubevip_image: ghcr.io/kube-vip/kube-vip:${var.kubevip_version}
 
 rke2_loadbalancer_ip_range: 
-  range-global: ${var.manager_rke2_loadbalancer_ip_range}
+  range-global: "${var.manager_rke2_loadbalancer_ip_range}"
   allow-share-global: "true"
   allow-share-ingress-nginx: "true"
   allow-share-logging: "true"
