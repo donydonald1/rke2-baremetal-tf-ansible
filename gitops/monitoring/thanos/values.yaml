@@ -1,6 +1,9 @@
 thanos:
-  global:
-    imageRegistry: docker.io/bitnamilegacy
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/thanos
+    # tag: 0.39.2-debian-12-r2
+    digest: ""
   query:
     enabled: true
     replicaCount: 2
