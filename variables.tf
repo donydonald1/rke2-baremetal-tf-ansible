@@ -207,6 +207,12 @@ variable "s3_backup_access_key" {
   sensitive   = true
 }
 
+variable "s3_backup_region" {
+  description = "The region for the S3 backup."
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "s3_backup_secret_key" {
   description = "The secret key for the S3 backup."
   type        = string

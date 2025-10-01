@@ -102,7 +102,14 @@ rke2_custom_manifests:
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"
-
+  - "etcd-s3: ${var.enable_rke2_etcd_s3_backup}"
+  - "etcd-s3-endpoint: ${var.s3_backup_endpoint}"
+  - "etcd-s3-access-key: ${var.s3_backup_access_key}"
+  - "etcd-s3-secret-key: ${var.s3_backup_secret_key}"
+  - "etcd-s3-bucket: ${var.s3_backup_bucketname}"
+  - "etcd-s3-region: ${var.s3_backup_region}"
+  - "etcd-s3-folder: ${var.cluster_name}"
+  - "etcd-snapshot-retention: ${var.etcd_snapshot_retention}"
 rke2_cluster_cidr:
   - 10.42.0.0/16
 
