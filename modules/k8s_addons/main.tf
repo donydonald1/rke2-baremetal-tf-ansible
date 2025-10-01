@@ -190,6 +190,29 @@ YAML
   depends_on = []
 }
 
+resource "kubectl_manifest" "metallb_ip_pool" {
+  count = var.enable_metallb ? 1 : 0
+
+  yaml_body = <<YAML
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: ${var.metallb_pool_name}
+spec:
+  addresses:
+    - ${var.metallb_lb_range}
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: ${var.metallb_pool_name}-l2
+  namespace: ${var.metallb_namespace}
+spec:
+  ipAddressPools:
+  - ${var.metallb_pool_name}
+YAML
+}
+
 resource "kubectl_manifest" "app_projects" {
   for_each = toset(var.argocd_projects)
 

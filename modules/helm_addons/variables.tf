@@ -59,3 +59,57 @@ variable "enable_nginx_service_monitor" {
   type        = bool
   default     = false
 }
+
+variable "enable_metallb" {
+  description = "Whether to enable the MetalLB Helm chart"
+  type        = bool
+  default     = false
+}
+
+variable "metallb_chart_version" {
+  description = "The version of the MetalLB Helm chart to use"
+  type        = string
+  default     = ""
+}
+
+variable "metallb_values" {
+  description = "Values for the MetalLB Helm chart"
+  type        = string
+  default     = ""
+}
+
+variable "metallb_namespace" {
+  description = "The namespace for the MetalLB Helm chart"
+  type        = string
+  default     = "metallb-system"
+}
+
+variable "prometheus_service_account_name" {
+  description = "The service account name for Prometheus to use in MetalLB"
+  type        = string
+  default     = "kube-prometheus-stack-prometheus"
+}
+
+variable "prometheus_service_monitor_namespace" {
+  description = "The namespace for the Prometheus ServiceMonitor"
+  type        = string
+  default     = "monitoring"
+}
+
+variable "enable_metallb_prometheusrule" {
+  description = "Whether to enable the MetalLB PrometheusRule"
+  type        = bool
+  default     = false
+}
+
+variable "enable_metallb_podmonitor" {
+  description = "Whether to enable the MetalLB PodMonitor"
+  type        = bool
+  default     = false
+}
+
+variable "prometheus_namespace" {
+  description = "The namespace where Prometheus is deployed"
+  type        = string
+  default     = "monitoring"
+}

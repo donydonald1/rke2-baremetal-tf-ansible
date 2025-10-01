@@ -135,3 +135,27 @@ variable "cloudflared_values" {
   type        = string
   default     = ""
 }
+
+variable "enable_metallb" {
+  description = "Whether to enable the MetalLB Helm chart"
+  type        = bool
+  default     = false
+}
+
+variable "metallb_pool_name" {
+  description = "The name of the MetalLB address pool"
+  type        = string
+  default     = ""
+}
+
+variable "metallb_namespace" {
+  description = "The namespace for the MetalLB Helm chart"
+  type        = string
+  default     = "metallb-system"
+}
+
+variable "metallb_lb_range}" {
+  description = "The IP address range for the MetalLB load balancer"
+  type        = string
+  default     = ""
+}

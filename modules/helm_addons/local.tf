@@ -73,4 +73,26 @@ scope:
 #   ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
 
   EOT
+
+  metallb_values = var.metallb_values != "" ? var.metallb_values : <<EOT
+    crds:
+      enabled: true
+    prometheus:
+      serviceAccount: ${var.prometheus_service_account_name != "" ? var.prometheus_service_account_name : "kube-prometheus-stack-prometheus"}
+      namespace: ${var.prometheus_namespace != "" ? var.prometheus_namespace : "monitoring"}
+      podMonitor:
+        enabled: ${var.enable_metallb_podmonitor ? "true" : "false"}
+      prometheusRule:
+        enabled: ${var.enable_metallb_prometheusrule ? "true" : "false"}
+    speaker:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+  EOT
 }
