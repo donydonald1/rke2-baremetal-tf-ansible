@@ -27,7 +27,6 @@ rke2_cluster_group_name: ${var.cluster_name}
 rke2_channel: stable
 rke2_cis_profile: "cis"
 rke2_kubevip_image: ghcr.io/kube-vip/kube-vip:${var.kubevip_version}
-rke2_wait_for_all_pods_to_be_ready: false
 rke2_loadbalancer_ip_range: 
   range-global: ${var.manager_rke2_loadbalancer_ip_range}
   allow-share-range-global: "true"
