@@ -130,4 +130,4 @@ rke2_etcd_snapshot_s3_options:
 
 EOT
 }
-# - "${path.module}/manifest/rke2-cilium.yaml"
+
