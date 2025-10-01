@@ -154,7 +154,7 @@ variable "metallb_namespace" {
   default     = "metallb-system"
 }
 
-variable "metallb_lb_range}" {
+variable "metallb_lb_range" {
   description = "The IP address range for the MetalLB load balancer"
   type        = string
   default     = ""
