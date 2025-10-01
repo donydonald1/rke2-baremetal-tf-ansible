@@ -7,9 +7,12 @@ controller:
   kind: Deployment
   service:
     type: LoadBalancer
-    # annotations:
-    #   ${var.enable_kube-vip-lb ? "kube-vip.io/loadbalancerIPs: \"${var.kube-vip-nginx-lb-ip}\"" : ""}
-    # loadBalancerClass: kube-vip.io/kube-vip-class
+    annotations:
+%{ if var.enable_kube_vip_lb && !var.enable_metallb }
+      kube-vip.io/loadbalancerIPs: "${var.ingress_lb_ip}"
+%{ else if var.enable_metallb && !var.enable_kube_vip_lb }
+      metallb.io/loadBalancerIPs: "${var.ingress_lb_ip}}"
+%{ endif }
     externalTrafficPolicy: Local
     enableHttp: true
     enableHttps: true
@@ -67,10 +70,10 @@ controller:
         release: kube-prometheus-stack
 scope:
   enabled: true
-# tcp:
-#   22: "gitlab/gitlab-gitlab-shell:22"
-# udp:
-#   ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
+tcp:
+  22: "gitlab/gitlab-gitlab-shell:22"
+udp:
+  ${var.wireguard_port}: "vpn/wireguard:${var.wireguard_port}"
 
   EOT
 
