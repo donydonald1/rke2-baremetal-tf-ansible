@@ -81,7 +81,7 @@ rke2_kubelet_config:
 rke2_kubelet_arg:
   # - "kube-reserved=cpu=0.5,memory=1Gi,ephemeral-storage=1Gi"
   # - "system-reserved=cpu=2,memory=10Gi,ephemeral-storage=1Gi"
-  - eviction-hard=memory.available<300Mi,nodefs.available<10%
+  # - eviction-hard=memory.available<300Mi,nodefs.available<10%
   - cgroup-driver=systemd
   - max-pods=600
   - skip-log-headers=false
