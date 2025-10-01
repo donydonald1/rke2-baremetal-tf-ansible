@@ -1,4 +1,6 @@
 thanos:
+  global:
+    imageRegistry: docker.io/bitnamilegacy
   query:
     enabled: true
     replicaCount: 2
