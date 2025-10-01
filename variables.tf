@@ -677,3 +677,27 @@ variable "ingress_controller_name" {
     error_message = "ingress_controller_name must be either 'nginx', 'traefik', 'istio', or 'ingress-nginx', or 'none'."
   }
 }
+
+variable "kubevip_cloud_provider_enable" {
+  description = "Whether to enable the kube-vip cloud provider."
+  type        = bool
+  default     = false
+}
+
+variable "kubevip_svc_enable" {
+  description = "Whether to enable the kube-vip service."
+  type        = bool
+  default     = true
+}
+
+variable "kubevip_ipvs_lb_enable" {
+  description = "Whether to enable the kube-vip IPVS load balancer."
+  type        = bool
+  default     = false
+}
+
+variable "enable_rke2_selinux" {
+  description = "Whether to enable SELinux for RKE2."
+  type        = bool
+  default     = true
+}

@@ -198,10 +198,17 @@ apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: ${var.metallb_pool_name}
+  namespace: ${var.metallb_namespace}
 spec:
   addresses:
     - ${var.metallb_lb_range}
----
+YAML
+}
+
+resource "kubectl_manifest" "metallb_l2_advertisement" {
+  count = var.enable_metallb ? 1 : 0
+
+  yaml_body  = <<YAML
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
@@ -211,6 +218,7 @@ spec:
   ipAddressPools:
   - ${var.metallb_pool_name}
 YAML
+  depends_on = [kubectl_manifest.metallb_ip_pool]
 }
 
 resource "kubectl_manifest" "app_projects" {

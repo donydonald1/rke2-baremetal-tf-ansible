@@ -37,11 +37,11 @@ rke2_loadbalancer_ip_range:
   allow-share-vpn: "true"
 
 rke2_ha_mode_kubevip: true
-rke2_kubevip_ipvs_lb_enable: true
+rke2_kubevip_ipvs_lb_enable: ${var.kubevip_ipvs_lb_enable}
 
-rke2_kubevip_cloud_provider_enable: true
+rke2_kubevip_cloud_provider_enable: ${var.kubevip_cloud_provider_enable}
 rke2_kubevip_cloud_provider_image: ghcr.io/kube-vip/kube-vip-cloud-provider:${var.kubevip_cloud_provider_image_tag}
-rke2_kubevip_svc_enable: true
+rke2_kubevip_svc_enable: ${var.kubevip_svc_enable}
 
 rke2_version: "${var.rke2_version}"
 
@@ -87,7 +87,7 @@ rke2_kubelet_arg:
   - "protect-kernel-defaults=true"
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
-rke2_selinux: true
+rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
 rke2_disable_cloud_controller: false
 
