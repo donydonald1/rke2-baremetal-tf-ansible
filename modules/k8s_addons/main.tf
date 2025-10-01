@@ -205,7 +205,7 @@ spec:
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: ${var.metallb_pool_name}-l2
+  name: "${var.metallb_pool_name}-l2"
   namespace: ${var.metallb_namespace}
 spec:
   ipAddressPools:
