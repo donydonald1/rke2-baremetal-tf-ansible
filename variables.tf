@@ -667,3 +667,13 @@ variable "wait_for_all_pods_to_be_ready" {
   type        = bool
   default     = true
 }
+
+variable "ingress_controller_name" {
+  description = "The ingress controller to use. Options are 'nginx' or 'traefik'. Default is 'nginx'."
+  type        = string
+  default     = "ingress-nginx"
+  validation {
+    condition     = contains(["traefik", "istio", "ingress-nginx", "none"], var.ingress_controller_name)
+    error_message = "ingress_controller_name must be either 'nginx', 'traefik', 'istio', or 'ingress-nginx', or 'none'."
+  }
+}
