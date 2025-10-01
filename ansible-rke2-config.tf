@@ -17,7 +17,7 @@ rke2_debug: true
 rke2_wait_for_all_pods_to_be_ready: ${var.wait_for_all_pods_to_be_ready}
 rke2_additional_sans: [
 %{for item in local.all_sans~}
-  ${item}%{if index(local.all_sans, item) < length(local.all_sans) - 1}, %{endif}
+  "${item}"%{if index(local.all_sans, item) < length(local.all_sans) - 1}, %{endif}
 %{endfor~}
 ]
 rke2_download_kubeconf: true
