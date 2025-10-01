@@ -61,7 +61,6 @@ spec:
         namespace: sonarqube
         serverSideApply: true
 
-      # - name: kured
       - name: keda
         namespace: keda
         serverSideApply: true
@@ -92,14 +91,11 @@ spec:
         #   namespace: kenboard
         #   serverSideApply: true
 
-        # - name: cloudnative-pg
-        #   namespace: cnpg-system
-        #   serverSideApply: true
+      - name: cloudnative-pg
+        namespace: cnpg-system
+        serverSideApply: true
         # - name: ghost
         # - name: go-healthcheck
-        # - name: kube-prometheus-stack
-        #   namespace: monitoring
-        #   serverSideApply: true
 
   template:
     metadata:
