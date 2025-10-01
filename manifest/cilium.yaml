@@ -45,7 +45,7 @@ spec:
     - enp0s31f6
     - br0
     operator:
-      replicas: 2
+      replicas: 1
     # agent: true
     hubble:
       enabled: true
