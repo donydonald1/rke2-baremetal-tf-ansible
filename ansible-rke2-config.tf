@@ -14,7 +14,7 @@ rke2_ha_mode_keepalived: false
 rke2_api_ip: ${var.manager_rke2_api_ip}
 rke2_token: "${random_password.rke2_token.result}"
 rke2_debug: true
-rke2_wait_for_all_pods_to_be_ready: false
+rke2_wait_for_all_pods_to_be_ready: ${var.wait_for_all_pods_to_be_ready}
 rke2_additional_sans: [
 %{for item in local.all_sans~}
   "${item}"%{if index(local.all_sans, item) < length(local.all_sans) - 1}, %{endif}
@@ -38,7 +38,7 @@ rke2_loadbalancer_ip_range:
 
 rke2_ha_mode_kubevip: true
 rke2_kubevip_ipvs_lb_enable: true
-rke2_api_cidr: 24
+# rke2_api_cidr: 24
 rke2_kubevip_cloud_provider_enable: true
 rke2_kubevip_cloud_provider_image: ghcr.io/kube-vip/kube-vip-cloud-provider:${var.kubevip_cloud_provider_image_tag}
 rke2_kubevip_svc_enable: true

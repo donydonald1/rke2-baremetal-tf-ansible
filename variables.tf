@@ -661,3 +661,9 @@ variable "wireguard_port" {
   type        = number
   default     = 51820
 }
+
+variable "wait_for_all_pods_to_be_ready" {
+  description = "Whether to wait for all pods to be ready before proceeding."
+  type        = bool
+  default     = true
+}
