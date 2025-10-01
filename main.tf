@@ -69,7 +69,7 @@ resource "local_file" "ansible_inventory" {
     ssh_private_key = var.ssh_private_key_file
     cluster_name    = var.cluster_name
   })
-  filename = "${path.module}/${var.cluster_name}-inventory.ini"
+  filename = "${path.root}/${var.cluster_name}-inventory.ini"
 
   depends_on = [module.rke2_metalhost_servers]
 }
@@ -79,16 +79,16 @@ resource "local_file" "ansible_rke2_playbook" {
     ansible_hosts_group   = local.ansible_hosts_group
     cluster_config_values = local.cluster_config_values
   })
-  filename = "${path.module}/${var.cluster_name}-deploy-rke2.yml"
+  filename = "${path.root}/${var.cluster_name}-deploy-rke2.yml"
 }
 
 resource "null_resource" "install_ansible_role" {
   provisioner "local-exec" {
     command = <<EOT
-      if ansible-galaxy list | grep -q 'lablabs.rke2'; then
-        ansible-galaxy remove lablabs.rke2
-      fi
-      ansible-galaxy role install lablabs.rke2 --force
+      # if ansible-galaxy list | grep -q 'lablabs.rke2'; then
+      #   ansible-galaxy remove lablabs.rke2
+      # fi
+      ansible-galaxy role install lablabs.rke2
     EOT
   }
 
@@ -114,7 +114,7 @@ resource "null_resource" "run_ansible_playbook" {
     }
 
     command = <<EOT
-      ansible-playbook -i ${path.module}/${var.cluster_name}-inventory.ini ${path.module}/${var.cluster_name}-deploy-rke2.yml
+      ansible-playbook -i ${path.root}/${var.cluster_name}-inventory.ini ${path.root}/${var.cluster_name}-deploy-rke2.yml
     EOT
   }
 
