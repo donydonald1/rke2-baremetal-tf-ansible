@@ -116,19 +116,19 @@ rke2_cluster_cidr:
 rke2_service_cidr:
   - 10.43.0.0/16
 
-rke2_etcd_snapshot_s3_options:
-  etcd-s3: "${var.enable_rke2_etcd_s3_backup}"
-  s3_endpoint: "${var.s3_backup_endpoint}" 
-  access_key: "${var.s3_backup_access_key}" 
-  secret_key: "${var.s3_backup_secret_key}" 
-  bucket: "${var.s3_backup_bucketname}" 
-  snapshot_name: "${var.snapshot_name}" 
-  etcd-snapshot-retention: "${var.etcd_snapshot_retention}"
-  etcd-snapshot-schedule-cron: "${var.etcd_snapshot_schedule_cron}"
-  skip_ssl_verify: ${var.s3_backup_skip_ssl_verify} 
-  endpoint_ca: "" 
-  region: "" 
-  folder: "${var.cluster_name}" 
+# rke2_etcd_snapshot_s3_options:
+#   etcd-s3: "${var.enable_rke2_etcd_s3_backup}"
+#   s3_endpoint: "${var.s3_backup_endpoint}" 
+#   access_key: "${var.s3_backup_access_key}" 
+#   secret_key: "${var.s3_backup_secret_key}" 
+#   bucket: "${var.s3_backup_bucketname}" 
+#   snapshot_name: "${var.snapshot_name}" 
+#   etcd-snapshot-retention: "${var.etcd_snapshot_retention}"
+#   etcd-snapshot-schedule-cron: "${var.etcd_snapshot_schedule_cron}"
+#   skip_ssl_verify: ${var.s3_backup_skip_ssl_verify} 
+#   endpoint_ca: "" 
+#   region: "" 
+#   folder: "${var.cluster_name}" 
 
 # rke2_ingress_controller: ${var.ingress_controller_name != "" ? var.ingress_controller_name : "nginx"}
 
