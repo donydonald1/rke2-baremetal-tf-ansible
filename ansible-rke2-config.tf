@@ -60,11 +60,11 @@ rke2_kube_apiserver_args: [
     "admission-control-config-file=/etc/rancher/rke2/rke2-psa.yaml",
 ]
 rke2_kube_controller_manager_arg:
-  - "bind-address=0.0.0.0"
+  - "bind-address=127.0.0.1"
   - "node-monitor-period=4s"
 
-rke2_kube_scheduler_arg:
-  - "bind-address=0.0.0.0"
+# rke2_kube_scheduler_arg:
+  # - "bind-address=0.0.0.0"
 
 k8s_node_label: 
   - rke2_upgrade=true
