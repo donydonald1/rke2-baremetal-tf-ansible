@@ -113,3 +113,9 @@ variable "prometheus_namespace" {
   type        = string
   default     = "monitoring"
 }
+
+variable "ingress_lb_ip" {
+  description = "The IP address for the ingress loadbalancer."
+  type        = string
+  default     = ""
+}
