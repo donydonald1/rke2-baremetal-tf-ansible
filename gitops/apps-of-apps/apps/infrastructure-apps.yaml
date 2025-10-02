@@ -21,9 +21,9 @@ spec:
       #   namespace: argocd
       #   serverSideApply: true
 
-      - name: cloudnative-pg-cluster
-        namespace: cnpg-pg-cluster
-        serverSideApply: true
+      # - name: cloudnative-pg-cluster
+      #   namespace: cnpg-pg-cluster
+      #   serverSideApply: true
       # # - name: ghost
       # - name: go-healthcheck
       # - name: prometheus-operator
