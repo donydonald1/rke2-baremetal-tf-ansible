@@ -28,6 +28,13 @@ spec:
       - name: grafana
         namespace: monitoring
         serverSideApply: true
+        helm:
+          valueFiles:
+          - "values.yaml"
+        # - name: loki
+        #   namespace: monitoring
+        #   serverSideApply: true
+        # helm:
         # - name: influxdb
         #   namespace: monitoring
         #   serverSideApply: true
