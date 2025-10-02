@@ -49,10 +49,6 @@ spec:
         namespace: minio-operator
         serverSideApply: true
 
-      # - name: postgres-operator
-      #   namespace: postgres-operator
-      #   serverSideApply: true
-
       - name: opentelemetry-operator
       - name: redis-operator
         serverSideApply: true
