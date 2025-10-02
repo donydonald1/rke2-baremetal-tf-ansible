@@ -22,7 +22,7 @@ spec:
       #   serverSideApply: true
 
       - name: cloudnative-pg-cluster
-        namespace: cnpg-system
+        namespace: cnpg-pg-cluster
         serverSideApply: true
       # # - name: ghost
       # - name: go-healthcheck
