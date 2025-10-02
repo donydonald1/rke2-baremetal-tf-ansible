@@ -1,11 +1,18 @@
-apiVersion: v1
-kind: Secret
-type: kubernetes.io/basic-auth
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
 metadata:
-    name: postgres-superuser-secret
-    namespace: {{ .Release.Namespace }}
-    labels:
-        cnpg.io/reload: ""
-stringData:
-    username: "postgres"
-    password: "kosmos@admin"
+  name: postgres-superuser-secret
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault
+  data:
+  - secretKey: username
+    remoteRef:
+      key: secret/postgres-users
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: secret/postgres-users
+      property: password
