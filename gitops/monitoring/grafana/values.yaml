@@ -408,7 +408,7 @@ grafana:
     analytics:
       check_for_updates: true
     auth:
-      oauth_auto_login: true
+      auto_login: true
       disable_signout_menu: true
     auth.generic_oauth:
       enabled: true
