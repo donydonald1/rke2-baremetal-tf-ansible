@@ -1,4 +1,4 @@
-name: grafana-dev
+name: grafana
 apiVersion: v2
 version: 10.0.0
 dependencies:
