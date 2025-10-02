@@ -102,6 +102,7 @@ rke2_custom_manifests:
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"
+  - "pod-security-admission-config-file: /etc/rancher/rke2/rke2-psa.yaml"
   - "etcd-s3: ${var.enable_rke2_etcd_s3_backup}"
   - "etcd-s3-endpoint: ${var.s3_backup_endpoint}"
   - "etcd-s3-access-key: ${var.s3_backup_access_key}"

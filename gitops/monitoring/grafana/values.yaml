@@ -428,11 +428,11 @@ grafana:
       provisioning: /etc/grafana/provisioning
     database:
       type: postgres
-      host: postgres-v17-rw.cnpg-system.svc.cluster.local:5432
+      host: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
       name: grafana
       createdb: true
-      user: grafana
-      password: <path:secret/data/grafana#dbpassword>
+      user: <path:secret/data/postgres-users#username>
+      password: <path:secret/data/postgres-users#password>
       # created with expternal secret operator
   admin:
     existingSecret: grafana-admin-creds

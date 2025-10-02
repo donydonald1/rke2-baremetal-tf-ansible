@@ -218,7 +218,7 @@ noProxy: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local
 name: vault-operator
   EOT
 
-  argocd_values         = var.argocd_values != "" ? var.argocd_values : <<EOT
+  argocd_values = var.argocd_values != "" ? var.argocd_values : <<EOT
 crds:
   install: true
   keep: true
@@ -240,42 +240,27 @@ configs:
       # if ignoreAggregatedRoles set to true then differences caused by aggregated roles in RBAC resources are ignored.
       ignoreAggregatedRoles: true
 
+    resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |+
+      # Ignore the huge client-side apply blob so Argo CD doesn't try to write it
+      jqPathExpressions:
+      - '.metadata.annotations."kubectl.kubernetes.io/last-applied-configuration"'
+
     resource.customizations.ignoreDifferences.all: |+
       jqPathExpressions:
       - '.metadata.labels."helm.sh/chart"'
-    resource.customizations.ignoreDifferences.external-secrets.io_ExternalSecret:
-      |+
+
+    resource.customizations.ignoreDifferences.external-secrets.io_ExternalSecret: |+
       jqPathExpressions:
       - '.spec.data[].remoteRef.conversionStrategy'
       - '.spec.data[].remoteRef.decodingStrategy'
       - '.spec.data[].remoteRef.metadataPolicy'
+
+    # Single merged block (typo fixed: caBundle)
     resource.customizations: |
       admissionregistration.k8s.io/MutatingWebhookConfiguration:
         ignoreDifferences: |
           jsonPointers:
-          - /webhooks/0/clientConfig/caBundl
-    kustomize.buildOptions: "--enable-helm"
-    timeout.reconciliation.jitter: 60s
-    timeout.reconciliation: 300s
-    statusbadge.enabled: true
-
-    # resource.ignoreResourceUpdatesEnabled: "true"
-    
-    resource.customizations.health.argoproj.io_Application: |
-      hs = {}
-      hs.status = "Progressing"
-      hs.message = ""
-      if obj.status ~= nil then
-        if obj.status.health ~= nil then
-          hs.status = obj.status.health.status
-          if obj.status.health.message ~= nil then
-            hs.message = obj.status.health.message
-          end
-        end
-      end
-      return hs
-
-    resource.customizations: |
+          - /webhooks/0/clientConfig/caBundle
       argoproj.io/Application:
         health.lua: |
           hs = {}
@@ -290,13 +275,33 @@ configs:
             end
           end
           return hs
-
       external-secrets.io/ExternalSecret:
         ignoreDifferences: |
           jqPathExpressions:
             - .spec.data[].remoteRef.conversionStrategy
             - .spec.data[].remoteRef.decodingStrategy
             - .spec.data[].remoteRef.metadataPolicy
+
+    kustomize.buildOptions: "--enable-helm"
+    timeout.reconciliation.jitter: 60s
+    timeout.reconciliation: 300s
+    statusbadge.enabled: true
+
+    # resource.ignoreResourceUpdatesEnabled: "true"
+
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      return hs
 
     oidc.config: |
       name: OIDC
@@ -334,6 +339,7 @@ configs:
     controller.self.heal.timeout.seconds: 5
     controller.repo.server.timeout.seconds: 60
   rbac:
+    policy.default: role:admin
     policy.csv: |
       g, argocd:admin, role:admin
       g, argocd:read_all, role:readonly
@@ -550,7 +556,9 @@ applicationSet:
     limits:
       memory: 1Gi
   argocdUrl: ${var.argocd_hostname}
-  EOT
+EOT
+
+
   cert_manager_values   = var.cert_manager_values != "" ? var.cert_manager_values : <<EOT
 crds:
   enabled: true
