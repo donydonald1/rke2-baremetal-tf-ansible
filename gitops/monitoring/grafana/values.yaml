@@ -429,7 +429,7 @@ grafana:
     database:
       type: postgres
       host: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
-      name: grafana
+      name: app
       createdb: true
       user: <path:secret/data/postgres-users#username>
       password: <path:secret/data/postgres-users#password>
