@@ -440,19 +440,19 @@ grafana:
     passwordKey: password
   assertNoLeakedSecrets: false
 
-superuserSecret: postgres-superuser-secret
-# Configure components of the External Secrets Operator (ESO).
-eso:
-  # -- Install components of the ESO.
-  enabled: true
-  # -- Defines provider type. One of `aws` or `generic`.
-  type: "vault"
-  # -- Defines Secret Store name.
-  secretStoreName: "vault"
-  # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
-  secretName: "secret/grafana"
+# superuserSecret: postgres-superuser-secret
+# # Configure components of the External Secrets Operator (ESO).
+# eso:
+#   # -- Install components of the ESO.
+#   enabled: true
+#   # -- Defines provider type. One of `aws` or `generic`.
+#   type: "vault"
+#   # -- Defines Secret Store name.
+#   secretStoreName: "vault"
+#   # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
+#   secretName: "secret/grafana"
 
-oidc:
-  enabled: false
+# oidc:
+#   enabled: false
 
 # <path:secret/data/argocd#github_app_id>
