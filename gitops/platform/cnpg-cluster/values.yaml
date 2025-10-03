@@ -1,5 +1,5 @@
 cnpg-cluster:
-  imageName: ghcr.io/cloudnative-pg/postgresql:17.6-minimal-trixie
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.6
 
   instances: 3
   computeSizeFactor: 4
@@ -47,6 +47,8 @@ cnpg-cluster:
     login: true
     createrole: true
     bypassrls: true
+    passwordSecret:
+      name: grafana-user-secret
 
   pooler:
     rw:

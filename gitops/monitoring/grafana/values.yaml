@@ -340,7 +340,7 @@ grafana:
         datasource: Prometheus
   sidecar:
     datasources:
-      enabled: true
+      enabled: false
       # defaultDatasourceEnabled: false
       searchNamespace: ALL
     dashboards:

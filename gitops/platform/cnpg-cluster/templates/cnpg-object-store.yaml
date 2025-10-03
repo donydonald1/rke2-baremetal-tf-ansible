@@ -19,3 +19,4 @@ spec:
     wal:
       maxParallel: 8
       compression: gzip
+
