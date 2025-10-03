@@ -432,8 +432,14 @@ grafana:
       name: app
       createdb: true
       user: <path:secret/data/postgres-users#username>
-      password: <path:secret/data/postgres-users#password>
-      # created with expternal secret operator
+      password: $__file{/etc/secrets/grafana-db-password}
+      ssl_mode: disable
+    extraSecretMounts:
+    - name: grafana-db-secret
+      secretName: postgres-superuser-secret
+      mountPath: /etc/secrets
+      readOnly: true
+    # created with expternal secret operator
   admin:
     existingSecret: grafana-admin-creds
     userKey: username
