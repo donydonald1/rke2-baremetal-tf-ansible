@@ -1,18 +1,8 @@
----
-#
-# IMPORTANT NOTE
-#
-# This chart inherits from our common library chart. You can check the default values/options here:
-# https://github.com/bjw-s/helm-charts/blob/main/charts/library/common/values.yaml
-#
 wikijs:
   controllers:
     main:
       # -- Controller type
       type: deployment
-      # -- Number of desired pods
-      #    **WARNING**: Set this to 1 when you first deploy Wiki.js.
-      #    You can increase the number of replicas after the initial deployment.
       replicas: 1
       containers:
         app:
@@ -22,14 +12,8 @@ wikijs:
             # -- Image pull policy
             pullPolicy: IfNotPresent
             # -- Image tag
-            tag: 2.5.307
-
-          # -- Environment variables.
-          #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
-          # @default -- See [values.yaml](./values.yaml)
+            tag: 2.5.308
           env:
-          # -- Set container timezone
-          # TZ: America/Chicago
           - name: TZ
             value: "America/Chicago"
           - name: DB_TYPE
@@ -54,28 +38,6 @@ wikijs:
           # DB_USER:
           # DB_PASS:
 
-          securityContext:
-            # -- Mount the container's root filesystem as read-only
-            readOnlyRootFilesystem: true
-            # -- Disable privilege escalations
-            allowPrivilegeEscalation: false
-            # -- Drop all capabilities
-            capabilities:
-              drop:
-              - ALL
-
-      pod:
-        securityContext:
-          # -- Run container as a non-root user
-          runAsNonRoot: true
-          # -- Run as `nobody` user
-          runAsUser: 65534
-          # -- Run as `nobody` group
-          runAsGroup: 65534
-          # -- Volume binds will be granted to `nobody` group
-          fsGroup: 65534
-
-      # -- Set the resource requests / limits for the container.
       resources: {}
         # limits:
         #   cpu: 100m
@@ -83,9 +45,6 @@ wikijs:
         # requests:
         #   cpu: 100m
         #   memory: 128Mi
-
-  # -- Configure the services for the chart here.
-  # @default -- See [values.yaml](./values.yaml)
   service:
     main:
       controller: main
@@ -93,16 +52,12 @@ wikijs:
         http:
           port: 3000
 
-  # -- Configure persistent storage for Wiki.js data.
-  # @default -- See [values.yaml](./values.yaml)
   data:
     storageClass: longhorn
     accessMode: ReadWriteOnce
     size: 8Gi
 
   ingress:
-    # -- Enable and configure ingress settings for the chart under this key.
-    # @default -- See [values.yaml](./values.yaml)
     main:
       enabled: true
       className: nginx
@@ -124,16 +79,8 @@ wikijs:
       - secretName: wiki-tls
         hosts:
         - *host-main
-      # -- Enable and configure postgresql database subchart under this key.
-      #    For more options see [postgresql chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
-      # @default -- See [values.yaml](./values.yaml)
   postgresql:
-    # -- Set this to `false` if you want to use your own database.
     enabled: false
-    # image:
-    #   registry: docker.io
-    #   repository: bitnamilegacy/postgresql
-    #   # tag: 17.6.0-debian-12-r4
     architecture: standalone
     primary:
       persistence:
