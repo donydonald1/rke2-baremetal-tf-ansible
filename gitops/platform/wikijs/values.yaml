@@ -33,7 +33,7 @@ wikijs:
           - name: TZ
             value: "America/Chicago"
           - name: DB_TYPE
-            value: "postgresq"
+            value: "postgres"
           - name: DB_HOST
             value: "cnpg-cluster-rw.cnpg-system.svc.cluster.local"
           - name: DB_PORT
