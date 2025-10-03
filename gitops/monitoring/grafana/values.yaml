@@ -451,7 +451,7 @@ grafana:
       type: postgres
       host: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
       name: grafana
-      createdb: false
+      # createdb: false
       user: $__file{/etc/secrets/username}
       password: $__file{/etc/secrets/password}
       ssl_mode: disable
