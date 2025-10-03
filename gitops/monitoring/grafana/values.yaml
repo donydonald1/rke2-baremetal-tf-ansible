@@ -393,15 +393,15 @@ grafana:
           sslmode: disable
       # should be enabled for OIDC integration, secret field should be GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
       # envFromSecret: keycloak-client-grafana-secret
-  podSecurityContext:
-    fsGroup: 472
-    fsGroupChangePolicy: "OnRootMismatch"
-    supplementalGroups: [ 0 ]
-  securityContext:
-    runAsUser: 472
-    runAsGroup: 472
+      # podSecurityContext:
+      #   fsGroup: 472
+      #   fsGroupChangePolicy: "OnRootMismatch"
+      #   supplementalGroups: [ 0 ]
+      # securityContext:
+      #   runAsUser: 472
+      #   runAsGroup: 472
   initChownData:
-    enabled: true
+    enabled: false
   useStatefulSet: true
   persistence:
     enabled: true
