@@ -22,20 +22,29 @@ wikijs:
             # -- Image pull policy
             pullPolicy: IfNotPresent
             # -- Image tag
-            tag: 2.5.307
+            # tag: 2.5.307
 
-          # -- Environment variables.
-          #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
-          # @default -- See [values.yaml](./values.yaml)
+            # -- Environment variables.
+            #    The database environment variables **need** to be set if `postgresql.enabled` is set to `false`
+            # @default -- See [values.yaml](./values.yaml)
           env:
-            # -- Set container timezone
-            TZ: America/Chicago
-            # DB_TYPE: postgres
-            # DB_HOST:
-            # DB_PORT:
-            # DB_NAME:
-            # DB_USER:
-            # DB_PASS:
+          - name: TZ
+            value: "America/Chicago"
+          - name: DB_TYPE
+            value: "postgres"
+          - name: DB_HOST
+            value: "cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432"
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_NAME
+            value: "wikijs"
+          - name: DB_USER
+            value: "wikijs"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: wikijs-user-secret
+                key: password
 
           securityContext:
             # -- Mount the container's root filesystem as read-only
@@ -112,7 +121,7 @@ wikijs:
       # @default -- See [values.yaml](./values.yaml)
   postgresql:
     # -- Set this to `false` if you want to use your own database.
-    enabled: true
+    enabled: false
     # image:
     #   registry: docker.io
     #   repository: bitnamilegacy/postgresql
