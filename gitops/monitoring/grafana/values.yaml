@@ -42,12 +42,12 @@ grafana:
     GF_DATABASE_SSL_MODE: disable
   extraEnvFrom:
   - secretRef:
-      name: postgres-superuser-secret
+      name: grafana-user-secret
   extraEnv:
   - name: GF_DATABASE_USER
     valueFrom:
       secretKeyRef:
-        name: postgres-superuser-secret
+        name: grafana-user-secret
         key: username
   - name: GF_DATABASE_PASSWORD__FILE
     value: /etc/secrets/password
@@ -457,7 +457,7 @@ grafana:
       ssl_mode: disable
   extraSecretMounts:
   - name: grafana-db-secret
-    secretName: postgres-superuser-secret
+    secretName: grafana-user-secret
     mountPath: /etc/secrets
     readOnly: true
     # created with expternal secret operator
@@ -466,18 +466,6 @@ grafana:
     userKey: username
     passwordKey: password
   assertNoLeakedSecrets: false
-
-# superuserSecret: postgres-superuser-secret
-# # Configure components of the External Secrets Operator (ESO).
-# eso:
-#   # -- Install components of the ESO.
-#   enabled: true
-#   # -- Defines provider type. One of `aws` or `generic`.
-#   type: "vault"
-#   # -- Defines Secret Store name.
-#   secretStoreName: "vault"
-#   # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
-#   secretName: "secret/grafana"
 
 # oidc:
 #   enabled: false
