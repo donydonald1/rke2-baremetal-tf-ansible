@@ -10,7 +10,7 @@ kube-prometheus-stack:
     additionalDataSources:
     - name: Loki
       type: loki
-      url: http://loki.loki:3100
+      url: http://loki.logging:3100
 
   prometheusOperator:
     createCustomResource: true
@@ -50,9 +50,9 @@ kube-prometheus-stack:
         cluster: apps
       resources:
         # requests:
-        #   cpu: 100m
+        #   cpu: 1000m
         limits:
-          memory: 2000Mi
+          memory: 2500Mi
       storageSpec:
         volumeClaimTemplate:
           spec:
@@ -203,7 +203,7 @@ kube-prometheus-stack:
       - key: "arm64"
         operator: "Exists"
   kubeProxy:
-    enabled: true
+    enabled: false
 
   kubeApiServer:
     enabled: true
