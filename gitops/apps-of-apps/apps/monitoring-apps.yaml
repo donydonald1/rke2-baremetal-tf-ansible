@@ -25,12 +25,12 @@ spec:
       - name: thanos
         namespace: monitoring
         serverSideApply: true
-        # - name: grafana
-        #   namespace: monitoring
-        #   serverSideApply: true
-        #   helm:
-        #     valueFiles:
-        #     - "values.yaml"
+      - name: grafana
+        namespace: monitoring
+        serverSideApply: true
+        helm:
+          valueFiles:
+          - "values.yaml"
         # - name: loki
         #   namespace: monitoring
         #   serverSideApply: true
