@@ -393,13 +393,21 @@ grafana:
           sslmode: disable
       # should be enabled for OIDC integration, secret field should be GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
       # envFromSecret: keycloak-client-grafana-secret
+  podSecurityContext:
+    fsGroup: 472
+    fsGroupChangePolicy: "OnRootMismatch"
+    supplementalGroups: [ 0 ]
+  securityContext:
+    runAsUser: 472
+    runAsGroup: 472
   initChownData:
-    enabled: false
+    enabled: true
   useStatefulSet: true
   persistence:
     enabled: true
     type: statefulset
     storageClassName: nfs-csi
+    accessModes: [ "ReadWriteMany" ]
     size: 5Gi
 
   grafana.ini:
@@ -434,11 +442,11 @@ grafana:
       user: <path:secret/data/postgres-users#username>
       password: $__file{/etc/secrets/grafana-db-password}
       ssl_mode: disable
-    extraSecretMounts:
-    - name: grafana-db-secret
-      secretName: postgres-superuser-secret
-      mountPath: /etc/secrets
-      readOnly: true
+  extraSecretMounts:
+  - name: grafana-db-secret
+    secretName: postgres-superuser-secret
+    mountPath: /etc/secrets
+    readOnly: true
     # created with expternal secret operator
   admin:
     existingSecret: grafana-admin-creds
