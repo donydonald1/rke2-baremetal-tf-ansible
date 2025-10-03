@@ -440,7 +440,7 @@ grafana:
       name: app
       createdb: true
       user: <path:secret/data/postgres-users#username>
-      password: $__file{/etc/secrets/grafana-db-password}
+      password: $__file{/etc/secrets/password}
       ssl_mode: disable
   extraSecretMounts:
   - name: grafana-db-secret
