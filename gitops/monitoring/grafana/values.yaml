@@ -36,8 +36,21 @@ grafana:
     GF_SERVER_ROOT_URL: https://grafana.prod.techsecom.io
     GF_SECURITY_COOKIE_SAMESITE: grafana
     TZ: America/Chicago
-    # envFromSecrets:
-    # - name: grafana-secret
+    GF_DATABASE_TYPE: postgres
+    GF_DATABASE_HOST: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
+    GF_DATABASE_NAME: app
+    GF_DATABASE_SSL_MODE: disable
+  extraEnvFrom:
+  - secretRef:
+      name: postgres-superuser-secret
+  extraEnv:
+  - name: GF_DATABASE_USER
+    valueFrom:
+      secretKeyRef:
+        name: postgres-superuser-secret
+        key: username
+  - name: GF_DATABASE_PASSWORD__FILE
+    value: /etc/secrets/password
 
   ingress:
     enabled: true
@@ -439,7 +452,7 @@ grafana:
       host: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
       name: app
       createdb: true
-      user: <path:secret/data/postgres-users#username>
+      user: $__file{/etc/secrets/username}
       password: $__file{/etc/secrets/password}
       ssl_mode: disable
   extraSecretMounts:
