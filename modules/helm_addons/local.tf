@@ -7,14 +7,7 @@ controller:
   kind: Deployment
   service:
     type: LoadBalancer
-#     annotations:
-# %{if var.enable_kube-vip-lb && !var.enable_metallb}
-#       kube-vip.io/loadbalancerIPs: "${var.ingress_lb_ip}"
-# %{else}
-# %{if var.enable_metallb && !var.enable_kube-vip-lb}
-#       metallb.io/loadBalancerIPs: "${var.ingress_lb_ip}"
-# %{endif}
-# %{endif}
+    loadBalancerIP: "${var.ingress_lb_ip}"
     externalTrafficPolicy: Local
     enableHttp: true
     enableHttps: true
