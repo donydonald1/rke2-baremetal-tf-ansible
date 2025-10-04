@@ -387,22 +387,19 @@ grafana:
           timeInterval: "15s"
           queryTimeout: "60s"
           httpMethod: POST
-      - name: loki # keep the existing name
-        uid: loki # <= add this
+      - name: loki
+        uid: loki
         type: loki
         access: proxy
         url: http://loki-gateway.logging.svc.cluster.local/loki
-        isDefault: true # <= make it the default
+        isDefault: true
         jsonData:
           maxLines: 250
+          # Remove the datasourceUid line; keep the URL if you want a plain link
           derivedFields:
-          - datasourceUid: Tempo
-            matcherRegex: (?:trace_id)=(\w+)
+          - matcherRegex: (?:trace_id)=(\w+)
             name: TraceID
-            # url will be interpreted as query for the datasource
-            # Use $$ (double-dollar sign) when your configuration needs a literal dollar sign.
             url: '$${__value.raw}'
-            # optional for URL Label to set a custom display label for the link.
             urlDisplayLabel: 'View Trace'
       - name: Alertmanager
         type: alertmanager
