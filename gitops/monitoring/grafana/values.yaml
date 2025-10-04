@@ -349,7 +349,7 @@ grafana:
     dashboards:
       enabled: true
       searchNamespace: monitoring
-      label: ops-dev-dc-bm-rke2
+      # label: ops-dev-dc-bm-rke2
       # folderAnnotation: grafana_folder
       # folder: /var/lib/grafana/dashboards
       # provider:
