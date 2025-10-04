@@ -119,14 +119,10 @@ grafana:
       enabled: true
       searchNamespace: ALL
   plugins:
-  - pr0ps-trackmap-panel
-  - natel-plotly-panel
-  - vonage-status-panel
   - grafana-piechart-panel
-  - https://github.com/panodata/panodata-map-panel/releases/download/0.16.0/panodata-map-panel-0.16.0.zip;grafana-worldmap-panel-ng
   - grafana-clock-panel
-  - grafana-worldmap-panel
-  - natel-discrete-panel
+  # If you really want a world map plugin:
+  - https://github.com/panodata/panodata-map-panel/releases/download/0.16.0/panodata-map-panel-0.16.0.zip;grafana-worldmap-panel-ng
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
