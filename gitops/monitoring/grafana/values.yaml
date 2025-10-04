@@ -440,7 +440,7 @@ grafana:
         url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-retention.json
         datasource: loki
       loki-thanos-object-storage:
-        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-thanos-object-storage.
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-thanos-object-storage.json
         datasource: loki
       loki-writes-resources:
         url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-writes-resources.json
