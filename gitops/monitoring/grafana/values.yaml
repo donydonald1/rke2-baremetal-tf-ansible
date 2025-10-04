@@ -463,9 +463,12 @@ grafana:
           httpMethod: POST
       - name: loki
         type: loki
+        uid: loki
         access: proxy
         url: http://loki-gateway.logging.svc.cluster.local:80
-        isDefault: false
+        isDefault: true
+        jsonData:
+          maxLines: 1000
       - name: Alertmanager
         type: alertmanager
         access: proxy
