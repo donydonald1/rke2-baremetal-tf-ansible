@@ -83,13 +83,13 @@ loki:
       repository: nginxinc/nginx-unprivileged
       # tag: 1.27.3-alpine
     nginxConfig:
+      resolver: "rke2-coredns-rke2-coredns.kube-system.svc.cluster.local valid=30s ipv6=off"
       httpSnippet: |
-        # keep chart’s default server block; add a small shim for legacy paths
         server {
           listen 8080;
           location ~ ^/logging/(.*)$ {
             rewrite ^/logging/(.*)$ /loki/$1 break;
-            proxy_pass http://loki-read:3100;  # or appropriate upstream for pushes (often write)
+            proxy_pass http://loki-read:3100;  
             proxy_set_header Host $host;
             proxy_http_version 1.1;
           }
