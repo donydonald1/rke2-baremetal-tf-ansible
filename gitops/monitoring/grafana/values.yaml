@@ -111,13 +111,14 @@ grafana:
       - grafana.prod.techsecom.io
       secretName: grafana-cert-tls
   sidecar:
-    datasources:
-      enabled: true
-      defaultDatasourceEnabled: true
-      searchNamespace: ALL
     dashboards:
       enabled: true
       searchNamespace: ALL
+      folder: /var/lib/grafana/dashboards
+      provider:
+        name: sidecarProvider
+        allowUiUpdates: true
+        foldersFromFilesStructure: true
   plugins:
   - grafana-piechart-panel
   - grafana-clock-panel
@@ -134,7 +135,7 @@ grafana:
         disableDeletion: false
         editable: true
         options:
-          path: /var/lib/grafana/dashboards/default
+          path: /var/lib/grafana/dashboards
       - name: kubernetes
         orgId: 1
         folder: Kubernetes
