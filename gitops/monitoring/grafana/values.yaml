@@ -27,6 +27,7 @@ grafana:
     GF_GRAFANA_NET_URL: https://grafana.net
     GF_LOG_FILTERS: rendering:debug
     GF_LOG_MODE: console
+
     GF_FEATURE_TOGGLES_ENABLE: publicDashboards
     GF_NEWS_NEWS_FEED_ENABLED: false
     GF_PANELS_DISABLE_SANITIZE_HTML: true
@@ -362,7 +363,7 @@ grafana:
         type: prometheus
         access: proxy
         url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-        isDefault: true
+        # isDefault: false
         jsonData:
           timeInterval: "15s"
           queryTimeout: "60s"
@@ -370,7 +371,8 @@ grafana:
       - name: loki
         type: loki
         access: proxy
-        url: http://loki-gateway.logging.svc.cluster.local:80
+        url: http://loki-backend.logging.svc.cluster.local:3100
+        # isDefault: false
       - name: Alertmanager
         type: alertmanager
         access: proxy
@@ -428,6 +430,7 @@ grafana:
       root_url: https://grafana.prod.techsecom.io
     analytics:
       check_for_updates: true
+      check_for_plugin_updates: true
     auth:
       auto_login: true
       disable_signout_menu: true
