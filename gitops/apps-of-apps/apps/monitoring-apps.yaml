@@ -22,9 +22,21 @@ spec:
       - name: kube-prometheus-stack
         namespace: monitoring
         serverSideApply: true
+        helm:
+          valueFiles:
+          - "values.yaml"
+
+      - name: prometheus-rules
+        namespace: monitoring
+        serverSideApply: true
+
       - name: thanos
         namespace: monitoring
         serverSideApply: true
+        helm:
+          valueFiles:
+          - "values.yaml"
+
       - name: grafana
         namespace: monitoring
         serverSideApply: true
