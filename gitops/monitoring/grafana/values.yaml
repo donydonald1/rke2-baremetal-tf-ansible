@@ -110,6 +110,14 @@ grafana:
     - hosts:
       - grafana.prod.techsecom.io
       secretName: grafana-cert-tls
+  sidecar:
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: true
+      searchNamespace: ALL
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
   plugins:
   - pr0ps-trackmap-panel
   - natel-plotly-panel
