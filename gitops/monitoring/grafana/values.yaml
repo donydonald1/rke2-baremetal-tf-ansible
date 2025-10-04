@@ -69,14 +69,7 @@ grafana:
       - grafana.prod.techsecom.io
       secretName: grafana-cert-tls
   plugins:
-  - pr0ps-trackmap-panel
-  - natel-plotly-panel
-  - vonage-status-panel
-  - grafana-piechart-panel
-  - https://github.com/panodata/panodata-map-panel/releases/download/0.16.0/panodata-map-panel-0.16.0.zip;grafana-worldmap-panel-ng
   - grafana-clock-panel
-  - grafana-worldmap-panel
-  - natel-discrete-panel
   - grafana-exploretraces-app
   - grafana-pyroscope-app
   serviceMonitor:
@@ -395,12 +388,6 @@ grafana:
         isDefault: true
         jsonData:
           maxLines: 250
-          # Remove the datasourceUid line; keep the URL if you want a plain link
-          derivedFields:
-          - matcherRegex: (?:trace_id)=(\w+)
-            name: TraceID
-            url: '$${__value.raw}'
-            urlDisplayLabel: 'View Trace'
       - name: Alertmanager
         type: alertmanager
         access: proxy
