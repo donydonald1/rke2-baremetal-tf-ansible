@@ -341,7 +341,7 @@ grafana:
         datasource: Prometheus
   sidecar:
     datasources:
-      enabled: false
+      enabled: true
       # defaultDatasourceEnabled: false
       searchNamespace: ALL
     dashboards:
@@ -371,7 +371,7 @@ grafana:
       - name: loki
         type: loki
         access: proxy
-        url: http://loki-backend.logging.svc.cluster.local:3100
+        url: http://loki-gateway.logging.svc.cluster.local:80
         isDefault: false
       - name: Alertmanager
         type: alertmanager
