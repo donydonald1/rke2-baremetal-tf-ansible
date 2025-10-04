@@ -79,9 +79,9 @@ loki:
     replicas: 2
     enabled: true
     image:
-      registry: ghcr.io
+      registry: docker.io
       repository: nginxinc/nginx-unprivileged
-      # tag: 1.27.3-alpine
+      tag: 1.29-alpine
     nginxConfig:
       resolver: "rke2-coredns-rke2-coredns.kube-system.svc.cluster.local valid=30s ipv6=off"
       serverSnippet: |
