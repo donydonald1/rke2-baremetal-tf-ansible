@@ -89,10 +89,20 @@ loki:
           listen 8080;
           location ~ ^/logging/(.*)$ {
             rewrite ^/logging/(.*)$ /loki/$1 break;
-            proxy_pass http://loki-read:3100;  
+            proxy_pass http://loki-read:3100; 
             proxy_set_header Host $host;
             proxy_http_version 1.1;
           }
+        }
+      serverSnippet: |
+        # Health endpoints
+        location = / {
+          return 200 'ok';
+          add_header Content-Type text/plain;
+        }
+        location = /ready {
+          return 200 'ok';
+          add_header Content-Type text/plain;
         }
     deploymentStrategy:
       type: RollingUpdate
