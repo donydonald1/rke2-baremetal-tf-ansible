@@ -34,10 +34,9 @@ grafana:
       api_url: <path:secret/data/grafana#api_url>
       use_pkce: true
       use_refresh_token: true
-      role_attribute_path: |
-        contains(roles[*], 'admin') && 'Admin' ||
-        contains(roles[*], 'editor') && 'Editor' || 'Viewer'
-    users: auto_assign_org = true auto_assign_org_role = Editor
+    users:
+      auto_assign_org: true
+      auto_assign_org_role: Editor
     paths:
       data: /var/lib/grafana/data
       logs: /var/log/grafana
@@ -45,9 +44,8 @@ grafana:
       provisioning: /etc/grafana/provisioning
     database:
       type: postgres
-      host: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
+      host: "cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432"
       name: grafana
-      # createdb: true
       user: $__file{/etc/secrets/username}
       password: $__file{/etc/secrets/password}
       ssl_mode: disable
@@ -100,131 +98,87 @@ grafana:
         editable: true
         options:
           path: /var/lib/grafana/dashboards/default
+
   dashboards:
     default:
-      node-exporter:
-        gnetId: 11074
-        revision: 9
-        datasource: Prometheus
-      node-exporter-full:
-        gnetId: 1860
-        revision: 37
-        datasource: Prometheus
-      traefik:
-        gnetId: 11462
-        revision: 1
-        datasource: Prometheus
-      go-processes:
-        gnetId: 6671
-        revision: 2
-        datasource: Prometheus
-      go-metrics:
-        gnetId: 10826
-        revision: 1
-        datasource: Prometheus
-      pihole:
-        gnetId: 10176
-        revision: 3
-        datasource: Prometheus
       pihole-ui:
         gnetId: 14475
         revision: 4
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
         - name: VAR_PIHOLEDEVICES
-          value: 3
-      flux:
-        gnetId: 16714
-        revision: 1
-        datasource: Prometheus
-      cilium-agent:
-        gnetId: 16611
-        revision: 1
-        datasource: Prometheus
-      cilium-operator:
-        gnetId: 16612
-        revision: 1
-        datasource: Prometheus
-      cilium-hubble:
-        gnetId: 16613
-        revision: 1
-        datasource: Prometheus
-      cert-manager:
-        gnetId: 20842
-        revision: 3
-        datasource: Prometheus
-      metallb:
-        gnetId: 14127
-        revision: 1
-        datasource: Prometheus
-      mysql-overview:
-        gnetId: 7362
-        revision: 5
-        datasource: Prometheus
-      mysql-quickstart:
-        gnetId: 14057
-        revision: 1
-        datasource: Prometheus
-      mysql-replication:
-        gnetId: 7371
-        revision: 1
-        datasource: Prometheus
-      mariadb-galera:
-        gnetId: 13106
-        revision: 3
-        datasource: Prometheus
-      ceph-cluster:
-        gnetId: 2842
-        revision: 18
-        datasource: Prometheus
-      ceph-osd:
-        gnetId: 5336
-        revision: 9
-        datasource: Prometheus
-      ceph-pool:
-        gnetId: 5342
-        revision: 9
-        datasource: Prometheus
+          type: constant
+          value: "3"
+
       blackbox:
         gnetId: 7587
         revision: 3
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_SIGNCL-PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
+
       blackbox-icmp:
         gnetId: 20338
         revision: 3
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
+
       synology-overview:
         gnetId: 14364
         revision: 10
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
         - name: VAR_NASDEVICES
-          value: 1
+          type: constant
+          value: "1"
+
       synology-detail:
         gnetId: 14284
         revision: 10
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
         - name: VAR_NASDEVICES
-          value: 1
+          type: constant
+          value: "1"
+
       minio:
         gnetId: 13502
         revision: 26
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
+
       volsync:
         gnetId: 21356
         revision: 3
-        datasource:
+        datasource: Prometheus
+        inputs:
         - name: DS_PROMETHEUS
+          pluginId: prometheus
+          type: datasource
           value: Prometheus
         - name: VAR_REPLICATIONDESTNAME
+          type: constant
           value: ".*"
