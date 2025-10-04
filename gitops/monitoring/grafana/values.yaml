@@ -112,7 +112,7 @@ grafana:
       secretName: grafana-cert-tls
   sidecar:
     dashboards:
-      enabled: true
+      enabled: false
       searchNamespace: ALL
       folder: /var/lib/grafana/dashboards
       provider:
