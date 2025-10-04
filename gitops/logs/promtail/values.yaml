@@ -22,6 +22,9 @@ promtail:
               target_label: 'unit'
             - source_labels: ['__journal__hostname']
               target_label: 'hostname'
+            - source_labels: ['__journal__hostname']   # <-- add this
+              target_label: 'host'                     # unify label name
+
         - job_name: syslog
           syslog:
             listen_address: 0.0.0.0:{{ .Values.extraPorts.syslog.containerPort }}
@@ -29,10 +32,10 @@ promtail:
             labels:
               job: "syslog"
           relabel_configs:
-          - source_labels: ['__syslog_message_hostname']
-            target_label: 'host'
-          - source_labels: ['__syslog_message_app_name']
-            target_label: 'app'
+            - source_labels: ['__syslog_message_hostname']
+              target_label: 'host'
+            - source_labels: ['__syslog_message_app_name']
+              target_label: 'app'
   extraPorts:
     syslog:
       name: tcp-syslog
