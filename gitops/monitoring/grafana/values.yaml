@@ -65,11 +65,11 @@ grafana:
     users:
       auto_assign_org: true
       auto_assign_org_role: Editor
-    # paths:
-    #   data: /var/lib/grafana/data
-    #   logs: /var/log/grafana
-    #   plugins: /var/lib/grafana/plugins
-    #   provisioning: /etc/grafana/provisioning
+    paths:
+      data: /var/lib/grafana/data
+      logs: /var/log/grafana
+      plugins: /var/lib/grafana/plugins
+      provisioning: /etc/grafana/provisioning
     database:
       type: postgres
       host: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
