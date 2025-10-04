@@ -104,7 +104,7 @@ loki:
           app.kubernetes.io/name: loki
           app.kubernetes.io/component: gateway
     ingress:
-      enabled: true
+      enabled: false
       ingressClassName: "nginx"
       annotations:
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
@@ -114,40 +114,6 @@ loki:
         cert-manager.io/renew-before: "720h"
       hosts:
       - host: "loki.prod.techsecom.io"
-      paths:
-        distributor:
-        - /api/prom/push
-        - /loki/api/v1/push
-        - /otlp/v1/logs
-        - /ui
-        queryFrontend:
-        - /api/prom/query
-        - /api/prom/label
-        - /api/prom/series
-        - /api/prom/tail
-        - /loki/api/v1/query
-        - /loki/api/v1/query_range
-        - /loki/api/v1/tail
-        - /loki/api/v1/label
-        - /loki/api/v1/labels
-        - /loki/api/v1/series
-        - /loki/api/v1/index/stats
-        - /loki/api/v1/index/volume
-        - /loki/api/v1/index/volume_range
-        - /loki/api/v1/format_query
-        - /loki/api/v1/detected_field
-        - /loki/api/v1/detected_fields
-        - /loki/api/v1/detected_labels
-        - /loki/api/v1/patterns
-        ruler:
-        - /api/prom/rules
-        - /api/prom/api/v1/rules
-        - /api/prom/api/v1/alerts
-        - /loki/api/v1/rules
-        - /prometheus/api/v1/rules
-        - /prometheus/api/v1/alerts
-        compactor:
-        - /loki/api/v1/delete
       tls:
       - secretName: loki-gateway-tls
         hosts:
@@ -172,6 +138,67 @@ loki:
     - key: "arm64"
       operator: "Exists"
 
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      cert-manager.io/revision-history-limit: "3"
+      external-dns.alpha.kubernetes.io/enabled: "true"
+      cert-manager.io/duration: "2160h"
+      cert-manager.io/renew-before: "720h"
+    #    nginx.ingress.kubernetes.io/auth-type: basic
+    #    nginx.ingress.kubernetes.io/auth-secret: loki-distributed-basic-auth
+    #    nginx.ingress.kubernetes.io/auth-secret-type: auth-map
+    #    nginx.ingress.kubernetes.io/configuration-snippet: |
+    #      proxy_set_header X-Scope-OrgID $remote_user;
+    labels: {}
+    #    blackbox.monitoring.exclude: "true"
+    paths:
+      distributor:
+      - /api/prom/push
+      - /loki/api/v1/push
+      - /otlp/v1/logs
+      - /ui
+      queryFrontend:
+      - /api/prom/query
+      - /api/prom/label
+      - /api/prom/series
+      - /api/prom/tail
+      - /loki/api/v1/query
+      - /loki/api/v1/query_range
+      - /loki/api/v1/tail
+      - /loki/api/v1/label
+      - /loki/api/v1/labels
+      - /loki/api/v1/series
+      - /loki/api/v1/index/stats
+      - /loki/api/v1/index/volume
+      - /loki/api/v1/index/volume_range
+      - /loki/api/v1/format_query
+      - /loki/api/v1/detected_field
+      - /loki/api/v1/detected_fields
+      - /loki/api/v1/detected_labels
+      - /loki/api/v1/patterns
+      ruler:
+      - /api/prom/rules
+      - /api/prom/api/v1/rules
+      - /api/prom/api/v1/alerts
+      - /loki/api/v1/rules
+      - /prometheus/api/v1/rules
+      - /prometheus/api/v1/alerts
+      compactor:
+      - /loki/api/v1/delete
+
+    hosts:
+    - loki.prod.techsecom.io
+    tls:
+    - secretName: loki-distributed-tls
+      hosts:
+      - loki.prod.techsecom.io
+
+  #    - hosts:
+  #       - loki.example.com
+  #      secretName: loki-distributed-tls
   # monitoring:
   #   dashboards:
   #     enabled: true
