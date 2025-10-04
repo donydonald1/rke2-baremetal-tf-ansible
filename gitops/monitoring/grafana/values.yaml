@@ -151,6 +151,9 @@ grafana:
     - hosts:
       - grafana.prod.techsecom.io
       secretName: grafana-cert-tls
+  initChownData:
+    enabled: false
+  useStatefulSet: true
   persistence:
     enabled: true
     type: statefulset
