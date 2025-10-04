@@ -387,11 +387,12 @@ grafana:
           timeInterval: "15s"
           queryTimeout: "60s"
           httpMethod: POST
-      - name: loki
+      - name: loki # keep the existing name
+        uid: loki # <= add this
         type: loki
         access: proxy
         url: http://loki-gateway.logging.svc.cluster.local/loki
-        isDefault: false
+        isDefault: true # <= make it the default
         jsonData:
           maxLines: 250
           derivedFields:
