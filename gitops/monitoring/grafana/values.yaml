@@ -390,7 +390,7 @@ grafana:
       - name: loki
         type: loki
         access: proxy
-        url: http://loki-gateway.logging.svc.cluster.local:80
+        url: http://loki-write.logging.svc.cluster.local:3100
         isDefault: false
         jsonData:
           maxLines: 250
