@@ -347,7 +347,7 @@ grafana:
         datasource: Prometheus
   sidecar:
     dashboards:
-      enabled: true
+      enabled: false
       searchNamespace: monitoring
       # label: ops-dev-dc-bm-rke2
       # folderAnnotation: grafana_folder
