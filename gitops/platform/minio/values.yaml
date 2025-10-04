@@ -263,6 +263,6 @@ minio:
 
   metrics:
     serviceMonitor:
-      enabled: false
+      enabled: true
       additionalLabels:
         release: monitoring
