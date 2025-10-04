@@ -1,4 +1,28 @@
 grafana:
+  env:
+    GF_ANALYTICS_CHECK_FOR_UPDATES: false
+    GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: false
+    GF_ANALYTICS_REPORTING_ENABLED: false
+    GF_AUTH_ANONYMOUS_ENABLED: false
+    GF_DATE_FORMATS_USE_BROWSER_LOCALE: true
+    GF_EXPLORE_ENABLED: true
+    GF_GRAFANA_NET_URL: https://grafana.net
+    GF_LOG_FILTERS: rendering:debug
+    GF_LOG_MODE: console
+
+    GF_FEATURE_TOGGLES_ENABLE: publicDashboards
+    GF_NEWS_NEWS_FEED_ENABLED: false
+    GF_PANELS_DISABLE_SANITIZE_HTML: true
+    GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel,grafana-lokiexplore-app
+    GF_SECURITY_ALLOW_EMBEDDING: true
+    # GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: true
+    GF_SERVER_ROOT_URL: https://grafana.prod.techsecom.io
+    GF_SECURITY_COOKIE_SAMESITE: grafana
+    TZ: America/Chicago
+    GF_DATABASE_TYPE: postgres
+    GF_DATABASE_HOST: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
+    GF_DATABASE_NAME: grafana
+    GF_DATABASE_SSL_MODE: disable
   admin:
     existingSecret: grafana-admin-creds
     userKey: username
@@ -86,21 +110,109 @@ grafana:
     - hosts:
       - grafana.prod.techsecom.io
       secretName: grafana-cert-tls
+  plugins:
+  - pr0ps-trackmap-panel
+  - natel-plotly-panel
+  - vonage-status-panel
+  - grafana-piechart-panel
+  - https://github.com/panodata/panodata-map-panel/releases/download/0.16.0/panodata-map-panel-0.16.0.zip;grafana-worldmap-panel-ng
+  - grafana-clock-panel
+  - grafana-worldmap-panel
+  - natel-discrete-panel
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
       - name: "default"
         orgId: 1
-        folder: ""
+        folder: "default"
         type: file
         disableDeletion: false
         editable: true
         options:
           path: /var/lib/grafana/dashboards/default
-
+      - name: kubernetes
+        orgId: 1
+        folder: Kubernetes
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/kubernetes
+      - name: nginx
+        orgId: 1
+        folder: Nginx
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/nginx
+      - name: 'teslamate'
+        orgId: 1
+        folder: Teslamate
+        type: file
+        disableDeletion: false
+        # updateIntervalSeconds: -1
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/teslamate
+      - name: thanos
+        orgId: 1
+        folder: Thanos
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/thanos
+      - name: loki
+        orgId: 1
+        folder: loki
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/loki
   dashboards:
     default:
+      1-node-exporter:
+        url: https://grafana.com/api/dashboards/22413/revisions/4/download
+        datasource: Prometheus
+      cert-manager:
+        gnetId: 20842
+        revision: 3
+        datasource: Prometheus
+      cloudnative-pg:
+        url: https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/main/docs/src/samples/monitoring/grafana-dashboard.json
+        datasource: Prometheus
+      external-secrets:
+        url: https://raw.githubusercontent.com/external-secrets/external-secrets/main/docs/snippets/dashboard.json
+        datasource: Prometheus
+      argo-cd:
+        url: https://raw.githubusercontent.com/argoproj/argo-cd/v2.14.9/examples/dashboard.json
+        datasource: Prometheus
+      frigate:
+        url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/grafana/dashboards/frigate.json
+        datasource: influxdb
+      home-assistant:
+        url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/grafana/dashboards/home_assistant.json
+        datasource: home_assistant
+      loki-logs:
+        url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/grafana/dashboards/loki_logs.json
+        datasource: loki
+      node-feature-discovery:
+        url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
+        datasource: Prometheus
+      prometheus-exporter-summary:
+        url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/grafana/dashboards/prometheus_exporter_summary.json
+        datasource: Prometheus
+      trivy:
+        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-addons-trivy-operator.json
+        datasource:
+        - { name: DS_PROMETHEUS, value: Prometheus }
       pihole-ui:
         gnetId: 14475
         revision: 4
@@ -182,3 +294,112 @@ grafana:
         - name: VAR_REPLICATIONDESTNAME
           type: constant
           value: ".*"
+    kubernetes:
+      k8s-system-api-server:
+        # renovate: dashboardName="Kubernetes / System / API Server"
+        gnetId: 15761
+        revision: 19
+        datasource: Prometheus
+      k8s-views-global:
+        # renovate: dashboardName="Kubernetes / Views / Global"
+        gnetId: 15757
+        revision: 43
+        datasource: Prometheus
+      k8s-views-nodes:
+        # renovate: dashboardName="Kubernetes / Views / Nodes"
+        gnetId: 15759
+        revision: 35
+        datasource: Prometheus
+      k8s-views-namespaces:
+        # renovate: dashboardName="Kubernetes / Views / Namespaces"
+        gnetId: 15758
+        revision: 42
+        datasource: Prometheus
+      k8s-views-pods:
+        # renovate: dashboardName="Kubernetes / Views / Pods"
+        gnetId: 15760
+        revision: 36
+        datasource: Prometheus
+      k8s-volumes:
+        # renovate: dashboardName="K8s / Storage / Volumes / Cluster"
+        gnetId: 11454
+        revision: 14
+        datasource: Prometheus
+    nginx:
+      nginx:
+        url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+        datasource: Prometheus
+      nginx-request-handling-performance:
+        url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/request-handling-performance.json
+        datasource: Prometheus
+
+    teslamate:
+      battery-health:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/battery-health.json
+      charge-level:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/charge-level.json
+      charges:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/charges.json
+      charging-stats:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/charging-stats.json
+      drive-stats:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/drive-stats.json
+      drives:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/drives.json
+      efficiency:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/efficiency.json
+      locations:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/locations.json
+      mileage:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/mileage.json
+      overview:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/overview.json
+      projected-range:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/projected-range.json
+      states:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/states.json
+      statistics:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/statistics.json
+      timeline:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/timeline.json
+      trip:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/trip.json
+      updates:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/updates.json
+      vampire-drain:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/vampire-drain.json
+      visited:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/visited.json
+      charge-details:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/internal/charge-details.json
+      drive-details:
+        url: https://raw.githubusercontent.com/teslamate-org/teslamate/master/grafana/dashboards/internal/drive-details.json
+
+    thanos:
+      thanos-bucket-replicate:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/bucket-replicate.json
+        datasource: Prometheus
+      thanos-compact:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/compact.json
+        datasource: Prometheus
+      thanos-overview:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/overview.json
+        datasource: Prometheus
+      thanos-query:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query.json
+        datasource: Prometheus
+      thanos-query-frontend:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query-frontend.json
+        datasource: Prometheus
+      thanos-receieve:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/receive.json
+        datasource: Prometheus
+      thanos-rule:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/rule.json
+        datasource: Prometheus
+      thanos-sidecar:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/sidecar.json
+        datasource: Prometheus
+      thanos-store:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/store.json
+        datasource: Prometheus
