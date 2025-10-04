@@ -35,7 +35,7 @@ spec:
         helm:
           values:
           - values.yaml
-        # serverSideApply: 
+        serverSideApply: true
 
       - name: wikijs
         namespace: wikijs
