@@ -408,6 +408,46 @@ grafana:
       thanos-store:
         url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/store.json
         datasource: Prometheus
+    loki:
+      loki-bloom-build:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-bloom-build.json
+        datasource: loki
+      loki-bloom-gateway:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-bloom-gateway.json
+        datasource: loki
+      loki-chunks:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-chunks.json
+        datasource: loki
+      loki-deletion:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-deletion.json
+        datasource: loki
+      loki-logs:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-logs.json
+        datasource: loki
+      loki-mixin-recording-rules:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-mixin-recording-rules.json
+        datasource: loki
+      loki-operational:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-operational.json
+        datasource: loki
+      loki-reads-resources:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-reads-resources.json
+        datasource: loki
+      loki-reads:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-reads.json
+        datasource: loki
+      loki-retention:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-retention.json
+        datasource: loki
+      loki-thanos-object-storage:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-thanos-object-storage.
+        datasource: loki
+      loki-writes-resources:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-writes-resources.json
+        datasource: loki
+      loki-writes:
+        url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-writes.json
+        datasource: loki
   datasources:
     datasources.yaml:
       apiVersion: 1
