@@ -53,9 +53,10 @@ wikijs:
           port: 3000
 
   data:
-    storageClass: longhorn
-    accessMode: ReadWriteOnce
-    size: 8Gi
+    storageClass: nfs-csi
+    accessModes:
+    - ReadWriteMany
+    size: 10Gi
 
   ingress:
     main:
@@ -85,7 +86,9 @@ wikijs:
     primary:
       persistence:
         enabled: true
-        storageClass: longhorn
+        storageClass: nfs-csi
+        accessModes:
+        - ReadWriteMany
         size: 8Gi
     auth:
       enablePostgresUser: false
