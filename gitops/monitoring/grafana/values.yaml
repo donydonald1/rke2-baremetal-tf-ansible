@@ -166,7 +166,7 @@ grafana:
         datasource: home_assistant
       loki-logs:
         url: https://raw.githubusercontent.com/billimek/k8s-gitops/master/monitoring/grafana/dashboards/loki_logs.json
-        datasource: Loki
+        datasource: loki
       # Ref: https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/
       ipmi:
         gnetId: 13177
@@ -175,7 +175,7 @@ grafana:
       loki:
         gnetId: 13407
         revision: 1
-        datasource: Prometheus
+        datasource: loki
       internet-speed:
         gnetId: 13665
         revision: 1

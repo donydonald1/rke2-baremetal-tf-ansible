@@ -1,61 +1,67 @@
-cnpg-cluster:
-  imageName: ghcr.io/cloudnative-pg/postgresql:17.6
+imageName: ghcr.io/cloudnative-pg/postgresql:17.6
 
-  instances: 3
-  computeSizeFactor: 4
+instances: 3
+computeSizeFactor: 4
 
-  affinity: {}
+affinity: {}
 
-  storageClass: longhorn
-  storageSize: 4Gi
+storageClass: longhorn
+storageSize: 150Gi
 
-  objectStore:
-    endpoint: https://s3.prod.techsecom.io
-    bucketName: postgres
-    s3CredentialsSecretName: aws-credentials
-    s3AccessKeyIdSecretKey: accessKeyId
-    s3SecretAccessKeySecretKey: secretAccessKey
+objectStore:
+  endpoint: "http://minio.minio.svc.cluster.local:9000"
+  bucketName: postgres
+  s3CredentialsSecretName: aws-credentials
+  s3AccessKeyIdSecretKey: accessKeyId
+  s3SecretAccessKeySecretKey: secretAccessKey
 
-  backup:
+backup:
+  enabled: true
+  schedule: "0 0 0 * * *"
+SuperuserSecret: postgres-superuser-secret
+recovery:
+  # ========================================================================
+  # DISASTER RECOVERY MODES
+  # ========================================================================
+  #
+  # Mode 1: "fresh" - Create new cluster with fresh data
+  # Mode 2: "production" - Use recovery bootstrap (prevents fresh cluster creation)
+  # Mode 3: "recovery" - Recover from specific timeline
+  #
+  mode: "fresh" # Options: fresh, production, recovery
+  # https://cloudnative-pg.io/documentation/current/recovery/#recovery-targets
+  target: {}
+  # Timeline configuration
+  timeline:
+    # Source reader timeline (set to writer timeline after successful recovery)
+    # This makes future recoveries easier by avoiding timeline searches
+    reader: ""
+    # Current writer timeline (update this for disaster recovery)
+    # Format: ISO 8601 timestamp (e.g., "2025-09-23T14:59:00+08:00")
+    writer: "2025-10-03T14:59:00+08:00"
+
+managedRoles:
+- name: grafana
+  ensure: present
+  login: true
+  createrole: true
+  bypassrls: true
+  passwordSecret:
+    name: grafana-user-secret
+- name: wikijs
+  ensure: present
+  login: true
+  createrole: true
+  bypassrls: true
+  passwordSecret:
+    name: wikijs-user-secret
+
+pooler:
+  rw:
     enabled: true
-    schedule: "0 0 0 * * *"
-  SuperuserSecret: postgres-superuser-secret
-  recovery:
-    # ========================================================================
-    # DISASTER RECOVERY MODES
-    # ========================================================================
-    #
-    # Mode 1: "fresh" - Create new cluster with fresh data
-    # Mode 2: "production" - Use recovery bootstrap (prevents fresh cluster creation)
-    # Mode 3: "recovery" - Recover from specific timeline
-    #
-    mode: "fresh" # Options: fresh, production, recovery
-    # https://cloudnative-pg.io/documentation/current/recovery/#recovery-targets
-    target: {}
-    # Timeline configuration
-    timeline:
-      # Source reader timeline (set to writer timeline after successful recovery)
-      # This makes future recoveries easier by avoiding timeline searches
-      reader: "2025-09-23T14:59:00+08:00"
-      # Current writer timeline (update this for disaster recovery)
-      # Format: ISO 8601 timestamp (e.g., "2025-09-23T14:59:00+08:00")
-      writer: "2025-09-23T14:59:00+08:00"
-
-  managedRoles:
-  - name: grafana
-    ensure: present
-    login: true
-    createrole: true
-    bypassrls: true
-    passwordSecret:
-      name: grafana-user-secret
-
-  pooler:
-    rw:
-      enabled: true
-      instances: 1
-      mode: transaction
-    ro:
-      enabled: true
-      instances: 1
-      mode: transaction
+    instances: 1
+    mode: transaction
+  ro:
+    enabled: true
+    instances: 1
+    mode: transaction

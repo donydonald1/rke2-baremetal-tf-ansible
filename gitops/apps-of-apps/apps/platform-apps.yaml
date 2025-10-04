@@ -30,9 +30,12 @@ spec:
       # helm:
       #   values:
       #   - values.yaml
-      # - name: vault
-      #   namespace: vault
-      #   serverSideApply: true
+      - name: cnpg-cluster
+        namespace: cnpg-system
+        helm:
+          values:
+          - values.yaml
+        # serverSideApply: 
 
       - name: wikijs
         namespace: wikijs
