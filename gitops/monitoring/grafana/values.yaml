@@ -363,7 +363,7 @@ grafana:
         type: prometheus
         access: proxy
         url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-        # isDefault: false
+        isDefault: false
         jsonData:
           timeInterval: "15s"
           queryTimeout: "60s"
@@ -372,7 +372,7 @@ grafana:
         type: loki
         access: proxy
         url: http://loki-backend.logging.svc.cluster.local:3100
-        # isDefault: false
+        isDefault: false
       - name: Alertmanager
         type: alertmanager
         access: proxy
