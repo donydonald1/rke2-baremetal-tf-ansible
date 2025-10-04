@@ -463,7 +463,7 @@ grafana:
           httpMethod: POST
       - name: loki
         type: loki
-        uid: loki
+        # uid: loki
         access: proxy
         url: http://loki-gateway.logging.svc.cluster.local:80
         isDefault: false
