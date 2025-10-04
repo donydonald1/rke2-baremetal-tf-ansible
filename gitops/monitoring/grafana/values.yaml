@@ -86,14 +86,14 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: default
-        disableDeletion: false
-        editable: true
-        folder: ""
-        options:
-          path: /var/lib/grafana/dashboards/default
-        orgId: 1
-        type: file
+      # - name: default
+      #   disableDeletion: false
+      #   editable: true
+      #   folder: ""
+      #   options:
+      #     path: /var/lib/grafana/dashboards/default
+      #   orgId: 1
+      #   type: file
       - name: kubernetes
         orgId: 1
         folder: Kubernetes
@@ -168,10 +168,10 @@ grafana:
         gnetId: 13665
         revision: 1
         datasource: Prometheus
-      node-exporter-full:
-        gnetId: 1860
-        revision: 29
-        datasource: Prometheus
+      # node-exporter-full:
+      #   gnetId: 1860
+      #   revision: 29
+      #   datasource: Prometheus
       node-feature-discovery:
         url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
         datasource: Prometheus
