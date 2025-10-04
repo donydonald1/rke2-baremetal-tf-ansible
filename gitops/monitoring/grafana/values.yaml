@@ -128,58 +128,59 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: files
+      - name: "default"
         orgId: 1
+        folder: "default"
         type: file
         disableDeletion: false
         editable: true
         options:
           path: /var/lib/grafana/dashboards
-      # - name: kubernetes
-      #   orgId: 1
-      #   folder: Kubernetes
-      #   type: file
-      #   disableDeletion: false
-      #   editable: true
-      #   allowUiUpdates: true
-      #   options:
-      #     path: /var/lib/grafana/dashboards/kubernetes
-      # - name: nginx
-      #   orgId: 1
-      #   folder: Nginx
-      #   type: file
-      #   disableDeletion: false
-      #   editable: true
-      #   allowUiUpdates: true
-      #   options:
-      #     path: /var/lib/grafana/dashboards/nginx
-      # - name: 'teslamate'
-      #   orgId: 1
-      #   folder: Teslamate
-      #   type: file
-      #   disableDeletion: false
-      #   # updateIntervalSeconds: -1
-      #   allowUiUpdates: true
-      #   options:
-      #     path: /var/lib/grafana/dashboards/teslamate
-      # - name: thanos
-      #   orgId: 1
-      #   folder: Thanos
-      #   type: file
-      #   disableDeletion: false
-      #   editable: true
-      #   allowUiUpdates: true
-      #   options:
-      #     path: /var/lib/grafana/dashboards/thanos
-      # - name: loki
-      #   orgId: 1
-      #   folder: loki
-      #   type: file
-      #   disableDeletion: false
-      #   editable: true
-      #   allowUiUpdates: true
-      #   options:
-      #     path: /var/lib/grafana/dashboards/loki
+      - name: kubernetes
+        orgId: 1
+        folder: Kubernetes
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/kubernetes
+      - name: nginx
+        orgId: 1
+        folder: Nginx
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/nginx
+      - name: 'teslamate'
+        orgId: 1
+        folder: Teslamate
+        type: file
+        disableDeletion: false
+        # updateIntervalSeconds: -1
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/teslamate
+      - name: thanos
+        orgId: 1
+        folder: Thanos
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/thanos
+      - name: loki
+        orgId: 1
+        folder: loki
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/loki
   dashboards:
     default:
       1-node-exporter:
