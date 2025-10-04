@@ -36,12 +36,13 @@ spec:
         helm:
           valueFiles:
           - "values.yaml"
-        # - name: grafana
-        #   namespace: monitoring
-        #   serverSideApply: true
-        #   helm:
-        #     valueFiles:
-        #     - "values.yaml"
+
+      - name: grafana
+        namespace: monitoring
+        serverSideApply: true
+        helm:
+          valueFiles:
+          - "values.yaml"
         # - name: loki
         #   namespace: monitoring
         #   serverSideApply: true
