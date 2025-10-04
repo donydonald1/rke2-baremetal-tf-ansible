@@ -28,8 +28,17 @@ grafana:
     # Database
     GF_DATABASE_SSL_MODE: disable
     GF_DATABASE_TYPE: postgres
-  # envFromSecrets:
-  # - name: *secret
+  extraEnvFrom:
+  - secretRef:
+      name: grafana-user-secret
+  extraEnv:
+  - name: GF_DATABASE_USER
+    valueFrom:
+      secretKeyRef:
+        name: grafana-user-secret
+        key: username
+  - name: GF_DATABASE_PASSWORD__FILE
+    value: /etc/secrets/password
   grafana.ini:
     server:
       root_url: https://grafana.prod.techsecom.io
