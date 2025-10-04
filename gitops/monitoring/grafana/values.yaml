@@ -348,15 +348,15 @@ grafana:
   sidecar:
     dashboards:
       enabled: true
-      searchNamespace: ALL
+      searchNamespace: monitoring
       label: ops-dev-dc-bm-rke2
       # folderAnnotation: grafana_folder
       # folder: /var/lib/grafana/dashboards
       # provider:
       #   foldersFromFilesStructure: true
-    datasources:
-      enabled: true
-      searchNamespace: ALL
+      # datasources:
+      #   enabled: true
+      #   searchNamespace: ALL
     provider:
       allowUiUpdates: true
   datasources:
