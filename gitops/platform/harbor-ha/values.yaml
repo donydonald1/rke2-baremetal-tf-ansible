@@ -26,7 +26,8 @@ redis:
     enabled: true
     image:
       registry: docker.io
-      repository: bitnamilegacy
+      repository: bitnamilegacy/redis-sentinel
+      tag: 8.2.1-debian-12-r0
 
 harbor:
   # we use harbor secret to consolidate all the secrets
