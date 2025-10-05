@@ -145,7 +145,7 @@ harbor:
     resourcePolicy: "keep"
     persistentVolumeClaim:
       trivy:
-        storageClass: "vsphere"
+        storageClass: nfs-csi
         size: 10Gi
     imageChartStorage:
       type: "s3"
