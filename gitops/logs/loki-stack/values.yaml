@@ -275,7 +275,7 @@ loki-stack:
 
       storage_config:
         aws:
-          bucketnames:
+          bucketNames:
             chunks: loki-chunks
             ruler: loki-ruler
             admin: loki-admin
@@ -293,7 +293,7 @@ loki-stack:
         storage:
           type: s3
           s3:
-            bucketnames:
+            bucketNames:
               chunks: loki-chunks
               ruler: loki-ruler
               admin: loki-admin
