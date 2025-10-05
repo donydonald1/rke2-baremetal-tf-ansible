@@ -1,6 +1,9 @@
 redis:
   fullnameOverride: redis
-  imageRegistry: docker.io
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/redis-cluster
+    tag: 8.2.1-debian-12-r0
   auth:
     sentinel: false
     existingSecret: redis-creds
