@@ -24,6 +24,9 @@ redis:
         memory: 512Mi
   sentinel:
     enabled: true
+    image:
+      registry: docker.io
+      repository: bitnamilegacy
 
 harbor:
   # we use harbor secret to consolidate all the secrets
