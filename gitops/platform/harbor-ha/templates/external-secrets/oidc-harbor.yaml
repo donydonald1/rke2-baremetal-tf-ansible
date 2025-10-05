@@ -1,0 +1,69 @@
+{{- if .Values.eso.enabled }}
+{{- $secretName := .Values.eso.secretName }}
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: oidc-harbor
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .Values.eso.secretStoreName }}
+  data:
+  - secretKey: oidc-client-id
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-client-id
+  - secretKey: oidc-client-secret
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-client-secret
+  - secretKey: oidc_issuer-url
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc_issuer-url
+  - secretKey: oidc-wellknown-url
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-wellknown-url
+  - secretKey: oidc-authorization-endpoint
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-authorization-endpoint
+  - secretKey: oidc-token-endpoint
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-token-endpoint
+  - secretKey: oidc-userinfo-endpoint
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-userinfo-endpoint
+  - secretKey: oidc-jwks-uri
+    remoteRef:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: secret/harbor
+      metadataPolicy: None
+      property: oidc-jwks-uri
+{{- end }}

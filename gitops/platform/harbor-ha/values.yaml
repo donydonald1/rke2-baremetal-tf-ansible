@@ -41,21 +41,37 @@ harbor:
       requests:
         cpu: 0.05
         memory: 150Mi
-    # xsrfKey: "somekey"
-    # (FIXME) This is not yet merged and still not released
-    # configureUserSettings: |
-    #   {
-    #     "auth_mode": "oidc_auth",
-    #     "oidc_name": "keycloak",
-    #     "oidc_endpoint": "https://keycloak.techsecom.io/auth/realms/shared",
-    #     "oidc_client_id": "harbor",
-    #     "oidc_client_secret": "YOURSECRET",
-    #     "oidc_groups_claim": "roles",
-    #     "oidc_admin_group": "administrator",
-    #     "oidc_scope": "openid,email,profile,roles",
-    #     "oidc_auto_onboard": "true",
-    #     "oidc_user_claim": "preferred_username"
-    #   }
+    extraEnvVars:
+    - name: OIDC_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: oidc-harbor
+          key: client_id
+    - name: OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: oidc-harbor
+          key: client_secret
+    - name: OIDC_ENDPOINT
+      valueFrom:
+        secretKeyRef:
+          name: oidc-harbor
+          key: oidc_issuer-url
+    - name: CONFIG_OVERWRITE_JSON
+      value: |
+        {
+          "auth_mode": "oidc_auth",
+          "oidc_name": "OIDC",
+          "oidc_endpoint": "$(OIDC_ENDPOINT)",
+          "oidc_groups_claim": "groups",
+          "oidc_admin_group": "superUsers",
+          "oidc_client_id": "$(OIDC_CLIENT_ID)",
+          "oidc_client_secret": "$(OIDC_CLIENT_SECRET)",
+          "oidc_scope": "openid,email,groups,name",
+          "oidc_verify_cert": "false",
+          "oidc_auto_onboard": "true",
+          "oidc_user_claim": "name"
+        }
 
   jobservice:
     replicas: 3
