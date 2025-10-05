@@ -276,7 +276,7 @@ loki-stack:
       storage_config:
         aws:
           bucketnames: loki-stack
-          s3forcepathstyle: false
+          s3forcepathstyle: true
           insecure: true
           endpoint: http://minio.minio.svc.cluster.local:9000
           secret_access_key: <path:secret/data/minio#postgres_password>
