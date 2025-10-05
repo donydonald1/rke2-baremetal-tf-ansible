@@ -121,6 +121,11 @@ harbor:
         cert-manager.io/cluster-issuer: letsencrypt-prod
         ingress.kubernetes.io/proxy-body-size: "0"
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
         # external-dns.alpha.kubernetes.io/target: "rke2-manager.techsecom.io"
         # external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
@@ -164,7 +169,7 @@ harbor:
   database:
     type: external
     external:
-      host: "hcnpg-cluster-rw.cnpg-system.svc.cluster.local"
+      host: "cnpg-cluster-rw.cnpg-system.svc.cluster.local"
       port: "5432"
       username: "harbor"
       existingSecret: "harbor-user-secret"
