@@ -467,7 +467,7 @@ grafana:
         type: loki
         # uid: loki
         access: proxy
-        url: http://loki-stack.logging.svc.cluster.local:3100
+        url: http://loki-stack.logging.svc.cluster.local:80
         isDefault: true
         jsonData:
           maxLines: 1000
