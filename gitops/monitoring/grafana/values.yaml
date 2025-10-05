@@ -44,6 +44,8 @@ grafana:
     analytics:
       check_for_updates: true
       check_for_plugin_updates: true
+    auth.anonymous:
+      org_name: "Techsecom Consulting Group"
     auth:
       auto_login: true
       disable_signout_menu: false
