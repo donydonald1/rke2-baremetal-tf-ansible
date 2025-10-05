@@ -276,7 +276,17 @@ loki-stack:
         secret_access_key: <path:secret/data/minio#postgres_password>
         access_key_id: <path:secret/data/minio#postgres_user>
         region: us-east-1
-
+    ruler:
+      storage:
+        type: s3
+        s3:
+          bucketnames: loki-ruler
+          s3forcepathstyle: true
+          insecure: true
+          endpoint: http://minio.minio.svc.cluster.local:9000
+          secret_access_key: <path:secret/data/minio#postgres_password>
+          access_key_id: <path:secret/data/minio#postgres_user>
+          region: us-east-1
     serviceAccount:
       create: true
       annotations:
