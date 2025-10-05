@@ -236,8 +236,15 @@ loki:
       enabled: true
       labels:
         grafana_dashboard: "1"
+
     rules:
       enabled: true
       alerting: true
     serviceMonitor:
       enabled: true
+      labels:
+        release: kube-prometheus-stack
+    podMonitor:
+      enabled: true
+      labels:
+        release: kube-prometheus-stack

@@ -59,7 +59,7 @@ kube-prometheus-stack:
       retention: 14d
       retentionSize: 15GB
       externalLabels:
-        cluster: apps
+        cluster: prod
       resources:
         # requests:
         #   cpu: 1000m
