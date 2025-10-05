@@ -206,7 +206,7 @@ harbor:
       enabled: true
 
 oidc:
-  enabled: false
+  enabled: true
 
 # Configure components of the External Secrets Operator (ESO).
 eso:
