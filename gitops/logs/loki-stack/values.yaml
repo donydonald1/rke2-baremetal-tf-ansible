@@ -293,7 +293,10 @@ loki-stack:
         storage:
           type: s3
           s3:
-            bucketnames: loki-ruler
+            bucketnames:
+              chunks: loki-chunks
+              ruler: loki-ruler
+              admin: loki-admin
             s3forcepathstyle: true
             insecure: true
             endpoint: http://minio.minio.svc.cluster.local:9000
