@@ -9,12 +9,12 @@ spec:
   - list:
       elements:
 
-      - name: loki
-        namespace: logging
-        serverSideApply: true
-      - name: promtail
-        namespace: logging
-        serverSideApply: true
+        # - name: loki
+        #   namespace: logging
+        #   serverSideApply: true
+        # - name: promtail
+        #   namespace: logging
+        #   serverSideApply: true
         # - name: influxdb
         #   namespace: monitoring
         #   serverSideApply: true

@@ -248,3 +248,136 @@ loki:
       enabled: true
       labels:
         release: kube-prometheus-stack
+---
+loki-stack:
+  loki:
+    auth_enabled: false
+
+    commonConfig:
+      replication_factor: 1
+
+    limitsConfig:
+      retention_period: 720h # 30 days
+      allow_structured_metadata: true
+      split_queries_by_interval: 15m
+      volume_enabled: true
+    schemaConfig:
+      configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+    server:
+      log_level: info
+      grpc_server_max_recv_msg_size: 8388608
+      grpc_server_max_send_msg_size: 8388608
+
+    storage:
+      type: s3
+      bucketNames:
+        chunks: loki-chunks
+        ruler: loki-ruler
+        admin: loki-admin
+      s3:
+        s3ForcePathStyle: true
+        insecure: true
+        endpoint: http://minio.minio.svc.cluster.local:9000
+        secretAccessKey: <path:secret/data/minio#postgres_password>
+        accessKeyId: <path:secret/data/minio#postgres_user>
+        region: us-east-1
+
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::682033478562:role/kosmos-observability-sbx-wl-01-s3-role
+
+  promtail:
+    enabled: true
+    config:
+      logLevel: info
+      serverPort: 3101
+      clients:
+      - url: http://{{ .Release.Name }}.{{ .Release.Namespace }}:3100/loki/api/v1/push
+        backoff_config:
+          min_period: 500ms
+          max_period: 5m
+          max_retries: 10
+        batchwait: 1s
+        batchsize: 1048576 # 1MB
+        timeout: 10s
+
+      snippets:
+        pipelineStages:
+        - cri: {}
+        - labelallow:
+          - "namespace"
+          - "app"
+          - "pod"
+        extraScrapeConfigs: |
+          - job_name: journal
+            journal:
+              path: /var/log/journal
+              max_age: 12h
+              labels:
+                job: systemd-journal
+            relabel_configs:
+              - source_labels: ['__journal__systemd_unit']
+                target_label: 'unit'
+              - source_labels: ['__journal__hostname']
+                target_label: 'hostname'
+              - source_labels: ['__journal__hostname']   # <-- add this
+                target_label: 'host'                     # unify label name
+
+          - job_name: syslog
+            syslog:
+              listen_address: 0.0.0.0:{{ .Values.extraPorts.syslog.containerPort }}
+              label_structured_data: true
+              labels:
+                job: "syslog"
+            relabel_configs:
+              - source_labels: ['__syslog_message_hostname']
+                target_label: 'host'
+              - source_labels: ['__syslog_message_app_name']
+                target_label: 'app'
+    extraVolumes:
+    - name: journal
+      hostPath:
+        path: /var/log/journal
+    - name: audit-logs
+      hostPath:
+        path: /var/log/audit
+    - name: rancher-audit-logs
+      hostPath:
+        path: /var/log/rancher
+    extraVolumeMounts:
+    - name: journal
+      mountPath: /var/log/journal
+      readOnly: true
+
+    - name: audit-logs
+      mountPath: /var/log/audit
+      readOnly: true
+
+    - name: rancher-audit-logs
+      mountPath: /var/log/rancher
+      readOnly: true
+    serviceMonitor:
+      enabled: true
+    extraPorts:
+      syslog:
+        name: tcp-syslog
+        containerPort: 1514
+        protocol: TCP
+        service:
+          type: LoadBalancer
+          port: 1514
+          # loadBalancerIP: 192.168.100.51
+          externalTrafficPolicy: Local
+    # extraVolumeMounts:
+    # - name: containerd-logs
+    #   mountPath: /var/log/pods
+    #   readOnly: true
