@@ -484,15 +484,15 @@ grafana:
         isDefault: true
         jsonData:
           maxLines: 1000
-          derivedFields:
-          - datasourceUid: Tempo
-            matcherRegex: (?:trace_id)=(\w+)
-            name: TraceID
-            # url will be interpreted as query for the datasource
-            # Use $$ (double-dollar sign) when your configuration needs a literal dollar sign.
-            url: '$${__value.raw}'
-            # optional for URL Label to set a custom display label for the link.
-            urlDisplayLabel: 'View Trace'
+          # derivedFields:
+          # - datasourceUid: Tempo
+          #   matcherRegex: (?:trace_id)=(\w+)
+          #   name: TraceID
+          #   # url will be interpreted as query for the datasource
+          #   # Use $$ (double-dollar sign) when your configuration needs a literal dollar sign.
+          #   url: '$${__value.raw}'
+          #   # optional for URL Label to set a custom display label for the link.
+          #   urlDisplayLabel: 'View Trace'
       - name: Alertmanager
         type: alertmanager
         access: proxy
