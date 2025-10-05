@@ -321,24 +321,11 @@ loki-stack:
       snippets:
         pipelineStages:
         - cri: {}
-        common:
-        - action: replace
-          source_labels: [ __meta_kubernetes_pod_node_name ]
-          target_label: node_name
-        - action: replace
-          source_labels: [ __meta_kubernetes_namespace ]
-          target_label: namespace
-        - action: replace
-          source_labels: [ __meta_kubernetes_pod_name ]
-          target_label: pod
-        - action: replace
-          source_labels: [ __meta_kubernetes_pod_container_name ]
-          target_label: container
-        - action: replace
-          replacement: /var/log/pods/*$1/*.log
-          separator: /
-          source_labels: [ __meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name ]
-          target_label: __path__
+        - labelallow:
+          - "namespace"
+          - "app"
+          - "pod"
+          - "host"
         extraScrapeConfigs: |
           - job_name: journal
             journal:
