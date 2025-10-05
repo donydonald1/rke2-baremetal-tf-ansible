@@ -46,12 +46,12 @@ harbor:
       valueFrom:
         secretKeyRef:
           name: oidc-harbor
-          key: client_id
+          key: oidc-client-id
     - name: OIDC_CLIENT_SECRET
       valueFrom:
         secretKeyRef:
           name: oidc-harbor
-          key: client_secret
+          key: oidc-client-secret
     - name: OIDC_ENDPOINT
       valueFrom:
         secretKeyRef:
