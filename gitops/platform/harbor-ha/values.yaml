@@ -62,7 +62,7 @@ harbor:
         {
           "auth_mode": "oidc_auth",
           "oidc_name": "OIDC",
-          "oidc_endpoint": "https://techsecoms.ui.com/gw/idp/api/v1/public/oauth/5c95deda-cf53-4535-8b70-46a3fdac4b35",
+          "oidc_endpoint": "$(OIDC_ENDPOINT)",
           "oidc_groups_claim": "groups",
           "oidc_admin_group": "superUsers",
           "oidc_client_id": "$(OIDC_CLIENT_ID)",

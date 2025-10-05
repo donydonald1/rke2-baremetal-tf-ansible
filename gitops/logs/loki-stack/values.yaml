@@ -1,254 +1,3 @@
-# loki:
-#   deploymentMode: SimpleScalable
-
-#   loki:
-#     auth_enabled: false
-
-#     analytics:
-#       reporting_enabled: false
-#     compactor:
-#       working_directory: /var/loki/compactor/retention
-#       delete_request_store: s3
-#       retention_enabled: true
-
-#     frontend:
-#       max_outstanding_per_tenant: 4096
-
-#     ingester:
-#       chunk_encoding: snappy
-
-#     commonConfig:
-#       replication_factor: 2
-
-#     limits_config:
-#       ingestion_burst_size_mb: 128
-#       ingestion_rate_mb: 64
-#       max_query_parallelism: 100
-#       per_stream_rate_limit: 64M
-#       per_stream_rate_limit_burst: 128M
-#       reject_old_samples: true
-#       reject_old_samples_max_age: 168h
-#       retention_period: 14d
-#       shard_streams:
-#         enabled: true
-#       split_queries_by_interval: 1h
-
-#     query_scheduler:
-#       max_outstanding_requests_per_tenant: 4096
-
-#     rulerConfig:
-#       enable_api: true
-#       enable_alertmanager_v2: true
-#       alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
-#       storage:
-#         type: local
-#         local:
-#           directory: /rules
-#       rule_path: /rules/fake
-
-#     schemaConfig:
-#       configs:
-#       - from: "2024-04-01"
-#         store: tsdb
-#         object_store: s3
-#         schema: v13
-#         index:
-#           prefix: loki_index_
-#           period: 24h
-
-#     server:
-#       log_level: info
-#       grpc_server_max_recv_msg_size: 8388608
-#       grpc_server_max_send_msg_size: 8388608
-
-#     storage:
-#       type: s3
-#       bucketNames:
-#         chunks: loki-chunks
-#         ruler: loki-ruler
-#         admin: loki-admin
-#       s3:
-#         s3ForcePathStyle: true
-#         insecure: true
-#         endpoint: http://minio.minio.svc.cluster.local:9000
-#         secretAccessKey: <path:secret/data/minio#postgres_password>
-#         accessKeyId: <path:secret/data/minio#postgres_user>
-#         region: us-east-1
-
-#   gateway:
-#     replicas: 2
-#     enabled: true
-#     image:
-#       registry: docker.io
-#       repository: nginxinc/nginx-unprivileged
-#       tag: 1.29-alpine
-#     nginxConfig:
-#       resolver: "rke2-coredns-rke2-coredns.kube-system.svc.cluster.local valid=30s ipv6=off"
-#       serverSnippet: |
-#         location ^~ /logging/ {
-#           # Permanent redirect that preserves method (POST) — Promtail may/may not follow;
-#           # prefer fixing Promtail instead of relying on redirects.
-#           return 308 /loki$uri$is_args$args;
-#         }
-#     deploymentStrategy:
-#       type: RollingUpdate
-#       rollingUpdate:
-#         maxUnavailable: 50%
-#         maxSurge: 50%
-#     topologySpreadConstraints:
-#     - maxSkew: 1
-#       topologyKey: kubernetes.io/hostname
-#       whenUnsatisfiable: DoNotSchedule
-#       labelSelector:
-#         matchLabels:
-#           app.kubernetes.io/name: loki
-#           app.kubernetes.io/component: gateway
-#     ingress:
-#       enabled: false
-#       ingressClassName: "nginx"
-#       annotations:
-#         cert-manager.io/cluster-issuer: "letsencrypt-prod"
-#         cert-manager.io/revision-history-limit: "3"
-#         external-dns.alpha.kubernetes.io/enabled: "true"
-#         cert-manager.io/duration: "2160h"
-#         cert-manager.io/renew-before: "720h"
-#       hosts:
-#       - host: "loki.prod.techsecom.io"
-#       tls:
-#       - secretName: loki-gateway-tls
-#         hosts:
-#         - "loki.prod.techsecom.io"
-
-#   write:
-#     replicas: 3
-#     persistence:
-#       size: 10Gi
-#       storageClass: "nfs-csi"
-#     tolerations:
-#     - key: "arm64"
-#       operator: "Exists"
-#   read:
-#     replicas: 2
-
-#   backend:
-#     replicas: 2
-#     persistence:
-#       storageClass: "nfs-csi"
-#     tolerations:
-#     - key: "arm64"
-#       operator: "Exists"
-
-#   ingress:
-#     enabled: true
-#     ingressClassName: "nginx"
-#     annotations:
-#       cert-manager.io/cluster-issuer: "letsencrypt-prod"
-#       cert-manager.io/revision-history-limit: "3"
-#       external-dns.alpha.kubernetes.io/enabled: "true"
-#       cert-manager.io/duration: "2160h"
-#       cert-manager.io/renew-before: "720h"
-#     #    nginx.ingress.kubernetes.io/auth-type: basic
-#     #    nginx.ingress.kubernetes.io/auth-secret: loki-distributed-basic-auth
-#     #    nginx.ingress.kubernetes.io/auth-secret-type: auth-map
-#     #    nginx.ingress.kubernetes.io/configuration-snippet: |
-#     #      proxy_set_header X-Scope-OrgID $remote_user;
-#     labels: {}
-#     #    blackbox.monitoring.exclude: "true"
-#     paths:
-#       distributor:
-#       - /api/prom/push
-#       - /loki/api/v1/push
-#       - /otlp/v1/logs
-#       - /ui
-#       queryFrontend:
-#       - /api/prom/query
-#       - /api/prom/label
-#       - /api/prom/series
-#       - /api/prom/tail
-#       - /loki/api/v1/query
-#       - /loki/api/v1/query_range
-#       - /loki/api/v1/tail
-#       - /loki/api/v1/label
-#       - /loki/api/v1/labels
-#       - /loki/api/v1/series
-#       - /loki/api/v1/index/stats
-#       - /loki/api/v1/index/volume
-#       - /loki/api/v1/index/volume_range
-#       - /loki/api/v1/format_query
-#       - /loki/api/v1/detected_field
-#       - /loki/api/v1/detected_fields
-#       - /loki/api/v1/detected_labels
-#       - /loki/api/v1/patterns
-#       ruler:
-#       - /api/prom/rules
-#       - /api/prom/api/v1/rules
-#       - /api/prom/api/v1/alerts
-#       - /loki/api/v1/rules
-#       - /prometheus/api/v1/rules
-#       - /prometheus/api/v1/alerts
-#       compactor:
-#       - /loki/api/v1/delete
-
-#     hosts:
-#     - loki.prod.techsecom.io
-#     tls:
-#     - secretName: loki-distributed-tls
-#       hosts:
-#       - loki.prod.techsecom.io
-
-#   #    - hosts:
-#   #       - loki.example.com
-#   #      secretName: loki-distributed-tls
-#   # monitoring:
-#   #   dashboards:
-#   #     enabled: true
-#   #     # -- Alternative namespace to create dashboards ConfigMap in
-#   #     namespace: null
-#   #     # -- Additional annotations for the dashboards ConfigMap
-#   #     annotations: {}
-#   #     annotations:
-#   #       grafana_folder: Loki
-#   #   rules:
-#   #     enabled: true
-#   #   serviceMonitor:
-#   #     enabled: true
-#   #     metricsInstance:
-#   #       enabled: true
-#   #   selfMonitoring:
-#   #     enabled: false
-#   #     grafanaAgent:
-#   #       installOperator: false
-
-#   sidecar:
-#     image:
-#       repository: ghcr.io/kiwigrid/k8s-sidecar
-#     rules:
-#       searchNamespace: ALL
-#       folder: /rules/fake
-
-#   lokiCanary:
-#     enabled: false
-
-#   test:
-#     enabled: false
-#   monitoring:
-#     dashboards:
-#       enabled: true
-#       labels:
-#         grafana_dashboard: "1"
-
-#     rules:
-#       enabled: true
-#       alerting: true
-#     serviceMonitor:
-#       enabled: true
-#       labels:
-#         release: kube-prometheus-stack
-#     podMonitor:
-#       enabled: true
-#       labels:
-#         release: kube-prometheus-stack
----
 loki-stack:
   loki:
     auth_enabled: false
@@ -288,13 +37,13 @@ loki-stack:
             prefix: loki_index_
             period: 24h
 
-      rulerConfig:
-        alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
-        ring:
-          kvstore:
-            store: inmemory
-        enable_api: true
-        enable_alertmanager_v2: true
+      # rulerConfig:
+      #   alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+      #   ring:
+      #     kvstore:
+      #       store: inmemory
+      #   enable_api: true
+      #   enable_alertmanager_v2: true
 
       storage_config:
         aws:
@@ -320,6 +69,12 @@ loki-stack:
             secret_access_key: <path:secret/data/minio#postgres_password>
             access_key_id: <path:secret/data/minio#postgres_user>
             region: us-east-1
+        alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+        ring:
+          kvstore:
+            store: inmemory
+        enable_api: true
+        enable_alertmanager_v2: true
 
     serviceAccount:
       create: true
