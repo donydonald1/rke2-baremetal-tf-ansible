@@ -189,7 +189,7 @@ grafana:
           path: /var/lib/grafana/dashboards/thanos
       - name: loki
         orgId: 1
-        folder: loki
+        folder: Loki
         type: file
         disableDeletion: false
         editable: true
@@ -463,6 +463,14 @@ grafana:
       loki-writes:
         url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/loki/dashboards/loki-writes.json
         datasource: loki
+      loki-logs-overview:
+        gnetId: 18494
+        title: Kubernetes Logs from Loki
+        revision: 1
+        datasource: loki
+        description: Overview of Kubernetes logs from Loki
+        interval: 15s
+
   datasources:
     datasources.yaml:
       apiVersion: 1
