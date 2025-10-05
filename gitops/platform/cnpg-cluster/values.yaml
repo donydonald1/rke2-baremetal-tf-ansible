@@ -48,6 +48,7 @@ managedRoles:
   bypassrls: true
   passwordSecret:
     name: grafana-user-secret
+
 - name: wikijs
   ensure: present
   login: true
@@ -55,6 +56,14 @@ managedRoles:
   bypassrls: true
   passwordSecret:
     name: wikijs-user-secret
+
+- name: harbor
+  ensure: present
+  login: true
+  createrole: true
+  bypassrls: true
+  passwordSecret:
+    name: harbor-user-secret
 
 pooler:
   rw:
