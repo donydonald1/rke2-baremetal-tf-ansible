@@ -1,36 +1,37 @@
-image:
-  repository: ghcr.io/dgtlmoon/changedetection.io
-  # tag: "0.50.15"
-env:
-  TZ: "America/Chicago"
-service:
-  main:
-    ports:
-      http:
-        port: 5000
-ingress:
-  main:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-      cert-manager.io/revision-history-limit: "3"
-      external-dns.alpha.kubernetes.io/enabled: "true"
-      cert-manager.io/duration: "2160h"
-      cert-manager.io/renew-before: "720h"
-    hosts:
-    - host: change.prod.techsecom.io
-      paths:
-      - path: /
-        pathType: Prefix
-    tls:
-    - hosts:
-      - change.prod.techsecom.io
-      secretName: change-cert-tls
-persistence:
-  data:
-    enabled: true
-    storageClass: "nfs-csi"
-    accessMode: ReadWriteOnce
-    skipuninstall: true
-    size: 1Gi
+change-detection:
+  image:
+    repository: ghcr.io/dgtlmoon/changedetection.io
+    # tag: "0.50.15"
+  env:
+    TZ: "America/Chicago"
+  service:
+    main:
+      ports:
+        http:
+          port: 5000
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+      hosts:
+      - host: change.prod.techsecom.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - change.prod.techsecom.io
+        secretName: change-cert-tls
+  persistence:
+    data:
+      enabled: true
+      storageClass: "nfs-csi"
+      accessMode: ReadWriteOnce
+      skipuninstall: true
+      size: 1Gi
