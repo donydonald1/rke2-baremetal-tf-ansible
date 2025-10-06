@@ -393,6 +393,9 @@ thanos:
   receive: { enabled: false }
   queryFrontend: { enabled: false }
 ##############################################################
+# ────────────────────────────────────────────────────────────────────────────────
+# Loki 
+# ───────────────────────────────────────────────────────────────────────────────
 loki:
   # subchart alias (from Chart.yaml)
   enabled: true
@@ -452,7 +455,7 @@ loki:
         schema: v13
         index:
           prefix: loki_index_
-          period: 24
+          period: "24"
 
     # storage_config:
     #   aws:
