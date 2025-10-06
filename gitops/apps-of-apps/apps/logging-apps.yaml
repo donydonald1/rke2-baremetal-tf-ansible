@@ -9,40 +9,40 @@ spec:
   - list:
       elements:
 
-      - name: loki-stack
-        namespace: logging
-        serverSideApply: true
-      # - name: promtail
-      #   namespace: logging
-      #   serverSideApply: true
-      # - name: influxdb
-      #   namespace: monitoring
-      #   serverSideApply: true
+        # - name: loki-stack
+        #   namespace: logging
+        #   serverSideApply: true
+        # - name: promtail
+        #   namespace: logging
+        #   serverSideApply: true
+        # - name: influxdb
+        #   namespace: monitoring
+        #   serverSideApply: true
 
-      # - name: botkube
-      #   namespace: monitoring
-      #   serverSideApply: true
+        # - name: botkube
+        #   namespace: monitoring
+        #   serverSideApply: true
 
-      # - name: karma
-      #   namespace: monitoring
-      #   serverSideApply: true
+        # - name: karma
+        #   namespace: monitoring
+        #   serverSideApply: true
 
-      # - name: eck-stack
-      #   namespace: elastic-system
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
-      #   serverSideApply: true
-      # - name: loki
-      #   namespace: monitoring
-      #   serverSideApply: true
-      # helm:
-      #   valueFiles:
-      #   - "values.yaml"
-      # - "manifest-dev.yaml"
-      # - name: eck-stack
-      #   namespace: elastic-system
-      # serverSideApply: true
+        # - name: eck-stack
+        #   namespace: elastic-system
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
+        #   serverSideApply: true
+        # - name: loki
+        #   namespace: monitoring
+        #   serverSideApply: true
+        # helm:
+        #   valueFiles:
+        #   - "values.yaml"
+        # - "manifest-dev.yaml"
+        # - name: eck-stack
+        #   namespace: elastic-system
+        # serverSideApply: true
 
   template:
     metadata:

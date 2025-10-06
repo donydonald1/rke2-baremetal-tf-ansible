@@ -1,0 +1,34 @@
+apiVersion: v2
+name: clover-monitoring
+description: Umbrella chart for Prometheus + Thanos + Grafana (via kube-prometheus-stack)
+type: application
+version: 0.1.1
+appVersion: "1.0.0"
+
+# These deps are informative; since you already have local subcharts in ./charts,
+# Helm will use those. If you later remove ./charts, `helm dependency update` will fetch these.
+dependencies:
+- name: kube-prometheus-stack
+  version: "77.12.0"
+  repository: "https://prometheus-community.github.io/helm-charts"
+
+- name: thanos
+  version: "15.7.1"
+  repository: "https://charts.bitnami.com/bitnami"
+  alias: thanos
+
+- name: loki
+  version: ">=5.0.0" # pin to what you test
+  repository: "https://grafana.github.io/helm-charts"
+  alias: loki
+
+# NEW: Tempo (single-binary chart)
+- name: tempo
+  version: ">=1.0.0" # pin to what you test
+  repository: "https://grafana.github.io/helm-charts"
+  alias: tempo
+
+- name: promtail
+  version: "10.1.0"
+  repository: "https://grafana.github.io/helm-charts"
+  alias: promtail

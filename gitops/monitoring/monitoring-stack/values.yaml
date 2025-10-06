@@ -1,0 +1,854 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# kube-prometheus-stack (Prometheus, Alertmanager, Grafana)
+# ────────────────────────────────────────────────────────────────────────────────
+kube-prometheus-stack:
+  fullnameOverride: "kps"
+
+  grafana:
+    enabled: true
+
+    env:
+      GF_SERVER_ROOT_URL: https://grafana.prod.techsecom.io
+      GF_SECURITY_COOKIE_SAMESITE: grafana
+      TZ: America/Chicago
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_SSL_MODE: disable
+
+    admin:
+      existingSecret: grafana-admin-creds
+      userKey: username
+      passwordKey: password
+
+    assertNoLeakedSecrets: false
+    initChownData:
+      enabled: false
+
+    useStatefulSet: true
+    persistence:
+      enabled: true
+      type: statefulset
+      storageClassName: nfs-csi
+      accessModes: [ "ReadWriteMany" ]
+      size: 5Gi
+
+    service:
+      type: NodePort
+      port: 80
+      nodePort: 32000
+    grafana.ini:
+      server:
+        root_url: https://grafana.prod.techsecom.io
+      analytics:
+        check_for_updates: false
+        check_for_plugin_updates: true
+      auth.anonymous:
+        org_name: "Techsecom Consulting Group"
+      dataproxy:
+        max_idle_connections: 500
+      security:
+        allow_embedding: true
+      feature_toggles:
+        provisioning: true
+        kubernetesDashboards: true
+      auth:
+        auto_login: true
+        disable_signout_menu: false
+      auth.generic_oauth:
+        enabled: true
+        client_id: <path:secret/data/grafana#client_id>
+        client_secret: <path:secret/data/grafana#client_secret>
+        allow_sign_up: true
+        scopes: openid profile email roles
+        auth_url: <path:secret/data/grafana#auth_url>
+        token_url: <path:secret/data/grafana#token_url>
+        api_url: <path:secret/data/grafana#api_url>
+        use_pkce: true
+        use_refresh_token: true
+      users:
+        auto_assign_org: true
+        auto_assign_org_role: Editor
+      paths:
+        data: /var/lib/grafana/data
+        logs: /var/log/grafana
+        plugins: /var/lib/grafana/plugins
+        provisioning: /etc/grafana/provisioning
+      database:
+        type: postgres
+        host: "cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432"
+        name: grafana
+        user: $__file{/etc/secrets/username}
+        password: $__file{/etc/secrets/password}
+        ssl_mode: disable
+      plugins:
+        allow_loading_unsigned_plugins: grafana-pyroscope-app,grafana-exploretraces-app
+
+    extraSecretMounts:
+    - name: grafana-db-secret
+      secretName: grafana-user-secret
+      mountPath: /etc/secrets
+      readOnly: true
+    serviceMonitor:
+      enabled: true
+    serviceAccount:
+      autoMount: true
+    extraEnvFrom:
+    - secretRef:
+        name: grafana-user-secret
+    extraEnv:
+    - name: GF_DATABASE_USER
+      valueFrom:
+        secretKeyRef:
+          name: grafana-user-secret
+          key: username
+    - name: GF_DATABASE_PASSWORD__FILE
+      value: /etc/secrets/password
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+
+      hosts: [ grafana.prod.techsecom.io ]
+      tls:
+      - hosts:
+        - grafana.prod.techsecom.io
+        secretName: grafana-cert-tls
+    # Ensure Grafana loads provisioning files
+    sidecar:
+      datasources:
+        enabled: true
+
+    # Strong, deterministic provisioning with stable UIDs
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+
+        # Cleanly replace any existing entries with same name/uid
+        deleteDatasources:
+        - name: Thanos
+          uid: thanos
+        - name: Loki
+          uid: loki
+        - name: Tempo
+          uid: tempo
+
+        datasources:
+        # --- Thanos (Prometheus) ---
+        - name: Thanos
+          uid: thanos
+          type: prometheus
+          access: proxy
+          url: http://thanos-query.monitoring.svc.cluster.local:10902
+          isDefault: false
+          jsonData:
+            httpMethod: POST
+            # optional: let metrics exemplars link to Tempo traces
+            exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: Tempo
+          editable: false
+
+        # --- Loki (Logs) ---
+        - name: Loki
+          uid: loki
+          type: loki
+          access: proxy
+          url: http://loki.monitoring.svc.cluster.local:3100
+          isDefault: false
+          jsonData:
+            # Link logs → traces (supports either trace_id or traceId fields)
+            derivedFields:
+            - name: trace_id
+              matcherRegex: '"trace_id"\\s*:\\s*"([a-fA-F0-9\\-]+)"'
+              datasourceUid: tempo
+              internalLink: true
+            - name: traceId
+              matcherRegex: '"traceId"\\s*:\\s*"([a-fA-F0-9\\-]+)"'
+              datasourceUid: tempo
+              internalLink: true
+          editable: false
+
+        # --- Tempo (Traces) ---
+        - name: Tempo
+          uid: tempo
+          type: tempo
+          access: proxy
+          url: http://tempo.monitoring.svc.cluster.local:3200
+          isDefault: false
+          jsonData:
+            httpMethod: GET
+            # Traces → Logs (pivot from a span to relevant logs)
+            tracesToLogs:
+              datasourceUid: loki
+              mapTagNamesEnabled: true
+              tags: [ "namespace", "pod", "container", "audit", "app" ]
+              filterByTraceID: true
+              filterBySpanID: true
+            # Service graph uses your metrics source
+            serviceMap:
+              datasourceUid: thanos
+            nodeGraph:
+              enabled: true
+          editable: false
+
+  prometheus:
+    thanosService:
+      enabled: true # exposes gRPC (10901) / HTTP (10902) for the sidecar
+
+    # EXPOSE PROMETHEUS VIA NODEPORT
+    service:
+      type: NodePort
+      port: 9090
+      targetPort: 9090
+      nodePort: 32090
+
+    prometheusSpec:
+      externalLabels:
+        cluster: "ops-dev-dc-bm-rke2"
+      thanos:
+        image: "quay.io/thanos/thanos:v0.39.2"
+        version: "v0.39.2"
+      enableFeatures:
+      - auto-gomemlimit
+      - memory-snapshot-on-shutdown
+      - new-service-discovery-manager
+      # Ensure Prometheus will pick up *all* ServiceMonitors/PodMonitors
+      serviceMonitorSelectorNilUsesHelmValues: true
+      podMonitorSelectorNilUsesHelmValues: true
+      enableRemoteWriteReceiver: true
+      enableAdminAPI: true
+      # walCompression: true
+      # allow operator to pick up ScrapeConfig CRDs from anywhere
+      scrapeConfigSelector: {}
+      scrapeConfigNamespaceSelector: {}
+
+      resources:
+        # requests:
+        #   cpu: 1000m
+        limits:
+          memory: 2500Mi
+
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: nfs-csi
+            resources:
+              requests:
+                storage: 60Gi
+      ingress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: nginx
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          cert-manager.io/revision-history-limit: "3"
+          external-dns.alpha.kubernetes.io/enabled: "true"
+          cert-manager.io/duration: "2160h"
+          cert-manager.io/renew-before: "720h"
+
+        hosts: [ prometheus.prod.techsecom.io ]
+        tls:
+        - hosts:
+          - prometheus.prod.techsecom.io
+          secretName: prom-server-cert-tls
+  alertmanager:
+    enabled: true
+    config:
+      global:
+        resolve_timeout: 5m
+      route:
+        group_by: [ 'alertname', 'job' ]
+        group_wait: 45s
+        group_interval: 10m
+        repeat_interval: 12h
+        receiver: "msteams"
+        routes:
+        - receiver: "null" # quote
+          matchers:
+          - alertname =~ "Watchdog"
+        - receiver: "null" # quote
+          matchers:
+          - alertname =~ "InfoInhibitor"
+        - receiver: "msteams"
+          match:
+            severity: critical
+          continue: true
+        - receiver: "msteams"
+      inhibit_rules:
+      - source_matchers:
+        - severity = "critical"
+        target_matchers:
+        - severity = "warning"
+        equal: [ "alertname", "namespace" ]
+      - target_match_re:
+          alertname: '.+Overcommit'
+        source_match:
+          alertname: 'Watchdog'
+        equal: [ 'prometheus' ]
+      receivers:
+      - name: "null"
+      - name: "msteams"
+        msteams_configs:
+        - send_resolved: true
+          webhook_url: <path:secret/data/msteams#webhook-url>
+          title: |-
+            🚨 [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] 
+            (Cluster: {{ .CommonLabels.cluster }})
+
+            **📢 Alert Notification - Techsecoms Monitoring**
+
+            {{ if eq .Status "firing" }}🔥 **Action Required Immediately!** 🔥{{ else }}✅ **Issue Resolved** ✅{{ end }}
+
+          text: |-
+            **🔔 Alert Details:**
+            {{ range $index, $alert := .Alerts -}}{{ if $index }}---{{ end }}
+            {{ if $alert.Labels.alertname }}
+            **🆘 Alert Name**: {{ $alert.Labels.alertname }}
+            {{ end }}
+
+            **🛑 Labels:**
+            {{ if $alert.Labels.severity }}
+            - **Severity**: {{ $alert.Labels.severity }}
+            {{ end }}
+            {{ if $alert.Labels.instance }}
+            - **Instance**: {{ $alert.Labels.instance }}
+            {{ end }}
+            {{ if $alert.Labels.namespace }}
+            - **Namespace**: {{ $alert.Labels.namespace }}
+            {{ end }}
+            {{ if $alert.Labels.pod }}
+            - **Pod**: {{ $alert.Labels.pod }}
+            {{ end }}
+
+            **📄 Annotations:**
+            {{ if $alert.Annotations.description }}
+            - **Description**: {{ $alert.Annotations.description }}
+            {{ end }}
+            {{ if $alert.Annotations.summary }}
+            - **Summary**: {{ $alert.Annotations.summary }}
+            {{ end }}
+
+            {{ if $alert.GeneratorURL }}
+            🔗 **Source**: [View in AlertManager]({{ $alert.GeneratorURL }})
+            {{ end }}
+
+            **📌 Additional Notes:**
+            - Ensure the affected service is reviewed immediately.
+            - Escalate to the **on-call team** if required.
+            - Check related metrics and logs for further debugging.
+
+            {{ end }}
+    alertmanagerSpec:
+      replicas: 1
+      # podAntiAffinity: hard
+
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: nfs-csi
+            resources:
+              requests:
+                storage: 10Gi
+      tolerations:
+      - key: "arm64"
+        operator: "Exists"
+# ────────────────────────────────────────────────────────────────────────────────
+# Bitnami Thanos (Query only)
+# ────────────────────────────────────────────────────────────────────────────────
+thanos:
+  fullnameOverride: "thanos"
+  image:
+    registry: quay.io
+    repository: thanos/thanos
+    tag: v0.39.2
+    pullPolicy: IfNotPresent
+  query:
+    enabled: true
+    replicaCount: 1
+    service:
+      type: NodePort
+      ports: { http: 9090 }
+      nodePorts: { http: 32190 }
+    serviceGrpc:
+      type: NodePort
+      ports: { grpc: 10901 }
+      nodePorts: { grpc: 32191 }
+    dnsDiscovery:
+      enabled: true
+      sidecarsService: "kps-thanos-discovery"
+      sidecarsNamespace: "monitoring"
+  bucketweb: { enabled: false }
+  compactor: { enabled: false }
+  storegateway: { enabled: false }
+  ruler: { enabled: false }
+  receive: { enabled: false }
+  queryFrontend: { enabled: false }
+##############################################################
+loki:
+  # subchart alias (from Chart.yaml)
+  enabled: true
+  fullnameOverride: loki
+  deploymentMode: SingleBinary
+
+  # one loki pod with a PVC
+  singleBinary:
+    replicas: 1
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClassName: csi-nfs
+      # absolutely disable all scalable roles
+  read: { replicas: 0 }
+  write: { replicas: 0 }
+  backend: { replicas: 0 }
+  gateway: { enabled: false }
+
+  # disable caches & canary to avoid extra pods / resource pressure
+  chunksCache: { enabled: false }
+  resultsCache: { enabled: false }
+  canary: { enabled: false }
+
+  serviceMonitor: { enabled: true }
+
+  loki:
+    # nested config consumed by grafana/loki
+    # keep 'common' minimal and consistent
+    commonConfig:
+      replication_factor: 1
+      path_prefix: /var/loki
+
+    # satisfy chart helpers; not using object store
+    storage:
+      use_thanos_objstore: false
+      type: s3
+      bucketNames:
+        chunks: loki-chunks
+        ruler: loki-ruler
+        admin: loki-admin
+      s3:
+        s3ForcePathStyle: true
+        insecure: true
+        endpoint: http://minio.minio.svc.cluster.local:9000
+        secretAccessKey: <path:secret/data/minio#postgres_password>
+        accessKeyId: <path:secret/data/minio#postgres_user>
+        region: us-east-1
+
+    auth_enabled: false
+
+    schemaConfig:
+      configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24
+
+    # storage_config:
+    #   aws:
+    #     bucketnames: loki-stack
+    #     s3forcepathstyle: true
+    #     insecure: true
+    #     endpoint: http://minio.minio.svc.cluster.local:9000
+    #     secret_access_key: <path:secret/data/minio#postgres_password>
+    #     access_key_id: <path:secret/data/minio#postgres_user>
+    #     region: us-east-1
+    #   boltdb_shipper:
+    #     shared_store: s3
+    #     cache_ttl: 24h
+
+    # IMPORTANT: let the chart’s default Memberlist ring stay in place.
+    # (Do NOT set ring.kvstore: inmemory here; that conflicts with the default memberlist section.)
+
+    # optional retention for dev
+    limits_config:
+      allow_structured_metadata: false
+      retention_period: 168h
+    chunk_store_config:
+      max_look_back_period: 168h
+
+# tableManager is top-level in this chart
+tableManager:
+  retention_deletes_enabled: true
+  retention_period: 168h
+
+# ────────────────────────────────────────────────────────────────────────────────
+# TEMPO (local storage for dev/POC)
+# ────────────────────────────────────────────────────────────────────────────────
+tempo:
+  enabled: true
+  fullnameOverride: tempo
+  serviceMonitor: { enabled: true }
+  tempo:
+    storage:
+      trace:
+        backend: local
+        local: { path: /var/tempo/traces }
+  persistence:
+    enabled: true
+    size: 20Gi
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Promtail (local storage for dev/POC)
+# ───────────────────────────────────────────────────────────────────────────────
+promtail:
+  enabled: true
+  config:
+    logLevel: info
+    serverPort: 3101
+    clients:
+    - url: http://{{ .Release.Name }}.{{ .Release.Namespace }}:3100/loki/api/v1/push
+      backoff_config:
+        min_period: 500ms
+        max_period: 5m
+        max_retries: 10
+      batchwait: 1s
+      batchsize: 1048576 # 1MB
+      timeout: 10s
+
+    snippets:
+      pipelineStages:
+      - cri: {}
+      - docker: {}
+      - cri: {}
+      - match:
+          selector: '{app=~".+"} |~ "(error|Error|ERROR)"'
+          stages:
+          - metrics:
+              error_total:
+                type: Counter
+                description: "Total number of error logs"
+                source: log
+                config:
+                  action: inc
+      # - labelallow:
+      #   - "namespace"
+      #   - "app"
+      #   - "pod"
+      #   - "host"
+      scrapeConfigs: |
+        - job_name: kubernetes-pods
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            # Add node name
+            - action: replace
+              source_labels: [__meta_kubernetes_pod_node_name]
+              target_label: node_name
+            
+            # Add namespace
+            - action: replace
+              source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            
+            # Add pod name
+            - action: replace
+              source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+            
+            # Add container name
+            - action: replace
+              source_labels: [__meta_kubernetes_pod_container_name]
+              target_label: container
+            
+            # Add app label if exists
+            - action: replace
+              source_labels: [__meta_kubernetes_pod_label_app]
+              target_label: app
+              
+            # Add service label if exists
+            - action: replace
+              source_labels: [__meta_kubernetes_pod_label_service]
+              target_label: service
+            
+            # Set the correct log path - FIXED
+            - action: replace
+              replacement: /var/log/pods/*$1/*.log
+              separator: /
+              source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
+              target_label: __path__
+          
+          pipeline_stages:
+            # Handle different log formats
+            - match:
+                selector: '{stream="stdout"}'
+                stages:
+                  # Try to parse as JSON first (for structured logs)
+                  - json:
+                      expressions:
+                        log: log
+                        message: message
+                        level: level
+                        timestamp: timestamp
+                        time: time
+                      drop_malformed: true
+                  
+                  # If JSON parsing fails, treat as plain text
+                  - output:
+                      source: log
+            
+            # Handle stderr separately
+            - match:
+                selector: '{stream="stderr"}'
+                stages:
+                  - output:
+                      source: message
+            
+            # Extract log level from unstructured logs
+            - regex:
+                expression: '(?i)(?P<extracted_level>debug|info|warn|warning|error|fatal|trace)'
+                source: message
+            
+            # Add extracted level as label
+            - labels:
+                extracted_level:
+            
+            # Parse timestamps if available
+            - match:
+                selector: '{extracted_level=~".+"}'
+                stages:
+                  - timestamp:
+                      source: timestamp
+                      format: RFC3339Nano
+                      fallback_formats:
+                        - "2006-01-02 15:04:05"
+                        - "2006-01-02T15:04:05Z"
+                        - "2006-01-02T15:04:05.999999999Z07:00"
+      extraScrapeConfigs: |
+        - job_name: journal
+          journal:
+            path: /var/log/journal
+            max_age: 12h
+            labels:
+              job: systemd-journal
+          relabel_configs:
+            - source_labels: ['__journal__systemd_unit']
+              target_label: 'unit'
+            - source_labels: ['__journal__hostname']
+              target_label: 'hostname'
+            - source_labels: ['__journal__hostname']   # <-- add this
+              target_label: 'host'                     # unify label name
+        - job_name: custom-config
+          pipeline_stages:
+          - docker: {}
+          - json:
+              expressions:
+                timestamp: timestamp
+                level: level
+                thread: thread
+                class: logger
+                message: message
+                context: context
+          - labels:
+              level:
+              class:
+              context:
+              thread:
+          - timestamp:
+              format: RFC3339
+              source: timestamp
+          - output:
+              source: message
+          kubernetes_sd_configs:
+          - role: pod
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_pod_controller_name
+            regex: ([0-9a-z-.]+?)(-[0-9a-f]{8,10})?
+            action: replace
+            target_label: __tmp_controller_name
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            - __meta_kubernetes_pod_label_app
+            - __tmp_controller_name
+            - __meta_kubernetes_pod_name
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: app
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_instance
+            - __meta_kubernetes_pod_label_release
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: instance
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_component
+            - __meta_kubernetes_pod_label_component
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: component
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_node_name
+            target_label: node_name
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_namespace
+            target_label: namespace
+          - action: replace
+            replacement: $1
+            separator: /
+            source_labels:
+            - namespace
+            - app
+            target_label: job
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_name
+            target_label: pod
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_container_name
+            target_label: container
+          - action: replace
+            replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+            - __meta_kubernetes_pod_uid
+            - __meta_kubernetes_pod_container_name
+            target_label: __path__
+          - action: replace
+            regex: true/(.*)
+            replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+            - __meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash
+            - __meta_kubernetes_pod_annotation_kubernetes_io_config_hash
+            - __meta_kubernetes_pod_container_name
+            target_label: __path__
+        - job_name: syslog
+          syslog:
+            listen_address: 0.0.0.0:{{ .Values.extraPorts.syslog.containerPort }}
+            label_structured_data: true
+            labels:
+              job: "syslog"
+          relabel_configs:
+            - source_labels: ['__syslog_message_hostname']
+              target_label: 'host'
+            - source_labels: ['__syslog_message_app_name']
+              target_label: 'app'
+
+        - job_name: glueops-nginx-with-host
+          pipeline_stages:
+          - cri: {}
+          - json:
+              expressions:
+                http_host: http_host
+          - labels:
+              http_host: http_host
+          kubernetes_sd_configs:
+          - role: pod
+          relabel_configs:
+          - source_labels:
+            - __meta_kubernetes_pod_controller_name
+            regex: ([0-9a-z-.]+?)(-[0-9a-f]{8,10})?
+            action: replace
+            target_label: __tmp_controller_name
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            - __meta_kubernetes_pod_label_app
+            - __tmp_controller_name
+            - __meta_kubernetes_pod_name
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: app
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_instance
+            - __meta_kubernetes_pod_label_release
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: instance
+          - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_component
+            - __meta_kubernetes_pod_label_component
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: component
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_node_name
+            target_label: node_name
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_namespace
+            target_label: namespace
+          - action: replace
+            replacement: $1
+            separator: /
+            source_labels:
+            - namespace
+            - app
+            target_label: job
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_name
+            target_label: pod
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_container_name
+            target_label: container
+          - action: replace
+            replacement: /var/log/pods/*nginx-controller*/*/*.log
+            separator: /
+            source_labels:
+            - __meta_kubernetes_pod_uid
+            - __meta_kubernetes_pod_container_name
+            target_label: __path__
+          - action: replace
+            regex: true/(.*)
+            replacement: /var/log/pods/*nginx-controller*/*/*.log
+            separator: /
+            source_labels:
+            - __meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash
+            - __meta_kubernetes_pod_annotation_kubernetes_io_config_hash
+            - __meta_kubernetes_pod_container_name
+            target_label: __path__
+          - action: replace
+            target_label: glueops_job_name
+            replacement: nginx-with-host
+          - action: keep
+            source_labels:
+            - __meta_kubernetes_pod_name
+            regex: ".*nginx-controller.*"
+  extraVolumes:
+  - name: journal
+    hostPath:
+      path: /var/log/journal
+  - name: audit-logs
+    hostPath:
+      path: /var/log/audit
+  - name: rancher-audit-logs
+    hostPath:
+      path: /var/log/rancher
+  extraVolumeMounts:
+  - name: journal
+    mountPath: /var/log/journal
+    readOnly: true
+
+  - name: audit-logs
+    mountPath: /var/log/audit
+    readOnly: true
+
+  - name: rancher-audit-logs
+    mountPath: /var/log/rancher
+    readOnly: true
+  serviceMonitor:
+    enabled: true
+  extraPorts:
+    syslog:
+      name: tcp-syslog
+      containerPort: 1514
+      protocol: TCP
+      service:
+        type: ClusterIP
+        port: 1514
