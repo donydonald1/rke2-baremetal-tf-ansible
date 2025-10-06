@@ -8,6 +8,10 @@ version: 1.5.0
 appVersion: 0.16.1
 home: https://github.com/gianlucam76/k8s-cleaner
 icon: https://raw.githubusercontent.com/gianlucam76/k8s-cleaner/main/assets/logo.png
+dependencies:
+- name: kube-prometheus-stack
+  version: 0.16.0
+  repository: oci://ghcr.io/gianlucam76/charts/k8s-cleaner
 keywords:
 - kubernetes
 - operator
