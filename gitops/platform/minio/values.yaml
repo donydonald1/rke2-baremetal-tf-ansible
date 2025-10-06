@@ -162,6 +162,15 @@ minio:
     versioning: true
     objectlocking: false
 
+  - name: loki-stack
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+
   - name: loki-chunks
     # Policy to be set on the
     # bucket [none|download|upload|public]
