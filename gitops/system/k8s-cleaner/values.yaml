@@ -1,0 +1,33 @@
+fullnameOverride: "k8s-cleaner"
+crds:
+  install: true
+  keep: true
+
+rbac:
+  create: true
+
+controller:
+  image:
+    registry: docker.io
+    repository: projectsveltos/k8s-cleaner
+    # tag: "v0.16.0"
+
+    # args: {}
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 100Mi
+    limits:
+      memory: 100Mi
+replicaCount: 1
+
+# ServiceMonitor
+serviceMonitor:
+  # -- Enable ServiceMonitor
+  enabled: true
+
+  jobLabel: "app.kubernetes.io/name"
+
+# -- Extra Kubernetes objects to deploy with the helm chart
+extraObjects: []

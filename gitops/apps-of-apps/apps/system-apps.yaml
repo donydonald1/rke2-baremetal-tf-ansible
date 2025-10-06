@@ -11,6 +11,13 @@ spec:
       - name: pod-cleaner
         namespace: pod-cleaner
         serverSideApply: true
+
+      - name: k8s-cleaner
+        namespace: k8s-cleaner
+        helm:
+          values:
+          - values.yaml
+
       - name: eck-operator
         namespace: elastic-system
         serverSideApply: true
