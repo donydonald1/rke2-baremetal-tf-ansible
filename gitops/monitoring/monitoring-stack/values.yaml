@@ -455,7 +455,7 @@ loki:
         schema: v13
         index:
           prefix: loki_index_
-          period: "24"
+          period: 24h
 
     # storage_config:
     #   aws:
