@@ -474,6 +474,7 @@ applicationSet:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { memory: 1Gi }
   argocdUrl: https://${var.argocd_hostname}  
+  
 EOT
 
 
