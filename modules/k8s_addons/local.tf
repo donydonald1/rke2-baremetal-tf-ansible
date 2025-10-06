@@ -45,5 +45,17 @@ persistence:
       - path: /etc/cloudflared/credentials.json
         subPath: credentials.json
   EOT
-
+  ns                 = trimspace(var.metallb_namespace)
+  range_str          = trimspace(var.metallb_lb_range)
+  range_safe = lower(
+    replace(
+      replace(
+        replace(
+          replace(local.range_str, ".", "-"),
+        "/", "-"),
+      " ", "-"),
+    ",", "-")
+  )
+  pool_name = length(trimspace(var.metallb_pool_name)) > 0 ? trimspace(var.metallb_pool_name) : "pool-${local.range_safe}"
+  addresses = [local.range_str]
 }

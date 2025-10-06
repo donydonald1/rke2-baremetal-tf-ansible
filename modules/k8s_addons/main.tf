@@ -190,35 +190,44 @@ YAML
   depends_on = []
 }
 
-resource "kubectl_manifest" "metallb_ip_pool" {
-  count = var.enable_metallb ? 1 : 0
+resource "kubernetes_manifest" "metallb_ipaddresspool" {
+  manifest = {
+    apiVersion = "metallb.io/v1beta1"
+    kind       = "IPAddressPool"
+    metadata = {
+      name      = local.pool_name
+      namespace = local.ns
+    }
+    spec = {
+      addresses = local.addresses
+    }
+  }
 
-  yaml_body = <<YAML
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: ${var.metallb_pool_name}
-  namespace: ${var.metallb_namespace}
-spec:
-  addresses:
-    - ${var.metallb_lb_range}
-YAML
+  lifecycle {
+    precondition {
+      condition     = length(local.pool_name) > 0
+      error_message = "metadata.name resolved to empty; set var.metallb_pool_name."
+    }
+    precondition {
+      condition     = length(local.range_str) > 0
+      error_message = "spec.addresses requires at least one range; set var.metallb_lb_range."
+    }
+  }
 }
 
-resource "kubectl_manifest" "metallb_l2_advertisement" {
-  count = var.enable_metallb ? 1 : 0
-
-  yaml_body  = <<YAML
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: ${var.metallb_pool_name}-l2
-  namespace: ${var.metallb_namespace}
-spec:
-  ipAddressPools:
-  - ${var.metallb_pool_name}
-YAML
-  depends_on = [kubectl_manifest.metallb_ip_pool]
+resource "kubernetes_manifest" "metallb_l2advertisement" {
+  manifest = {
+    apiVersion = "metallb.io/v1beta1"
+    kind       = "L2Advertisement"
+    metadata = {
+      name      = "${local.pool_name}-l2"
+      namespace = local.ns
+    }
+    spec = {
+      ipAddressPools = [local.pool_name]
+    }
+  }
+  depends_on = [kubernetes_manifest.metallb_ipaddresspool]
 }
 
 resource "kubectl_manifest" "app_projects" {
