@@ -321,7 +321,7 @@ variable "argocd_admin_password" {
   default     = ""
 }
 
-variable "argocd_iodc_issuer_url" {
+variable "argocd_oidc_issuer_url" {
   type        = string
   default     = ""
   description = "The OIDC issuer URL for the ArgoCD OIDC configuration."

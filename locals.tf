@@ -222,6 +222,7 @@ name: vault-operator
 crds:
   install: true
   keep: true
+
 global:
   domain: ${var.argocd_hostname}
   env:
@@ -229,33 +230,44 @@ global:
       value: America/Chicago
     - name: ARGOCD_EXEC_TIMEOUT
       value: 300s
+
 configs:
   cm:
     create: true
-    # application.resourceTrackingMethod: annotation+label
     admin.enabled: true
     exec.enabled: true
     url: https://${var.argocd_hostname}
+    kustomize.buildOptions: "--enable-helm"
+    timeout.reconciliation.jitter: 60s
+    timeout.reconciliation: 300s
+    statusbadge.enabled: true
+
+    # Keep server-side diff (prevents client-side last-applied use)
+    # (You already set this in params; leaving it there too.)
+    # application.resourceTrackingMethod: annotation+label  # (optional)
+
     resource.compareoptions: |
-      # if ignoreAggregatedRoles set to true then differences caused by aggregated roles in RBAC resources are ignored.
       ignoreAggregatedRoles: true
 
+    # ✨ CRDs: ignore the huge client-side apply blob so Argo CD doesn't try to write or diff it
     resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |+
-      # Ignore the huge client-side apply blob so Argo CD doesn't try to write it
       jqPathExpressions:
       - '.metadata.annotations."kubectl.kubernetes.io/last-applied-configuration"'
 
+    # ✨ Cluster-wide: also ignore that annotation on *all* resources (helps ConfigMaps like node-exporter-full)
     resource.customizations.ignoreDifferences.all: |+
       jqPathExpressions:
+      - '.metadata.annotations."kubectl.kubernetes.io/last-applied-configuration"'
       - '.metadata.labels."helm.sh/chart"'
 
+    # Keep your existing specific ignores
     resource.customizations.ignoreDifferences.external-secrets.io_ExternalSecret: |+
       jqPathExpressions:
       - '.spec.data[].remoteRef.conversionStrategy'
       - '.spec.data[].remoteRef.decodingStrategy'
       - '.spec.data[].remoteRef.metadataPolicy'
 
-    # Single merged block (typo fixed: caBundle)
+    # Single merged block (typo fixed: caBundle); no duplicate keys
     resource.customizations: |
       admissionregistration.k8s.io/MutatingWebhookConfiguration:
         ignoreDifferences: |
@@ -282,13 +294,6 @@ configs:
             - .spec.data[].remoteRef.decodingStrategy
             - .spec.data[].remoteRef.metadataPolicy
 
-    kustomize.buildOptions: "--enable-helm"
-    timeout.reconciliation.jitter: 60s
-    timeout.reconciliation: 300s
-    statusbadge.enabled: true
-
-    # resource.ignoreResourceUpdatesEnabled: "true"
-
     resource.customizations.health.argoproj.io_Application: |
       hs = {}
       hs.status = "Progressing"
@@ -305,7 +310,7 @@ configs:
 
     oidc.config: |
       name: OIDC
-      issuer: ${var.argocd_iodc_issuer_url}
+      issuer: ${var.argocd_oidc_issuer_url}     # 🔧 fixed var name
       clientID: ${var.argocd_oidc_client_id}
       clientSecret: ${var.argocd_oidc_client_secret}
       enableUserInfoGroups: true
@@ -328,16 +333,16 @@ configs:
       githubAppID: "${var.argocd_github_app_id}"
       githubAppInstallationID: "${var.argocd_github_app_installation_id}"
       githubAppPrivateKey: |
-      ${indent(8, var.argocd_github_app_private_key)}
+${indent(8, var.argocd_github_app_private_key)}
+
   params:
     controller.diff.server.side: true
     server.insecure: true
-    otlp.address: ''
-    ## Controller Properties
     controller.status.processors: 20
     controller.operation.processors: 10
     controller.self.heal.timeout.seconds: 5
     controller.repo.server.timeout.seconds: 60
+
   rbac:
     policy.default: role:admin
     policy.csv: |
@@ -345,6 +350,7 @@ configs:
       g, argocd:read_all, role:readonly
       g, oidc-admins, role:admin
       g, oidc-readers, role:readonly
+
   secret:
     argocdServerAdminPassword: ${var.argocd_admin_password}
 
@@ -363,6 +369,7 @@ dex:
 
 redis-ha:
   enabled: true
+
 redis:
   resources:
     requests:
@@ -387,175 +394,84 @@ server:
   ingress:
     enabled: true
     annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-        external-dns.alpha.kubernetes.io/enabled: "true"
-        # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-        # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        # cert-manager.io/renew-before: "720h"
-        # cert-manager.io/duration: "2160h"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      external-dns.alpha.kubernetes.io/enabled: "true"
     ingressClassName: nginx
     hostname: ${var.argocd_hostname}
     tls: true
     https: true
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: monitoring
 
-  server:
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        memory: 1Gi
-    autoscaling:
-      enabled: false
-      minReplicas: 1
-      maxReplicas: 5
-      targetCPUUtilizationPercentage: 50
-      targetMemoryUtilizationPercentage: 50
-    ingress:
-      enabled: true
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-        external-dns.alpha.kubernetes.io/enabled: "true"
-        # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-        # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        # cert-manager.io/renew-before: "720h"
-        # cert-manager.io/duration: "2160h"
-      ingressClassName: nginx
-      hostname: ${var.argocd_hostname}
-      tls: true
-      https: true
-    metrics: &metrics
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        additionalLabels:
-          release: monitoring
 repoServer:
   replicas: 2
-  rbac:
-  - verbs:
-    - get
-    - list
-    - watch
-    apiGroups:
-    - ''
-    resources:
-    - secrets
-    - configmaps
   automountServiceAccountToken: true
   volumes:
-  - name: avp-cmp-plugin
-    configMap:
-      name: avp-cmp-plugin
-  - name: custom-tools
-    emptyDir: {}
-
+    - name: avp-cmp-plugin
+      configMap:
+        name: avp-cmp-plugin
+    - name: custom-tools
+      emptyDir: {}
   initContainers:
-  - name: download-tools
-    image: registry.access.redhat.com/ubi8
-    command: [ sh, -c ]
-    env:
-    - name: AVP_VERSION
-      value: "1.18.1"
-    args:
-    - >-
-      curl -L https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v$(AVP_VERSION)/argocd-vault-plugin_$(AVP_VERSION)_linux_amd64 -o argocd-vault-plugin && chmod +x argocd-vault-plugin && mv argocd-vault-plugin /custom-tools/
-    volumeMounts:
-    - mountPath: /custom-tools
-      name: custom-tools
-
+    - name: download-tools
+      # 🔧 Use a tiny image that *has* curl; ubi8 may not.
+      image: cgr.dev/chainguard/curl:latest
+      command: [ "sh", "-c" ]
+      env:
+        - name: AVP_VERSION
+          value: "1.18.1"
+      args:
+        - >-
+          curl -L https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v$(AVP_VERSION)/argocd-vault-plugin_$(AVP_VERSION)_linux_amd64 -o /custom-tools/argocd-vault-plugin &&
+          chmod +x /custom-tools/argocd-vault-plugin
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
   extraContainers:
-  # argocd-vault-plugin with plain YAML
-  - name: avp-k8s
-    command:
-    - "/var/run/argocd/argocd-cmp-server"
-    image: quay.io/argoproj/argocd
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 999
-    volumeMounts:
-    - mountPath: /var/run/argocd
-      name: var-files
-    - mountPath: /home/argocd/cmp-server/plugins
-      name: plugins
-    - mountPath: /tmp
-      name: tmp
-
-    - mountPath: /home/argocd/cmp-server/config/plugin.yaml
-      subPath: avp-k8s.yaml
-      name: avp-cmp-plugin
-
-    - name: custom-tools
-      subPath: argocd-vault-plugin
-      mountPath: /usr/local/bin/argocd-vault-plugin
-    envFrom:
-    - secretRef:
-        name: avp-plugin-credentials
-
-  # argocd-vault-plugin with plain Kustomize
-  - name: avp-kustomize
-    command: [ /var/run/argocd/argocd-cmp-server ]
-    image: quay.io/argoproj/argocd
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 999
-    volumeMounts:
-    - mountPath: /var/run/argocd
-      name: var-files
-    - mountPath: /home/argocd/cmp-server/plugins
-      name: plugins
-    - mountPath: /tmp
-      name: tmp
-
-    - mountPath: /home/argocd/cmp-server/config/plugin.yaml
-      subPath: avp-kustomize.yaml
-      name: avp-cmp-plugin
-
-    - name: custom-tools
-      subPath: argocd-vault-plugin
-      mountPath: /usr/local/bin/argocd-vault-plugin
-    envFrom:
-    - secretRef:
-        name: avp-plugin-credentials
-    # argocd-vault-plugin with Helm
-  - name: avp-helm
-    command: [ /var/run/argocd/argocd-cmp-server ]
-    image: quay.io/argoproj/argocd
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 999
-    volumeMounts:
-    - mountPath: /var/run/argocd
-      name: var-files
-    - mountPath: /home/argocd/cmp-server/plugins
-      name: plugins
-    - mountPath: /tmp
-      name: tmp
-
-    # Register plugins into sidecar
-    - mountPath: /home/argocd/cmp-server/config/plugin.yaml
-      subPath: avp-helm.yaml
-      name: avp-cmp-plugin
-
-    - name: custom-tools
-      subPath: argocd-vault-plugin
-      mountPath: /usr/local/bin/argocd-vault-plugin
-    envFrom:
-    - secretRef:
-        name: avp-plugin-credentials
+    - name: avp-k8s
+      command: [ "/var/run/argocd/argocd-cmp-server" ]
+      image: quay.io/argoproj/argocd
+      securityContext: { runAsNonRoot: true, runAsUser: 999 }
+      volumeMounts:
+        - { mountPath: /var/run/argocd, name: var-files }
+        - { mountPath: /home/argocd/cmp-server/plugins, name: plugins }
+        - { mountPath: /tmp, name: tmp }
+        - { mountPath: /home/argocd/cmp-server/config/plugin.yaml, subPath: avp-k8s.yaml, name: avp-cmp-plugin }
+        - { name: custom-tools, subPath: argocd-vault-plugin, mountPath: /usr/local/bin/argocd-vault-plugin }
+      envFrom: [ { secretRef: { name: avp-plugin-credentials } } ]
+    - name: avp-kustomize
+      command: [ "/var/run/argocd/argocd-cmp-server" ]
+      image: quay.io/argoproj/argocd
+      securityContext: { runAsNonRoot: true, runAsUser: 999 }
+      volumeMounts:
+        - { mountPath: /var/run/argocd, name: var-files }
+        - { mountPath: /home/argocd/cmp-server/plugins, name: plugins }
+        - { mountPath: /tmp, name: tmp }
+        - { mountPath: /home/argocd/cmp-server/config/plugin.yaml, subPath: avp-kustomize.yaml, name: avp-cmp-plugin }
+        - { name: custom-tools, subPath: argocd-vault-plugin, mountPath: /usr/local/bin/argocd-vault-plugin }
+      envFrom: [ { secretRef: { name: avp-plugin-credentials } } ]
+    - name: avp-helm
+      command: [ "/var/run/argocd/argocd-cmp-server" ]
+      image: quay.io/argoproj/argocd
+      securityContext: { runAsNonRoot: true, runAsUser: 999 }
+      volumeMounts:
+        - { mountPath: /var/run/argocd, name: var-files }
+        - { mountPath: /home/argocd/cmp-server/plugins, name: plugins }
+        - { mountPath: /tmp, name: tmp }
+        - { mountPath: /home/argocd/cmp-server/config/plugin.yaml, subPath: avp-helm.yaml, name: avp-cmp-plugin }
+        - { name: custom-tools, subPath: argocd-vault-plugin, mountPath: /usr/local/bin/argocd-vault-plugin }
+      envFrom: [ { secretRef: { name: avp-plugin-credentials } } ]
 
 applicationSet:
   resources:
-    requests:
-      cpu: 50m
-      memory: 64Mi
-    limits:
-      memory: 1Gi
-  argocdUrl: ${var.argocd_hostname}
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { memory: 1Gi }
+  argocdUrl: https://${var.argocd_hostname}  
 EOT
 
 

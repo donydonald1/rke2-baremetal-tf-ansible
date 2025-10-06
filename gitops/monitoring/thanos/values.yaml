@@ -113,7 +113,7 @@ thanos:
     type: s3
     config:
       bucket: thanos
-      endpoint: "minio.minio.svc:9000"
+      endpoint: "http://minio.minio.svc.cluster.local:9000"
       access_key: <path:secret/data/minio#postgres_user>
       secret_key: <path:secret/data/minio#postgres_password>
       insecure: true
