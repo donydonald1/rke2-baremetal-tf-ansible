@@ -26,9 +26,9 @@ spec:
           valueFiles:
           - "values.yaml"
 
-      - name: prometheus-rules
-        namespace: monitoring
-        serverSideApply: true
+      # - name: prometheus-rules
+      #   namespace: monitoring
+      #   serverSideApply: true
 
       - name: thanos
         namespace: monitoring
