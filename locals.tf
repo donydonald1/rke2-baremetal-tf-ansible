@@ -417,6 +417,7 @@ repoServer:
         name: avp-cmp-plugin
     - name: custom-tools
       emptyDir: {}
+
   initContainers:
     - name: download-tools
       # 🔧 Use a tiny image that *has* curl; ubi8 may not.
@@ -432,6 +433,7 @@ repoServer:
       volumeMounts:
         - mountPath: /custom-tools
           name: custom-tools
+          
   extraContainers:
     - name: avp-k8s
       command: [ "/var/run/argocd/argocd-cmp-server" ]
