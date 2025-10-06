@@ -11,7 +11,7 @@ icon: https://raw.githubusercontent.com/gianlucam76/k8s-cleaner/main/assets/logo
 dependencies:
 - name: k8s-cleaner
   version: 0.16.0
-  repository: oci://ghcr.io/gianlucam76/charts/
+  repository: oci://ghcr.io/gianlucam76/charts
 keywords:
 - kubernetes
 - operator
