@@ -421,7 +421,7 @@ repoServer:
   initContainers:
     - name: download-tools
       # 🔧 Use a tiny image that *has* curl; ubi8 may not.
-      image: image: curlimages/curl:latest
+      image: curlimages/curl:latest
       command: [ "sh", "-c" ]
       env:
         - name: AVP_VERSION
