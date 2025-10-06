@@ -40,9 +40,9 @@ kube-prometheus-stack:
     grafana.ini:
       server:
         root_url: https://grafana.prod.techsecom.io
-      analytics:
-        check_for_updates: false
-        check_for_plugin_updates: true
+        # analytics:
+        # check_for_updates: false
+        # check_for_plugin_updates: true
       auth.anonymous:
         org_name: "Techsecom Consulting Group"
       dataproxy:
@@ -69,11 +69,11 @@ kube-prometheus-stack:
       users:
         auto_assign_org: true
         auto_assign_org_role: Editor
-      paths:
-        data: /var/lib/grafana/data
-        logs: /var/log/grafana
-        plugins: /var/lib/grafana/plugins
-        provisioning: /etc/grafana/provisioning
+      # paths:
+      #   data: /var/lib/grafana/data
+      #   logs: /var/log/grafana
+      #   plugins: /var/lib/grafana/plugins
+      #   provisioning: /etc/grafana/provisioning
       database:
         type: postgres
         host: "cnpg-cluster-rw.cnpg-system.svc.cluster.local:5432"
@@ -510,7 +510,7 @@ promtail:
     logLevel: info
     serverPort: 3101
     clients:
-    - url: http://{{ .Release.Name }}.{{ .Release.Namespace }}:3100/loki/api/v1/push
+    - url: http://loki.{{ .Release.Namespace }}:3100/loki/api/v1/push
       backoff_config:
         min_period: 500ms
         max_period: 5m
