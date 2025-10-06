@@ -302,6 +302,21 @@ grafana:
           type: datasource
           value: Prometheus
 
+      kubernetes-cluster:
+        gnetId: 7249
+        revision: 1
+        datasource: Prometheus
+
+      kubernetes-nodes:
+        gnetId: 11074
+        revision: 9
+        datasource: Prometheus
+
+      kubernetes-pods:
+        gnetId: 6417
+        revision: 1
+        datasource: Prometheus
+
       volsync:
         gnetId: 21356
         revision: 3
