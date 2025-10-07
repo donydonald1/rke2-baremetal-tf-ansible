@@ -62,7 +62,7 @@ recovery:
   # Mode 2: "production" - Use recovery bootstrap (prevents fresh cluster creation)
   # Mode 3: "recovery" - Recover from specific timeline
   #
-  mode: "fresh" # Options: fresh, production, recovery
+  mode: "recovery" # Options: fresh, production, recovery
   # https://cloudnative-pg.io/documentation/current/recovery/#recovery-targets
   target: {}
   # Timeline configuration
