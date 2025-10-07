@@ -6,11 +6,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
   instanceSidecarConfiguration:
-    env:
-      - name: AWS_REQUEST_CHECKSUM_CALCULATION
-        value: when_required
-      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
-        value: when_required
+  env:
+    - name: AWS_REQUEST_CHECKSUM_CALCULATION
+      value: when_required
+    - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+      value: when_required
   retentionPolicy: 15d
   configuration:
     endpointURL: {{ .Values.objectStore.endpoint }}
