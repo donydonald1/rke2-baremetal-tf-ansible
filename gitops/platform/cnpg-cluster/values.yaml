@@ -43,7 +43,7 @@ storageClass: longhorn
 storageSize: 150Gi
 
 objectStore:
-  endpoint: "http://minio.minio.svc.cluster.local:9000"
+  endpoint: http://minio.minio.svc.cluster.local:9000
   bucketName: postgres
   s3CredentialsSecretName: aws-credentials
   s3AccessKeyIdSecretKey: accessKeyId
