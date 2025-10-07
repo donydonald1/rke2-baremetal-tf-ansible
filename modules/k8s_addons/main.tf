@@ -190,8 +190,8 @@ YAML
   depends_on = []
 }
 
-resource "kubernetes_manifest" "metallb_ipaddresspool" {
-  manifest = {
+resource "kubectl_manifest" "metallb_ipaddresspool" {
+  yaml_body = yamlencode({
     apiVersion = "metallb.io/v1beta1"
     kind       = "IPAddressPool"
     metadata = {
@@ -201,7 +201,10 @@ resource "kubernetes_manifest" "metallb_ipaddresspool" {
     spec = {
       addresses = local.addresses
     }
-  }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  wait              = true
 
   lifecycle {
     precondition {
@@ -215,8 +218,8 @@ resource "kubernetes_manifest" "metallb_ipaddresspool" {
   }
 }
 
-resource "kubernetes_manifest" "metallb_l2advertisement" {
-  manifest = {
+resource "kubectl_manifest" "metallb_l2advertisement" {
+  yaml_body = yamlencode({
     apiVersion = "metallb.io/v1beta1"
     kind       = "L2Advertisement"
     metadata = {
@@ -226,8 +229,13 @@ resource "kubernetes_manifest" "metallb_l2advertisement" {
     spec = {
       ipAddressPools = [local.pool_name]
     }
-  }
-  depends_on = [kubernetes_manifest.metallb_ipaddresspool]
+  })
+
+  server_side_apply = true
+  force_conflicts   = true
+  wait              = true
+
+  depends_on = [kubectl_manifest.metallb_ipaddresspool]
 }
 
 resource "kubectl_manifest" "app_projects" {
