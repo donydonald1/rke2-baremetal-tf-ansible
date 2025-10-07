@@ -18,10 +18,16 @@ spec:
   # https://cloudnative-pg.io/documentation/current/resource_management/
   resources: {{ .Values.resources | toYaml | nindent 4 }}
   env:
-  - name: AWS_REQUEST_CHECKSUM_CALCULATION
-    value: when_required
-  - name: AWS_RESPONSE_CHECKSUM_VALIDATION
-    value: when_required
+    - name: AWS_REQUEST_CHECKSUM_CALCULATION
+      value: when_required
+    - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+      value: when_required
+    - name: AWS_REGION
+      value: auto            
+    - name: AWS_EC2_METADATA_DISABLED
+      value: "true"
+    - name: AWS_S3_FORCE_PATH_STYLE
+      value: "true"  
   postgresql:
     parameters:
       shared_buffers: {{ include "cnpg-cluster.sharedBuffersMB" . }}MB
