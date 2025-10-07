@@ -8,30 +8,30 @@ spec:
   generators:
   - list:
       elements:
-      - name: kube-cleanup-operator
-        serverSideApply: true
-        namespace: kube-cleanup
-      # - name: cert-manager
-      #   namespace: cert-manager
-      #   serverSideApply: true
-      # - name: ingress-nginx
-      #   namespace: ingress-nginx
-      #   serverSideApply: true
-      # - name: argocd
-      #   namespace: argocd
-      #   serverSideApply: true
+        # - name: kube-cleanup-operator
+        #   serverSideApply: true
+        #   namespace: kube-cleanup
+        # - name: cert-manager
+        #   namespace: cert-manager
+        #   serverSideApply: true
+        # - name: ingress-nginx
+        #   namespace: ingress-nginx
+        #   serverSideApply: true
+        # - name: argocd
+        #   namespace: argocd
+        #   serverSideApply: true
 
-      # - name: cloudnative-pg-cluster
-      #   namespace: cnpg-pg-cluster
-      #   serverSideApply: true
-      # # - name: ghost
-      # - name: go-healthcheck
-      # - name: prometheus-operator
-      #   namespace: monitoring
-      #   serverSideApply: true
-      # - name: eck-stack
-      #   namespace: elastic-system
-      #   serverSideApply: true
+        # - name: cloudnative-pg-cluster
+        #   namespace: cnpg-pg-cluster
+        #   serverSideApply: true
+        # # - name: ghost
+        # - name: go-healthcheck
+        # - name: prometheus-operator
+        #   namespace: monitoring
+        #   serverSideApply: true
+        # - name: eck-stack
+        #   namespace: elastic-system
+        #   serverSideApply: true
 
   template:
     metadata:

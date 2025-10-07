@@ -33,9 +33,9 @@ spec:
       #   namespace: awx-operator
       #   serverSideApply: true
 
-      - name: change-detection
-        namespace: change-detection
-        # #- name: awx-operator
+      # - name: change-detection
+      #   namespace: change-detection
+      #   # #- name: awx-operator
 
       - name: kured
         namespace: kured
