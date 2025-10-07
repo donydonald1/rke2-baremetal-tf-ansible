@@ -74,6 +74,18 @@ recovery:
     # Format: ISO 8601 timestamp (e.g., "2025-09-23T14:59:00+08:00")
     writer: "2025-10-03T14:59:00+08:00"
 
+monitoring:
+  enabled: true
+  podMonitor:
+    enabled: true
+    # relabelings: []
+
+    # metricRelabelings: []
+  prometheusRule:
+    enabled: true
+    # excludeRules: []
+
+
 managedRoles:
 - name: grafana
   ensure: present
