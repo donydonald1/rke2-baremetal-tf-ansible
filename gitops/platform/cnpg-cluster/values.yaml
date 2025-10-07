@@ -69,7 +69,7 @@ recovery:
   timeline:
     # Source reader timeline (set to writer timeline after successful recovery)
     # This makes future recoveries easier by avoiding timeline searches
-    reader: ""
+    reader: "2025-10-03T14:59:00+08:00"
     # Current writer timeline (update this for disaster recovery)
     # Format: ISO 8601 timestamp (e.g., "2025-09-23T14:59:00+08:00")
     writer: "2025-10-03T14:59:00+08:00"
