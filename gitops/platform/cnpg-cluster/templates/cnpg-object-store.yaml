@@ -5,13 +5,19 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
+  retentionPolicy: 15d
   instanceSidecarConfiguration:
     env:
       - name: AWS_REQUEST_CHECKSUM_CALCULATION
         value: when_required
       - name: AWS_RESPONSE_CHECKSUM_VALIDATION
         value: when_required
-  retentionPolicy: 15d
+    # optional extras:
+    # retentionPolicyIntervalSeconds: 1800
+    # resources:
+    #   requests:
+    #     memory: "64Mi"
+    #     cpu: "250m"
   configuration:
     endpointURL: {{ .Values.objectStore.endpoint }}
     destinationPath: "s3://{{ .Values.objectStore.bucketName }}/{{ .Release.Name }}/{{ include "cnpg-cluster.fullname" . }}-backups"
@@ -23,10 +29,9 @@ spec:
         name: {{ .Values.objectStore.s3CredentialsSecretName }}
         key: {{ .Values.objectStore.s3SecretAccessKeySecretKey }}
     data:
-      compression: gzip
-      immediateCheckpoint: true  
-      jobs: 2 
+      compression: bzip2
+      immediateCheckpoint: true
+      jobs: 2
     wal:
-      compression: gzip
+      compression: bzip2
       maxParallel: 8
-
