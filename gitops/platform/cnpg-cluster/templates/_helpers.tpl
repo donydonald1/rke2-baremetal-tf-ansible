@@ -212,3 +212,6 @@ Schedule for automatic backups
 {{- $minute := mod $offset 60 -}}
 {{- printf "0 %02d %d * * *" $minute $hour -}}
 {{- end }}
+{{- define "cnpg-cluster.namespace" -}}
+{{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

@@ -1,10 +1,17 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
+  namespace: {{ .Release.Namespace }}   
   name: {{ include "cnpg-cluster.fullname" . }}
+  {{- with .Values.annotations }}
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+  {{- include "cnpg-cluster.labels" . | nindent 4 }}
+  {{- with .Values.additionalLabels }}
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   # https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql
   imageName: {{ .Values.imageName }}
@@ -29,27 +36,27 @@ spec:
   #   - name: AWS_S3_FORCE_PATH_STYLE
   #     value: "true"  
   monitoring:
-    enablePodMonitor: {{ and .Values.cluster.monitoring.enabled .Values.cluster.monitoring.podMonitor.enabled }}
-    disableDefaultQueries: {{ .Values.cluster.monitoring.disableDefaultQueries }}
-    {{- if not (empty .Values.cluster.monitoring.customQueries) }}
+    enablePodMonitor: {{ and .Values.monitoring.enabled .Values.monitoring.podMonitor.enabled }}
+    disableDefaultQueries: {{ .Values.monitoring.disableDefaultQueries }}
+    {{- if not (empty .Values.monitoring.customQueries) }}
     customQueriesConfigMap:
-      - name: {{ include "cluster.fullname" . }}-monitoring
+      - name: {{ include "cnpg-cluster.fullname" . }}-monitoring
         key: custom-queries
     {{- end }}
-    {{- if not (empty .Values.cluster.monitoring.customQueriesSecret) }}
-    {{- with .Values.cluster.monitoring.customQueriesSecret }}
+    {{- if not (empty .Values.monitoring.customQueriesSecret) }}
+    {{- with .Values.monitoring.customQueriesSecret }}
     customQueriesSecret:
       {{- toYaml . | nindent 6 }}
     {{ end }}
     {{- end }}
-    {{- if not (empty .Values.cluster.monitoring.podMonitor.relabelings) }}
-    {{- with .Values.cluster.monitoring.podMonitor.relabelings }}
+    {{- if not (empty .Values.monitoring.podMonitor.relabelings) }}
+    {{- with .Values.monitoring.podMonitor.relabelings }}
     podMonitorRelabelings:
       {{- toYaml . | nindent 6 }}
     {{ end }}
     {{- end }}
-    {{- if not (empty .Values.cluster.monitoring.podMonitor.metricRelabelings) }}
-    {{- with .Values.cluster.monitoring.podMonitor.metricRelabelings }}
+    {{- if not (empty .Values.monitoring.podMonitor.metricRelabelings) }}
+    {{- with .Values.monitoring.podMonitor.metricRelabelings }}
     podMonitorMetricRelabelings:
       {{- toYaml . | nindent 6 }}
     {{ end }}

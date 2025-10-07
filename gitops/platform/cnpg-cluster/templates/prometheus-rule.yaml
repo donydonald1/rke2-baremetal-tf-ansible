@@ -1,30 +1,44 @@
-{{- if and .Values.cluster.monitoring.enabled .Values.cluster.monitoring.prometheusRule.enabled -}}
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheusRule.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   labels:
-    {{- include "cluster.labels" . | nindent 4 }}
-    {{- with .Values.cluster.additionalLabels }}
-      {{ toYaml . | nindent 4 }}
+    {{- include "cnpg-cluster.labels" . | nindent 4 }}
+    {{- with .Values.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
-  name: {{ include "cluster.fullname" . }}-alert-rules
-  namespace: {{ include "cluster.namespace" . }}
+  name: {{ include "cnpg-cluster.fullname" . }}-alert-rules
+  namespace: {{ include "cnpg-cluster.namespace" . }}
 spec:
   groups:
-    - name: cloudnative-pg/{{ include "cluster.fullname" . }}
+    - name: cloudnative-pg/{{ include "cnpg-cluster.fullname" . }}
       rules:
-        {{- $dict := dict "excludeRules" .Values.cluster.monitoring.prometheusRule.excludeRules -}}
-        {{- $_ := set $dict "value"       "{{ $value }}" -}}
-        {{- $_ := set $dict "namespace"   .Release.Namespace -}}
-        {{- $_ := set $dict "cluster"     (include "cluster.fullname" .) -}}
-        {{- $_ := set $dict "labels"      (dict "job" "{{ $labels.job }}" "node" "{{ $labels.node }}" "pod" "{{ $labels.pod }}") -}}
-        {{- $_ := set $dict "podSelector" (printf "%s-([1-9][0-9]*)$" (include "cluster.fullname" .)) -}}
-        {{- $_ := set $dict "Values"      .Values -}}
-        {{- $_ := set $dict "Template"    .Template -}}
-        {{- range $path, $_ := .Files.Glob  "prometheus_rules/**.yaml" }}
-        {{- $tpl := tpl ($.Files.Get $path) $dict | nindent 10 | trim -}}
-        {{- with $tpl }}
-        - {{ $tpl }}
-        {{- end -}}
-        {{- end -}}
-{{ end }}
+
+        {{- $instances := (default 1 .Values.instances) | int -}}
+
+        {{- $ctx := dict
+            "Values"       .Values
+            "Release"      .Release
+            "Chart"        .Chart
+            "Files"        .Files
+            "Capabilities" .Capabilities
+            "Template"     .Template
+
+            "namespace"    (include "cnpg-cluster.namespace" .)
+            "cluster"      (include "cnpg-cluster.fullname" .)  
+            "instances"    $instances
+            "podSelector"  (printf "%s-([1-9][0-9]*)$" (include "cnpg-cluster.fullname" .))
+            "excludeRules" (default (list) .Values.monitoring.prometheusRule.excludeRules)
+
+            "labels" (dict
+              "job"  "{{`{{ $labels.job }}`}}"
+              "node" "{{`{{ $labels.node }}`}}"
+              "pod"  "{{`{{ $labels.pod }}`}}")
+            "prom"  (dict "value" "{{`{{ $value }}`}}")
+          -}}
+        {{- range $path, $_ := .Files.Glob "prometheus_rules/**.yaml" }}
+        {{- with tpl ($.Files.Get $path) $ctx | nindent 10 | trim }}
+        - {{ . }}
+        {{- end }}
+        {{- end }}
+{{- end }}

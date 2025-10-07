@@ -22,7 +22,9 @@ poolerResources:
   limits:
     memory: 256Mi
     cpu: 180m
-
+annotations:
+  argocd.argoproj.io/sync-wave: "-1"
+  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 # Connection allocation strategy
 # Total max_connections will be calculated from memory, then distributed:
 connections:
