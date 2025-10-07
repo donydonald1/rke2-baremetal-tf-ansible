@@ -120,7 +120,7 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: {{ include "cnpg-cluster.fullname" . }}-object-store
-        serverName: {{ .Values.recovery.timeline.writer | default (include "cnpg-cluster.now" .) | quote }}
+        serverName: {{ include "cnpg-cluster.fullname" . }}
   {{- end }}
 
   managed:
