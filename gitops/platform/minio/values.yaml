@@ -249,6 +249,11 @@ minio:
     versioning: true
     objectlocking: false
 
+  - name: tempo-traces
+    policy: none
+    purge: false
+    versioning: true
+    objectlocking: false
   environment:
     MINIO_IDENTITY_OPENID_ROLE_POLICY: consoleAdmin
     # MINIO_IDENTITY_OPENID_SCOPES: 'openid,profile,email,groups'
