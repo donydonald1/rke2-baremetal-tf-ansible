@@ -163,7 +163,7 @@ kube-prometheus-stack:
           uid: loki
           type: loki
           access: proxy
-          url: http://monitoring-stack-loki-gateway.monitoring.svc.cluster.local:3100
+          url: http://monitoring-stack-loki-gateway.monitoring.svc.cluster.local
           isDefault: false
           secureJsonData:
             httpHeaderValue1: "application/json"
@@ -820,7 +820,7 @@ promtail:
     logLevel: info
     serverPort: 3101
     clients:
-    - url: http://monitoring-stack-loki-gateway.{{ .Release.Namespace }}:3100/loki/api/v1/push
+    - url: http://monitoring-stack-loki-gateway.{{ .Release.Namespace }}.svc.cluster.local/loki/api/v1/push
       backoff_config:
         min_period: 500ms
         max_period: 5m
