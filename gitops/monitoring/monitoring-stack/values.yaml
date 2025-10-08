@@ -148,7 +148,7 @@ kube-prometheus-stack:
           uid: thanos
           type: prometheus
           access: proxy
-          url: http://thanos-query.monitoring.svc.cluster.local:10902
+          url: http://monitoring-stack-thanos-query.monitoring.svc.cluster.local:10902
           isDefault: false
           jsonData:
             httpMethod: POST
@@ -163,7 +163,7 @@ kube-prometheus-stack:
           uid: loki
           type: loki
           access: proxy
-          url: http://loki-gateway.monitoring.svc.cluster.local:3100
+          url: http://monitoring-stack-loki-gateway.monitoring.svc.cluster.local:3100
           isDefault: false
           secureJsonData:
             httpHeaderValue1: "application/json"
@@ -544,7 +544,7 @@ loki:
     rulerConfig:
       enable_api: true
       enable_alertmanager_v2: true
-      alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+      alertmanager_url: http://kps-alertmanager.monitoring.svc.cluster.local:9093
       storage:
         type: local
         local:
@@ -820,7 +820,7 @@ promtail:
     logLevel: info
     serverPort: 3101
     clients:
-    - url: http://loki-gateway.{{ .Release.Namespace }}:3100/loki/api/v1/push
+    - url: http://monitoring-stack-loki-gateway.{{ .Release.Namespace }}:3100/loki/api/v1/push
       backoff_config:
         min_period: 500ms
         max_period: 5m
@@ -1236,7 +1236,7 @@ alloy:
 
         loki.write "endpoint" {
           endpoint {
-              url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+              url = "http://monitoring-stack-loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
 
               // Enhanced batching for better performance
               batch_size = "1MB"
