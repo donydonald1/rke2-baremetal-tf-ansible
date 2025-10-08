@@ -766,19 +766,34 @@ tempo:
   enabled: true
   fullnameOverride: tempo
   serviceMonitor: { enabled: true }
-  replicas: 1
+  # replicas: 1
   stream_over_http_enabled: true
 
-  server:
-    http_listen_port: 3200
+  gateway:
+    enabled: true
+  minio:
+    enabled: true
+  storage:
+    trace:
+      backend: s3
+      s3:
+        access_key: <path:secret/data/minio#postgres_user>
+        secret_key: <path:secret/data/minio#postgres_password>
+        bucket: "tempo-traces"
+        endpoint: "http://minio.minio.svc.cluster.local:9000"
+        insecure: true
+  traces:
+    otlp:
+      http:
+        enabled: true
+      grpc:
+        enabled: true
   distributor:
-    receivers:
-      otlp:
-        protocols:
-          http:
-            endpoint: "0.0.0.0:4318"
-          grpc:
-            endpoint: "0.0.0.0:4317"
+    config:
+      log_received_spans:
+        enabled: true
+      log_discarded_spans:
+        enabled: true
 
   tempo:
     metricsGenerator:
@@ -790,22 +805,6 @@ tempo:
         metrics_generator:
           processors: [ service-graphs, span-metrics, local-blocks ]
 
-  # minio:
-  #   enabled: true
-
-  # traces:
-  #   otlp:
-  #     grpc:
-  #       enabled: true # Enable Tempo to ingest Open Telemetry GRPC traces
-  #     http:
-  #       enabled: true # Enable Tempo to ingest Open Telemetry HTTP traces
-  #   zipkin:
-  #     enabled: false
-  #   jaeger:
-  #     thriftHttp:
-  #       enabled: false
-  #   opencensus:
-  #     enabled: false
   persistence:
     enabled: true
     size: 20Gi
