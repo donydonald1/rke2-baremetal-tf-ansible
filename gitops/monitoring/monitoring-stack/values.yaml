@@ -790,22 +790,22 @@ tempo:
         metrics_generator:
           processors: [ service-graphs, span-metrics, local-blocks ]
 
-  minio:
-    enabled: true
+  # minio:
+  #   enabled: true
 
-  traces:
-    otlp:
-      grpc:
-        enabled: true # Enable Tempo to ingest Open Telemetry GRPC traces
-      http:
-        enabled: true # Enable Tempo to ingest Open Telemetry HTTP traces
-    zipkin:
-      enabled: false
-    jaeger:
-      thriftHttp:
-        enabled: false
-    opencensus:
-      enabled: false
+  # traces:
+  #   otlp:
+  #     grpc:
+  #       enabled: true # Enable Tempo to ingest Open Telemetry GRPC traces
+  #     http:
+  #       enabled: true # Enable Tempo to ingest Open Telemetry HTTP traces
+  #   zipkin:
+  #     enabled: false
+  #   jaeger:
+  #     thriftHttp:
+  #       enabled: false
+  #   opencensus:
+  #     enabled: false
   persistence:
     enabled: true
     size: 20Gi
