@@ -20,6 +20,8 @@ kube-prometheus-stack:
       existingSecret: grafana-admin-creds
       userKey: username
       passwordKey: password
+    plugins:
+    - grafana-exploretraces-app
 
     assertNoLeakedSecrets: false
     initChownData:
@@ -161,9 +163,12 @@ kube-prometheus-stack:
           uid: loki
           type: loki
           access: proxy
-          url: http://loki.monitoring.svc.cluster.local:3100
+          url: http://loki-gateway.monitoring.svc.cluster.local:3100
           isDefault: false
+          secureJsonData:
+            httpHeaderValue1: "application/json"
           jsonData:
+            httpHeaderName1: "X-scope-OrgID"
             # Link logs → traces (supports either trace_id or traceId fields)
             derivedFields:
             - name: trace_id
@@ -185,6 +190,12 @@ kube-prometheus-stack:
           isDefault: false
           jsonData:
             httpMethod: GET
+            tracesToLogsV2:
+              datasourceUid: loki
+            search:
+              hide: false
+            lokiSearch:
+              datasourceUid: loki
             # Traces → Logs (pivot from a span to relevant logs)
             tracesToLogs:
               datasourceUid: loki
@@ -209,7 +220,9 @@ kube-prometheus-stack:
       port: 9090
       targetPort: 9090
       nodePort: 32090
-
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
     prometheusSpec:
       externalLabels:
         cluster: "ops-dev-dc-bm-rke2"
@@ -220,11 +233,14 @@ kube-prometheus-stack:
       - auto-gomemlimit
       - memory-snapshot-on-shutdown
       - new-service-discovery-manager
+      - exemplar-storage
+      - native-histograms
       # Ensure Prometheus will pick up *all* ServiceMonitors/PodMonitors
       serviceMonitorSelectorNilUsesHelmValues: true
       podMonitorSelectorNilUsesHelmValues: true
       enableRemoteWriteReceiver: true
       enableAdminAPI: true
+      replicas: 2
       # walCompression: true
       # allow operator to pick up ScrapeConfig CRDs from anywhere
       scrapeConfigSelector: {}
@@ -365,73 +381,192 @@ kube-prometheus-stack:
 # Bitnami Thanos (Query only)
 # ────────────────────────────────────────────────────────────────────────────────
 thanos:
-  fullnameOverride: "thanos"
   image:
-    registry: quay.io
-    repository: thanos/thanos
-    tag: v0.39.2
-    pullPolicy: IfNotPresent
+    registry: docker.io
+    repository: bitnamilegacy/thanos
+    # tag: 0.39.2-debian-12-r2
+    digest: ""
   query:
     enabled: true
-    replicaCount: 1
-    service:
-      type: NodePort
-      ports: { http: 9090 }
-      nodePorts: { http: 32190 }
-    serviceGrpc:
-      type: NodePort
-      ports: { grpc: 10901 }
-      nodePorts: { grpc: 32191 }
+    replicaCount: 2
+    replicaLabels:
+    - replica
     dnsDiscovery:
+      sidecarsService: kps-thanos-discovery
+      sidecarsNamespace: monitoring
+    ingress:
       enabled: true
-      sidecarsService: "kps-thanos-discovery"
-      sidecarsNamespace: "monitoring"
-  bucketweb: { enabled: false }
-  compactor: { enabled: false }
-  storegateway: { enabled: false }
-  ruler: { enabled: false }
-  receive: { enabled: false }
-  queryFrontend: { enabled: false }
+      hostname: thanos.prod.techsecom.io
+      annotations:
+        gethomepage.dev/enabled: 'true'
+        gethomepage.dev/group: Monitoring
+        gethomepage.dev/icon: prometheus
+        gethomepage.dev/name: Thanos
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        # nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://auth.rsr.net/oauth2/start"
+      tls: true
+  queryFrontend:
+    enabled: true
+  bucketweb:
+    enabled: true
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        # nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://auth.rsr.net/oauth2/start"
+      hostname: thanos-bucketweb.prod.techsecom.io
+      tls: true
+  compactor:
+    enabled: true
+    # extraFlags: [ "--compact.concurrency", "4" ]
+    retentionResolutionRaw: 7d
+    retentionResolution5m: 14d
+    retentionResolution1h: 30d
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        # nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://auth.rsr.net/oauth2/start"
+      hostname: thanos-compactor.prod.techsecom.io
+      tls: true
+    persistence:
+      enabled: true
+      storageClass: nfs-csi
+      size: 20Gi
+  storegateway:
+    enabled: true
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        # nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:80/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://auth.rsr.net/oauth2/start"
+      hostname: thanos-storegateway.prod.techsecom.io
+      tls: true
+    persistence:
+      enabled: true
+      storageClass: nfs-csi
+      size: 7Gi
+  ruler:
+    enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  # receive:
+  #   ## @param receive.enabled Enable/disable Thanos Receive component
+  #   ##
+  #   enabled: true
+  #   ## @param receive.mode Mode to run receiver in. Valid options are "standalone" or "dual-mode"
+  #   ## ref: https://github.com/thanos-io/thanos/blob/release-0.22/docs/proposals-accepted/202012-receive-split.md
+  #   ## Enables running the Thanos Receiver in dual mode. Setting this to "dual-mode" will create a deployment for
+  #   ## the stateless thanos distributor.
+  #   mode: standalone
+  #   ## @param receive.logLevel Thanos Receive log level
+  #   ##
+  #   logLevel: info
+  #   resources:
+  #     limits:
+  #       memory: 1000Mi
+  objstoreConfig: |
+    type: s3
+    config:
+      bucket: thanos
+      endpoint: "minio.minio.svc.cluster.local:9000"
+      access_key: <path:secret/data/minio#postgres_user>
+      secret_key: <path:secret/data/minio#postgres_password>
+      insecure: true
 ##############################################################
 # ────────────────────────────────────────────────────────────────────────────────
 # Loki 
 # ───────────────────────────────────────────────────────────────────────────────
 loki:
-  # subchart alias (from Chart.yaml)
-  enabled: true
-  fullnameOverride: loki
-  deploymentMode: SingleBinary
-
-  # one loki pod with a PVC
-  singleBinary:
-    replicas: 1
-    persistence:
-      enabled: true
-      size: 20Gi
-      storageClassName: csi-nfs
-      # absolutely disable all scalable roles
-  read: { replicas: 0 }
-  write: { replicas: 0 }
-  backend: { replicas: 0 }
-  gateway: { enabled: false }
-
-  # disable caches & canary to avoid extra pods / resource pressure
-  chunksCache: { enabled: false }
-  resultsCache: { enabled: false }
-  canary: { enabled: false }
-
-  serviceMonitor: { enabled: true }
+  deploymentMode: SimpleScalable
 
   loki:
-    # nested config consumed by grafana/loki
-    # keep 'common' minimal and consistent
-    commonConfig:
-      replication_factor: 1
-      path_prefix: /var/loki
+    auth_enabled: false
 
-    # satisfy chart helpers; not using object store
+    analytics:
+      reporting_enabled: false
+    compactor:
+      working_directory: /var/loki/compactor/retention
+      delete_request_store: s3
+      retention_enabled: true
+
+    frontend:
+      max_outstanding_per_tenant: 4096
+
+    ingester:
+      chunk_encoding: snappy
+
+    commonConfig:
+      replication_factor: 2
+
+    limits_config:
+      ingestion_burst_size_mb: 128
+      ingestion_rate_mb: 64
+      max_query_parallelism: 100
+      per_stream_rate_limit: 64M
+      per_stream_rate_limit_burst: 128M
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      retention_period: 14d
+      shard_streams:
+        enabled: true
+      split_queries_by_interval: 1h
+
+    query_scheduler:
+      max_outstanding_requests_per_tenant: 4096
+
+    rulerConfig:
+      enable_api: true
+      enable_alertmanager_v2: true
+      alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+      storage:
+        type: local
+        local:
+          directory: /rules
+      rule_path: /rules/fake
+
+    schemaConfig:
+      configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+    server:
+      log_level: info
+      grpc_server_max_recv_msg_size: 8388608
+      grpc_server_max_send_msg_size: 8388608
+
     storage:
-      use_thanos_objstore: false
       type: s3
       bucketNames:
         chunks: loki-chunks
@@ -445,42 +580,181 @@ loki:
         accessKeyId: <path:secret/data/minio#postgres_user>
         region: us-east-1
 
-    auth_enabled: false
+  gateway:
+    replicas: 2
+    enabled: true
+    image:
+      registry: docker.io
+      repository: nginxinc/nginx-unprivileged
+      tag: 1.29-alpine
+    nginxConfig:
+      resolver: "rke2-coredns-rke2-coredns.kube-system.svc.cluster.local valid=30s ipv6=off"
+      serverSnippet: |
+        location ^~ /logging/ {
+          # Permanent redirect that preserves method (POST) — Promtail may/may not follow;
+          # prefer fixing Promtail instead of relying on redirects.
+          return 308 /loki$uri$is_args$args;
+        }
+    deploymentStrategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 50%
+        maxSurge: 50%
+    topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: loki
+          app.kubernetes.io/component: gateway
+    ingress:
+      enabled: false
+      ingressClassName: "nginx"
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        cert-manager.io/revision-history-limit: "3"
+        external-dns.alpha.kubernetes.io/enabled: "true"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+      hosts:
+      - host: "loki.prod.techsecom.io"
+      tls:
+      - secretName: loki-gateway-tls
+        hosts:
+        - "loki.prod.techsecom.io"
 
-    schemaConfig:
-      configs:
-      - from: "2024-04-01"
-        store: tsdb
-        object_store: s3
-        schema: v13
-        index:
-          prefix: loki_index_
-          period: 24h
+  write:
+    replicas: 3
+    persistence:
+      size: 10Gi
+      storageClass: "nfs-csi"
+    tolerations:
+    - key: "arm64"
+      operator: "Exists"
+  read:
+    replicas: 2
 
-    # storage_config:
-    #   aws:
-    #     bucketnames: loki-stack
-    #     s3forcepathstyle: true
-    #     insecure: true
-    #     endpoint: http://minio.minio.svc.cluster.local:9000
-    #     secret_access_key: <path:secret/data/minio#postgres_password>
-    #     access_key_id: <path:secret/data/minio#postgres_user>
-    #     region: us-east-1
-    #   boltdb_shipper:
-    #     shared_store: s3
-    #     cache_ttl: 24h
+  backend:
+    replicas: 2
+    persistence:
+      storageClass: "nfs-csi"
+    tolerations:
+    - key: "arm64"
+      operator: "Exists"
 
-    # IMPORTANT: let the chart’s default Memberlist ring stay in place.
-    # (Do NOT set ring.kvstore: inmemory here; that conflicts with the default memberlist section.)
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      cert-manager.io/revision-history-limit: "3"
+      external-dns.alpha.kubernetes.io/enabled: "true"
+      cert-manager.io/duration: "2160h"
+      cert-manager.io/renew-before: "720h"
+    #    nginx.ingress.kubernetes.io/auth-type: basic
+    #    nginx.ingress.kubernetes.io/auth-secret: loki-distributed-basic-auth
+    #    nginx.ingress.kubernetes.io/auth-secret-type: auth-map
+    #    nginx.ingress.kubernetes.io/configuration-snippet: |
+    #      proxy_set_header X-Scope-OrgID $remote_user;
+    labels: {}
+    #    blackbox.monitoring.exclude: "true"
+    paths:
+      distributor:
+      - /api/prom/push
+      - /loki/api/v1/push
+      - /otlp/v1/logs
+      - /ui
+      queryFrontend:
+      - /api/prom/query
+      - /api/prom/label
+      - /api/prom/series
+      - /api/prom/tail
+      - /loki/api/v1/query
+      - /loki/api/v1/query_range
+      - /loki/api/v1/tail
+      - /loki/api/v1/label
+      - /loki/api/v1/labels
+      - /loki/api/v1/series
+      - /loki/api/v1/index/stats
+      - /loki/api/v1/index/volume
+      - /loki/api/v1/index/volume_range
+      - /loki/api/v1/format_query
+      - /loki/api/v1/detected_field
+      - /loki/api/v1/detected_fields
+      - /loki/api/v1/detected_labels
+      - /loki/api/v1/patterns
+      ruler:
+      - /api/prom/rules
+      - /api/prom/api/v1/rules
+      - /api/prom/api/v1/alerts
+      - /loki/api/v1/rules
+      - /prometheus/api/v1/rules
+      - /prometheus/api/v1/alerts
+      compactor:
+      - /loki/api/v1/delete
 
-    # optional retention for dev
-    limits_config:
-      allow_structured_metadata: false
-      retention_period: 168h
-    chunk_store_config:
-      max_look_back_period: 168h
+    hosts:
+    - loki.prod.techsecom.io
+    tls:
+    - secretName: loki-distributed-tls
+      hosts:
+      - loki.prod.techsecom.io
 
-# tableManager is top-level in this chart
+  #    - hosts:
+  #       - loki.example.com
+  #      secretName: loki-distributed-tls
+  # monitoring:
+  #   dashboards:
+  #     enabled: true
+  #     # -- Alternative namespace to create dashboards ConfigMap in
+  #     namespace: null
+  #     # -- Additional annotations for the dashboards ConfigMap
+  #     annotations: {}
+  #     annotations:
+  #       grafana_folder: Loki
+  #   rules:
+  #     enabled: true
+  #   serviceMonitor:
+  #     enabled: true
+  #     metricsInstance:
+  #       enabled: true
+  #   selfMonitoring:
+  #     enabled: false
+  #     grafanaAgent:
+  #       installOperator: false
+
+  sidecar:
+    image:
+      repository: ghcr.io/kiwigrid/k8s-sidecar
+    rules:
+      searchNamespace: ALL
+      folder: /rules/fake
+
+  lokiCanary:
+    enabled: false
+
+  test:
+    enabled: false
+  monitoring:
+    dashboards:
+      enabled: true
+      labels:
+        grafana_dashboard: "1"
+
+    rules:
+      enabled: true
+      alerting: true
+    serviceMonitor:
+      enabled: true
+      # labels:
+      #   release: kube-prometheus-stack
+    podMonitor:
+      enabled: true
+      # labels:
+      #   release: kube-prometheus-stack
+
+      # tableManager is top-level in this chart
 tableManager:
   retention_deletes_enabled: true
   retention_period: 168h
@@ -492,14 +766,50 @@ tempo:
   enabled: true
   fullnameOverride: tempo
   serviceMonitor: { enabled: true }
+  replicas: 1
+  stream_over_http_enabled: true
+
+  server:
+    http_listen_port: 3200
+  distributor:
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: "0.0.0.0:4318"
+          grpc:
+            endpoint: "0.0.0.0:4317"
+
   tempo:
-    storage:
-      trace:
-        backend: local
-        local: { path: /var/tempo/traces }
+    metricsGenerator:
+      enabled: true
+      remoteWriteUrl: "http://kps-prometheus.monitoring.svc.cluster.local/api/v1/write"
+
+    overrides:
+      defaults:
+        metrics_generator:
+          processors: [ service-graphs, span-metrics, local-blocks ]
+
+  minio:
+    enabled: true
+
+  traces:
+    otlp:
+      grpc:
+        enabled: true # Enable Tempo to ingest Open Telemetry GRPC traces
+      http:
+        enabled: true # Enable Tempo to ingest Open Telemetry HTTP traces
+    zipkin:
+      enabled: false
+    jaeger:
+      thriftHttp:
+        enabled: false
+    opencensus:
+      enabled: false
   persistence:
     enabled: true
     size: 20Gi
+    storageClassName: csi-nfs
 
 # ────────────────────────────────────────────────────────────────────────────────
 # Promtail (local storage for dev/POC)
@@ -510,7 +820,7 @@ promtail:
     logLevel: info
     serverPort: 3101
     clients:
-    - url: http://loki.{{ .Release.Namespace }}:3100/loki/api/v1/push
+    - url: http://loki-gateway.{{ .Release.Namespace }}:3100/loki/api/v1/push
       backoff_config:
         min_period: 500ms
         max_period: 5m
@@ -855,3 +1165,82 @@ promtail:
       service:
         type: ClusterIP
         port: 1514
+# ────────────────────────────────────────────────────────────────────────────────
+# Alloy(local storage for dev/POC)
+# ───────────────────────────────────────────────────────────────────────────────
+alloy:
+  alloy:
+    mounts:
+      varlog: true
+
+    # Service annotations for Prometheus scraping
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "12345"
+        prometheus.io/path: "/metrics"
+
+    # Additional ports for OTLP
+    extraPorts:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+
+    configMap:
+      content: |
+        // OTLP receiver configuration
+        otelcol.receiver.otlp "default" {
+          grpc {
+            endpoint = "0.0.0.0:4317"
+          }
+          http {
+            endpoint = "0.0.0.0:4318"
+          }
+          output {
+            metrics = [otelcol.exporter.prometheus.default.input]
+            traces  = [otelcol.exporter.otlp.tempo.input]
+            logs    = [otelcol.exporter.loki.default.input]
+          }
+        }
+
+        // Metrics to Prometheus
+        otelcol.exporter.prometheus "default" {
+          forward_to = [prometheus.remote_write.default.receiver]
+        }
+
+        prometheus.remote_write "default" {
+          endpoint {
+            url = "http://kps-prometheus.monitoring.svc.cluster.local/api/v1/write"
+          }
+        }
+
+        // Traces to Tempo
+        otelcol.exporter.otlp "tempo" {
+          client {
+            endpoint = "http://tempo.monitoring.svc.cluster.local:4317"
+            tls {
+              insecure = true
+            }
+          }
+        }
+
+        // Logs to Loki
+        otelcol.exporter.loki "default" {
+          forward_to = [loki.write.endpoint.receiver]
+        }
+
+        loki.write "endpoint" {
+          endpoint {
+              url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+
+              // Enhanced batching for better performance
+              batch_size = "1MB"
+              batch_wait = "1s"
+
+          }
+        }

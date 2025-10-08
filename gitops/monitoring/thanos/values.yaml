@@ -10,7 +10,7 @@ thanos:
     replicaLabels:
     - replica
     dnsDiscovery:
-      sidecarsService: kube-prometheus-stack-thanos-discovery
+      sidecarsService: kps-thanos-discovery
       sidecarsNamespace: monitoring
     ingress:
       enabled: true
@@ -30,7 +30,7 @@ thanos:
         # nginx.ingress.kubernetes.io/auth-signin: "https://auth.rsr.net/oauth2/start"
       tls: true
   queryFrontend:
-    enabled: false
+    enabled: true
   bucketweb:
     enabled: true
     ingress:
