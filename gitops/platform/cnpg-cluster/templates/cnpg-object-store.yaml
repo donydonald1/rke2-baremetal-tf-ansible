@@ -34,10 +34,6 @@ spec:
       secretAccessKey:
         name: {{ .Values.objectStore.s3CredentialsSecretName }}
         key: {{ .Values.objectStore.s3SecretAccessKeySecretKey }}
-    data:
-      compression: bzip2
-      immediateCheckpoint: true
-      jobs: 2
     wal:
-      compression: bzip2
       maxParallel: 8
+      compression: gzip
