@@ -8,78 +8,79 @@ spec:
   generators:
   - list:
       elements:
-      # - name: uptime-kuma
-      #   namespace: kube-system
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
-      #   serverSideApply: true
-      # - name: cloudnative-pg
-      #   namespace: cnpg-system
-      #   serverSideApply: true
-      # # - name: ghost
-      # - name: go-healthcheck
-      # - name: kube-prometheus-stack
-      #   namespace: monitoring
-      #   serverSideApply: true
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
+        # - name: uptime-kuma
+        #   namespace: kube-system
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
+        #   serverSideApply: true
+        # - name: cloudnative-pg
+        #   namespace: cnpg-system
+        #   serverSideApply: true
+        # # - name: ghost
+        # - name: go-healthcheck
+        # - name: kube-prometheus-stack
+        #   namespace: monitoring
+        #   serverSideApply: true
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
 
-      - name: monitoring-stack
-        namespace: monitoring
-        serverSideApply: true
-        helm:
-          valueFiles:
-          - "values.yaml"
-      # - name: prometheus-rules
-      #   namespace: monitoring
-      #   serverSideApply: tru
-      # - name: thanos
-      #   namespace: monitoring
-      #   serverSideApply: true
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
+        # - name: monitoring-stack
+        #   namespace: monitoring
+        #   serverSideApply: true
+        #   SkipCRDs: true
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
+        # - name: prometheus-rules
+        #   namespace: monitoring
+        #   serverSideApply: tru
+        # - name: thanos
+        #   namespace: monitoring
+        #   serverSideApply: true
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
 
-      # - name: grafana
-      #   namespace: monitoring
-      #   serverSideApply: true
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
-      # - name: loki
-      #   namespace: monitoring
-      #   serverSideApply: true
-      # helm:
-      # - name: influxdb
-      #   namespace: monitoring
-      #   serverSideApply: true
+        # - name: grafana
+        #   namespace: monitoring
+        #   serverSideApply: true
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
+        # - name: loki
+        #   namespace: monitoring
+        #   serverSideApply: true
+        # helm:
+        # - name: influxdb
+        #   namespace: monitoring
+        #   serverSideApply: true
 
-      # - name: botkube
-      #   namespace: monitoring
-      #   serverSideApply: true
+        # - name: botkube
+        #   namespace: monitoring
+        #   serverSideApply: true
 
-      # - name: karma
-      #   namespace: monitoring
-      #   serverSideApply: true
+        # - name: karma
+        #   namespace: monitoring
+        #   serverSideApply: true
 
-      # - name: eck-stack
-      #   namespace: elastic-system
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
-      #   serverSideApply: true
-      # - name: loki
-      #   namespace: monitoring
-      #   serverSideApply: true
-      # helm:
-      #   valueFiles:
-      #   - "values.yaml"
-      # - "manifest-dev.yaml"
-      # - name: eck-stack
-      #   namespace: elastic-system
-      # serverSideApply: true
+        # - name: eck-stack
+        #   namespace: elastic-system
+        #   helm:
+        #     valueFiles:
+        #     - "values.yaml"
+        #   serverSideApply: true
+        # - name: loki
+        #   namespace: monitoring
+        #   serverSideApply: true
+        # helm:
+        #   valueFiles:
+        #   - "values.yaml"
+        # - "manifest-dev.yaml"
+        # - name: eck-stack
+        #   namespace: elastic-system
+        # serverSideApply: true
 
   template:
     metadata:
