@@ -809,7 +809,7 @@ tempo:
   persistence:
     enabled: true
     size: 20Gi
-    storageClassName: csi-nfs
+    storageClassName: nfs-csi
 
 # ────────────────────────────────────────────────────────────────────────────────
 # Promtail (local storage for dev/POC)
