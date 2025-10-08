@@ -98,6 +98,7 @@ rke2_custom_manifests:
   - "${path.module}/manifest/generic-device-plugin.yaml"
   - "${path.module}/manifest/nodelocaldns.yaml"
   - "${path.module}/manifest/configmap-dns-proxy.yaml"
+  - "${path.module}/manifest/prometheus-operator.yaml"
   - "${path.module}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml"
 
 rke2_server_options:
