@@ -806,7 +806,7 @@ tempo:
   tempo:
     metricsGenerator:
       enabled: true
-      remoteWriteUrl: "http://kps-prometheus.monitoring.svc.cluster.local/api/v1/write"
+      remoteWriteUrl: "http://kps-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
     # overrides:
     #   defaults:
     #     metrics_generator:
