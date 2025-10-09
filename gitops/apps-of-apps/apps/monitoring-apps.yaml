@@ -26,13 +26,13 @@ spec:
       #     valueFiles:
       #     - "values.yaml"
 
-      # - name: monitoring-stack
-      #   namespace: monitoring
-      #   serverSideApply: true
-      #   SkipCRDs: true
-      #   helm:
-      #     valueFiles:
-      #     - "values.yaml"
+      - name: monitoring-stack
+        namespace: monitoring
+        serverSideApply: true
+        SkipCRDs: true
+        helm:
+          valueFiles:
+          - "values.yaml"
       # - name: prometheus-rules
       #   namespace: monitoring
       #   serverSideApply: tru
