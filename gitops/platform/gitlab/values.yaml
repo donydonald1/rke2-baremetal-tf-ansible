@@ -4,17 +4,29 @@ gitlab:
     installCRDs: false
   nginx-ingress:
     enabled: false
+  saml:
+    provider: <path:secret/data/gitlab#saml-idp-provider>
   global:
     time_zone: America/Chicago
     appConfig:
       omniauth:
         enabled: true
         aautoSignInWithProvider: 'saml'
-        syncProfileAttributes: [ 'email' ]
+        syncProfileAttributes: [ 'email', "username", "profile" ]
         allowBypassTwoFactor: []
         autoLinkSamlUser: true
         providers:
         - secret: idp-provider
+      object_store:
+        enabled: true
+        proxy_download: true
+        storage_options:
+          s3:
+            bucket: gitlab-uploads-storage
+            endpoint: http://minio.minio.svc.cluster.local:9000
+            region: us-east-1
+            access_key_id: <path:secret/data/minio#postgres_user>
+            secret_access_key: <path:secret/data/minio#postgres_password>
       contentSecurityPolicy:
         enabled: true
         directives:
@@ -30,7 +42,7 @@ gitlab:
         # connection: {}
       gitlab_docs:
         enabled: false
-        host: https://gitlab-docs.dev.techsecoms.com
+        host: https://gitlab-docs.prod.techsecom.io
       # sidekiq:
       #   routingRules:
       #   - [ "resource_boundary=cpu", "cpu-boundary" ]
@@ -41,8 +53,8 @@ gitlab:
       # application:
       #   create: true
     psql:
-      host: gitlab-postgresql-ha-pgpool.gitlab.svc.cluster.local
-      serviceName: gitlab-postgresql-ha-pgpool
+      host: cnpg-cluster-rw.cnpg-system.svc.cluster.local"
+      serviceName: cnpg-cluster-rw.cnpg-system
       port: "5432"
       database: "gitlab"
       username: "gitlab"
@@ -142,29 +154,29 @@ gitlab:
         - default2
         - default3
     hosts:
-      domain: gitlab.dev.techsecoms.com
+      domain: techsecom.io
       # hostSuffix: prod
       https: true
       gitlab:
-        name: gitlab.dev.techsecoms.com
-        # https: true
-        # tls:
-        #   enabled: true
-        #   secretName: gitlab-tls
+        name: gitlab.prod.techsecom.io
+        https: true
+        tls:
+          enabled: true
+          secretName: gitlab-tls
       registry:
-        name: gitlab.registry.dev.techsecoms.com
+        name: gitlab.registry.techsecom.io
         https: true
       minio:
-        name: gitlab.minio.dev.techsecoms.com
+        name: s3.prod.techsecom.io
         https: true
       smartcard:
-        name: gitlab.smartcard.dev.techsecoms.com
+        name: gitlab.smartcard.techsecom.io
       kas:
-        name: gitlab.kas.dev.techsecoms.com
+        name: gitlab.kas.techsecom.io
       pages:
-        name: pages.dev.techsecoms.com
+        name: gitlab.pages.techsecom.io
         https: true
-      ssh: gitlab.dev.techsecoms.com
+      ssh: gitlab.prod.techsecom.io
     ingress:
       annotations:
         kubernetes.io/ingress.class: nginx
@@ -172,8 +184,12 @@ gitlab:
         nginx.ingress.kubernetes.io/ssl-passthrough: "false"
         external-dns.alpha.kubernetes.io/enabled: "true"
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      external-dns.alpha.kubernetes.io/target: "rke2-manager.techsecoms.com"
-      external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+        cert-manager.io/revision-history-limit: "3"
+        cert-manager.io/duration: "2160h"
+        cert-manager.io/renew-before: "720h"
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        external-dns.alpha.kubernetes.io/target: "ops-dev-dc-bm-rke2.techsecoms.com"
+        external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
       configureCertmanager: false
       useNewIngressForCerts: false
       provider: "nginx"
@@ -204,11 +220,6 @@ gitlab:
       signupEnabled: false
   postgresql:
     install: false
-    image:
-      tag: 15.4.0-ce.0
-    primary:
-      extendedConfiguration: |-
-        max_connections = 200
   prometheus:
     install: true
   gitlab:
@@ -230,6 +241,40 @@ gitlab:
             requests:
               cpu: 100m
               memory: 550M
+    gitlab-rails:
+      object_storage:
+        artifacts:
+          enabled: true
+          bucket: gitlab-artifacts-storage
+          connection:
+            endpoint: http://minio.minio.svc.cluster.local:9000
+            region: us-east-1
+            access_key_id: <path:secret/data/minio#postgres_user>
+            secret_access_key: <path:secret/data/minio#postgres_password>
+        lfs:
+          enabled: true
+          bucket: gitlab-lfs-storage
+          connection:
+            endpoint: http://minio.minio.svc.cluster.local:9000
+            region: us-east-1
+            access_key_id: <path:secret/data/minio#postgres_user>
+            secret_access_key: <path:secret/data/minio#postgres_password>
+        uploads:
+          enabled: true
+          bucket: gitlab-uploads-storage
+          connection:
+            endpoint: http://minio.minio.svc.cluster.local:9000
+            region: us-east-1
+            access_key_id: <path:secret/data/minio#postgres_user>
+            secret_access_key: <path:secret/data/minio#postgres_password>
+        packages:
+          enabled: true
+          bucket: gitlab-packages-storage
+          connection:
+            endpoint: http://minio.minio.svc.cluster.local:9000
+            region: us-east-1
+            access_key_id: <path:secret/data/minio#postgres_user>
+            secret_access_key: <path:secret/data/minio#postgres_password>
     webservice:
       minReplicas: 1
       maxReplicas: 6
@@ -248,14 +293,19 @@ gitlab:
           cert-manager.io/cluster-issuer: letsencrypt-prod
           nginx.ingress.kubernetes.io/ssl-redirect: false
           nginx.ingress.kubernetes.io/ssl-passthrough: false
+          external-dns.alpha.kubernetes.io/enabled: "true"
+          cert-manager.io/revision-history-limit: "3"
+          cert-manager.io/duration: "2160h"
+          cert-manager.io/renew-before: "720h"
+          nginx.ingress.kubernetes.io/proxy-body-size: "0"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Gitlab
           gethomepage.dev/description: Prod Gitlab
           gethomepage.dev/group: Platform
           gethomepage.dev/app: gitlab-webservice-default
           gethomepage.dev/icon: https://gitlab.com/gitlab-com/gitlab-artwork/raw/master/logo/logo-square.png
-          gethomepage.dev/href: https://gitlab.dev.techsecoms.com
-          gethomepage.dev/siteMonitor: https://gitlab.dev.techsecoms.com
+          gethomepage.dev/href: https://gitlab.prod.techsecom.io
+          gethomepage.dev/siteMonitor: https://gitlab.prod.techsecom.io
           gethomepage.dev/external: "true"
           # nginx.ingress.kubernetes.io/rewrite-target: /
         class: nginx
@@ -300,22 +350,27 @@ gitlab:
     sentinel:
       enabled: false
   minio:
-    # resources:
-    requests:
-      cpu: 4
-    ingress:
-      annotations:
-        kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        nginx.ingress.kubernetes.io/ssl-redirect: false
-      class: nginx
-      tls:
-        enabled: true
-        secretName: minio-tls
-    persistence:
-      size: 100Gi
-    pools: 3
-    replicas: 16
+    enabled: false
+    # storageClass: standard
+    # # accessKey: minio
+    # # secretKey: minio123
+    # # region: us-east-1
+    # # resources:
+    # requests:
+    #   cpu: 4
+    # ingress:
+    #   annotations:
+    #     kubernetes.io/ingress.class: nginx
+    #     cert-manager.io/cluster-issuer: letsencrypt-prod
+    #     nginx.ingress.kubernetes.io/ssl-redirect: false
+    #   class: nginx
+    #   tls:
+    #     enabled: true
+    #     secretName: minio-tls
+    # persistence:
+    #   size: 100Gi
+    # pools: 3
+    # replicas: 16
   registry:
     # resources:
     requests:
@@ -329,7 +384,13 @@ gitlab:
       tls:
         enabled: true
         secretName: registry-tls
-
+    storage:
+      s3:
+        bucket: gitlab-registry-storage
+        endpoint: http://minio.minio.svc.cluster.local:9000
+        region: us-east-1
+        access_key_id: <path:secret/data/minio#postgres_user>
+        secret_access_key: <path:secret/data/minio#postgres_password>
   gitlab-zoekt:
     install: false
   gitlab-runner:
@@ -380,7 +441,7 @@ gitlab:
             Shared = true
             [runners.cache.s3]
               ServerAddress = {{ include "gitlab-runner.cache-tpl.s3ServerAddress" . }}
-              BucketName = "runner-cache"
+              BucketName = "gitlab-runner-cache"
               BucketLocation = "us-east-1"
               Insecure = false
 
@@ -403,80 +464,4 @@ eso:
   # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
   secretName: "secret/harbor"
   # -- Role ARN for the ExternalSecretOperator to assume.
-postgresql-ha:
-  global:
-    storageClass: "vsphere"
 
-  postgresql:
-    username: "gitlab"
-    password: null
-    existingSecret: "postgresql-secret"
-    database: "gitlab"
-    resourcesPreset: "large"
-    maxConnections: 2000
-    image:
-      debug: true
-    command:
-    - /bin/bash
-
-    args:
-    - -ec
-    - |
-      sleep 60
-      /opt/bitnami/scripts/postgresql-repmgr/entrypoint.sh /opt/bitnami/scripts/postgresql-repmgr/run.sh
-    extendedConf: |-
-      wal_keep_size = '1GB'
-      recovery_min_apply_delay = 180s
-    resources:
-      limits:
-        cpu: 4
-        memory: "4Gi"
-      requests:
-        cpu: 2
-        memory: "1Gi"
-  witness:
-    create: false
-  repmgr:
-    password: null
-    existingSecret: "repmgr-secret"
-
-  pgpool:
-    adminUsername: "admin"
-    adminPassword: null
-    existingSecret: "pgpool-secret"
-    replicaCount: 3
-    resourcesPreset: "large"
-    maxPool: 1000
-    clientIdleLimit: 60
-    numInitChildren: 300
-    childLifeTime: 60
-    reservedConnections: 0
-    childMaxConnections: 1000
-    resources:
-      limits:
-        cpu: 4
-        memory: "8Gi"
-      requests:
-        cpu: 2
-        memory: "6Gi"
-    image:
-      debug: true
-  volumePermissions:
-    enabled: true
-  metrics:
-    enabled: true
-    # resources:
-    #   limits:
-    #     cpu: 2
-    #     memory: "2Gi"
-    #   requests:
-    #     cpu: 1
-    #     memory: "500Mi"
-  persistence:
-    enabled: true
-    existingClaim: ""
-    storageClass: ""
-    mountPath: /bitnami/postgresql
-    accessModes:
-    - ReadWriteOnce
-    size: 8Gi

@@ -53,7 +53,7 @@ objectStore:
 
 backup:
   enabled: true
-  schedule: 0 */3 * * *
+  schedule: ""
 SuperuserSecret: postgres-superuser-secret
 recovery:
   # ========================================================================
@@ -112,6 +112,14 @@ managedRoles:
   bypassrls: true
   passwordSecret:
     name: harbor-user-secret
+
+- name: gitlab
+  ensure: present
+  login: true
+  createrole: true
+  bypassrls: true
+  passwordSecret:
+    name: gitlab-user-secret
 
 pooler:
   rw:

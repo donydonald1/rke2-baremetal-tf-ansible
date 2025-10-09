@@ -8,17 +8,17 @@ type: application
 
 # The chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-version: 8.9.0
+version: 9.4.2
 
 # Version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: "17.9.2"
+appVersion: "18.4.2"
 icon: https://gitlab.com/gitlab-com/gitlab-artwork/raw/master/logo/logo-square.png
 dependencies:
 - name: gitlab
-  version: 8.9.2
+  version: 9.4.2
   repository: https://charts.gitlab.io
 
-- name: postgresql-ha
-  version: 15.3.0
-  repository: https://charts.bitnami.com/bitnami
+# - name: postgresql-ha
+#   version: 15.3.0
+#   repository: https://charts.bitnami.com/bitnami
