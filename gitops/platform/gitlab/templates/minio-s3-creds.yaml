@@ -1,0 +1,39 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+    name: registry-storage
+    namespace: gitlab
+spec:
+    refreshInterval: 1h
+    secretStoreRef:
+        kind: ClusterSecretStore
+        name: vault
+    target:
+        name: registry-storage
+        creationPolicy: Owner
+        template:
+            type: Opaque
+            engineVersion: v2
+            data:
+                storage: |
+                    storage:
+                      s3:
+                        accesskey: "{{ .MINIO_ACCESS_KEY }}"
+                        secretkey: "{{ .MINIO_SECRET_KEY }}"
+                        bucket: "gitlab-registry-storage"
+                        region: "us-east-1"
+                        regionendpoint: "http://minio.minio.svc.cluster.local:9000"
+                        v4auth: true
+                        pathstyle: true
+                        secure: false
+                        rootdirectory: "/"
+    data:
+      - secretKey: MINIO_ACCESS_KEY
+        remoteRef:
+            # Vault KV v2 path (relative to the kv mount configured above)
+            key: secret/minio/
+            property: postgres_user
+      - secretKey: MINIO_SECRET_KEY
+        remoteRef:
+            key: secret/minio/
+            property: postgres_password

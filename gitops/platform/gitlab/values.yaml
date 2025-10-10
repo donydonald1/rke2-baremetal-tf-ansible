@@ -1,7 +1,7 @@
 gitlab:
-  certmanager:
-    install: false
-    installCRDs: false
+  installCertmanager: false
+  certmanager-issuer:
+    email: donydonald1@icloud.com
   nginx-ingress:
     enabled: false
   saml:
@@ -40,6 +40,8 @@ gitlab:
         enabled: true
         bucket: gitlab-terraform-state
         # connection: {}
+      minio:
+        enabled: false
       gitlab_docs:
         enabled: false
         host: https://gitlab-docs.prod.techsecom.io
@@ -221,7 +223,7 @@ gitlab:
   postgresql:
     install: false
   prometheus:
-    install: true
+    install: false
   gitlab:
     toolbox:
       replicas: 2
@@ -349,27 +351,6 @@ gitlab:
           memory: 3Gi
     sentinel:
       enabled: false
-  minio:
-    enabled: false
-    # storageClass: standard
-    # # accessKey: minio
-    # # secretKey: minio123
-    # # region: us-east-1
-    # # resources:
-    # requests:
-    #   cpu: 4
-    # ingress:
-    #   annotations:
-    #     kubernetes.io/ingress.class: nginx
-    #     cert-manager.io/cluster-issuer: letsencrypt-prod
-    #     nginx.ingress.kubernetes.io/ssl-redirect: false
-    #   class: nginx
-    #   tls:
-    #     enabled: true
-    #     secretName: minio-tls
-    # persistence:
-    #   size: 100Gi
-    # pools: 3
     # replicas: 16
   registry:
     # resources:
@@ -385,12 +366,14 @@ gitlab:
         enabled: true
         secretName: registry-tls
     storage:
-      s3:
-        bucket: gitlab-registry-storage
-        endpoint: http://minio.minio.svc.cluster.local:9000
-        region: us-east-1
-        access_key_id: <path:secret/data/minio#postgres_user>
-        secret_access_key: <path:secret/data/minio#postgres_password>
+      secret: registry-storage
+      key: storage
+      # s3:
+      #   bucket: gitlab-registry-storage
+      #   endpoint: http://minio.minio.svc.cluster.local:9000
+      #   region: us-east-1
+      #   access_key_id: <path:secret/data/minio#postgres_user>
+      #   secret_access_key: <path:secret/data/minio#postgres_password>
   gitlab-zoekt:
     install: false
   gitlab-runner:
@@ -402,50 +385,47 @@ gitlab:
       serviceAccountName: gitlab-runner
       serviceAccount:
         create: true
-      rules:
-      - resources: [ "configmaps", "pods", "pods/attach", "secrets", "services" ]
-        verbs: [ "get", "list", "watch", "create", "patch", "delete" ]
-      - resources: [ "secrets", "namespace", "configmaps", "services", "pods", "pods/log" ]
-        verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
-      - resources: [ "serviceAccounts" ]
-        verbs: [ "get" ]
-      - apiGroups: [ "" ]
-        resources: [ "pods/exec", "deployments", "statefulsets", "daemonsets" ]
-        verbs: [ "create", "patch", "delete" ]
-    revisionHistoryLimit: 2
-    runnerRegistrationToken: ""
-    runner-token: ""
     envVars:
     - name: RUNNER_ENV
       value: "DOCKER_TLS_CERTDIR=/certs"
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: minio-s3-creds
+          key: accesskey
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: minio-s3-creds
+          key: secretkey
+
     securityContext:
       privileged: true
       allowPrivilegeEscalation: true
+
     runners:
       privileged: true
       config: |
         [[runners]]
-          
           name = "gitlab-runner"
           [runners.kubernetes]
             privileged = true
             poll_timeout = 2000
             node_selector_overwrite_allowed = ".*"
-            namespace = "{{.Release.Namespace}}"
+            namespace = "{{ .Release.Namespace }}"
             image = "docker:stable"
-          {{- if .Values.global.minio.enabled }}
+
           [runners.cache]
             Type = "s3"
             Path = "gitlab-runner"
-            privileged = true
             Shared = true
             [runners.cache.s3]
-              ServerAddress = {{ include "gitlab-runner.cache-tpl.s3ServerAddress" . }}
-              BucketName = "gitlab-runner-cache"
+              ServerAddress = "minio.minio.svc.cluster.local:9000"
+              BucketName = "runner-cache"
               BucketLocation = "us-east-1"
-              Insecure = false
+              S3ForcePathStyle = true
+              Insecure = true
 
-          {{ end }}
         [[runners.kubernetes.volumes.empty_dir]]
           name = "docker-certs"
           mount_path = "/certs/client"
@@ -464,4 +444,3 @@ eso:
   # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
   secretName: "secret/harbor"
   # -- Role ARN for the ExternalSecretOperator to assume.
-
