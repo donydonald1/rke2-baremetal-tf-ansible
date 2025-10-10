@@ -1,0 +1,7 @@
+apiVersion: v2
+name: gitlab-operator
+version: 0.0.0
+dependencies:
+- name: gitlab-operator
+  version: 2.4.2
+  repository: https://charts.gitlab.io
