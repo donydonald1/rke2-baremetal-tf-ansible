@@ -60,7 +60,7 @@ spec:
         - http
         enableOpenMetrics: true
         serviceMonitor:
-          enabled: false
+          enabled: true 
         service:
           enabled: true
 

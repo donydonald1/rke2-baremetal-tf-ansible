@@ -22,9 +22,9 @@ spec:
       #   serverSideApply: true
       # - name: sonar
       #   namespace: sonar
-      - name: gitlab
-        namespace: gitlab
-        serverSideApply: true
+      # - name: gitlab
+      #   namespace: gitlab
+      #   serverSideApply: true
       #   helm:
       #     values:
       #     - values.yaml
