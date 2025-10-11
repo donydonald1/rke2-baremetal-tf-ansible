@@ -214,7 +214,7 @@ spec:
           main:
             host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
             port: "5432"
-            database: "gitlabhq_production"
+            database: "gitlabhq-production"
             username: "gitlab"
             password:
               useSecret: true
@@ -223,7 +223,7 @@ spec:
           ci:
             host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
             port: "5432"
-            database: "gitlabhq_production_ci"
+            database: "gitlabhq_-roduction_ci"
             username: "gitlab"
             password:
               useSecret: true
