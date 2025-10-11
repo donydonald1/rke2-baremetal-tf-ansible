@@ -223,7 +223,7 @@ spec:
           ci:
             host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
             port: "5432"
-            database: "gitlabhq_-roduction_ci"
+            database: "gitlabhq_-roduction-ci"
             username: "gitlab"
             password:
               useSecret: true

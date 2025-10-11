@@ -11,9 +11,9 @@ spec:
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
-    name: gitlabhq_production_ci
+    name: gitlabhq_production-ci
 spec:
-    name: gitlabhq_production_ci
+    name: gitlabhq_production-ci
     owner: gitlab
     cluster:
         name: cnpg-cluster
