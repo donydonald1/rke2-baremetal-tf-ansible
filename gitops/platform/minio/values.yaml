@@ -278,6 +278,78 @@ minio:
     # bucket [true|false] NOTE: versioning is enabled by default if you use locking
     objectlocking: false
 
+  - name: gitlab-artifacts
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: git-lfs
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-packages
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-uploads
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-mr-diffs
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-terraform-state
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-ci-secure-files
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-dependency-proxy
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-pages
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
   - name: harbor
     policy: none
     purge: false
