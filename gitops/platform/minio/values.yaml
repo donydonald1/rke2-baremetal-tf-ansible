@@ -243,6 +243,33 @@ minio:
     versioning: true
     objectlocking: false
 
+  - name: gitlab-backup-storage
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  - name: gitlab-tmp-storage
+    # Policy to be set on the
+    # bucket [none|download|upload|public]
+    policy: none
+    # Purge if bucket exists already
+    purge: false
+    versioning: true
+    objectlocking: false
+
+  # - name: gitlab-registry-storage
+  #   # Policy to be set on the
+  #   # bucket [none|download|upload|public]
+  #   policy: none
+  #   # Purge if bucket exists already
+  #   purge: false
+  #   versioning: true
+  #   objectlocking: false
+
   - name: gitlab-runner-cache
     # Policy to be set on the
     # bucket [none|download|upload|public]
@@ -343,6 +370,14 @@ minio:
     objectlocking: false
 
   - name: gitlab-pages
+    policy: none
+    purge: false
+    versioning: true
+    # set objectlocking for
+    # bucket [true|false] NOTE: versioning is enabled by default if you use locking
+    objectlocking: false
+
+  - name: gitlab-mr-diffs
     policy: none
     purge: false
     versioning: true

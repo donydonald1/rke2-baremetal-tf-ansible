@@ -33,13 +33,13 @@ spec:
       type: Opaque
       engineVersion: v2
       data:
-        storage.yml: |
+        connection: |
           provider: AWS
           region: us-east-1
           aws_access_key_id: "{{ .MINIO_ACCESS_KEY }}"
           aws_secret_access_key: "{{ .MINIO_SECRET_KEY }}"
           aws_signature_version: 4
-          host: "s3.prod.techsecom.io"
+          host: minio.minio.svc.cluster.local
           endpoint: "http://minio.minio.svc.cluster.local:9000"
           path_style: true
   data:
@@ -70,7 +70,7 @@ spec:
       type: Opaque
       engineVersion: v2
       data:
-        registry-s3.yml: |
+        registry: |
           s3:
             bucket: gitlab-registry
             accesskey: "{{ .MINIO_ACCESS_KEY }}"
@@ -82,6 +82,40 @@ spec:
   - secretKey: MINIO_ACCESS_KEY
     remoteRef:
       # Vault KV v2 path (relative to the kv mount configured above)
+      key: secret/minio/
+      property: postgres_user
+  - secretKey: MINIO_SECRET_KEY
+    remoteRef:
+      key: secret/minio/
+      property: postgres_password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: s3cmd-config
+  namespace: gitlab
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault
+  target:
+    name: s3cmd-config
+    creationPolicy: Owner
+    template:
+      type: Opaque
+      engineVersion: v2
+      data:
+        config: |
+          [default]
+            access_key = "{{ .MINIO_ACCESS_KEY }}"
+            secret_key = "{{ .MINIO_SECRET_KEY }}"
+            bucket_location = us-east-1
+            multipart_chunk_size_mb = 128 
+            regionendpoint: "http://minio.minio.svc.cluster.local:9000"
+  data:
+  - secretKey: MINIO_ACCESS_KEY
+    remoteRef:
       key: secret/minio/
       property: postgres_user
   - secretKey: MINIO_SECRET_KEY
@@ -145,83 +179,113 @@ spec:
       key: secret/gitlab/
       property: dbpassword
 ---
-apiVersion: apps.gitlab.com/v1beta1
-kind: GitLab
-metadata:
-  name: gitlab
-  namespace: gitlab
-spec:
-  chart:
-    values:
-      installCertmanager: false
-      postgresql:
-        install: false
-      nginx-ingress:
-        enabled: false
-      gitlab:
-        gitlab-shell:
-          maxReplicas: 6
-          minReplicas: 1
-        sidekiq:
-          maxReplicas: 6
-          minReplicas: 1
-          resources:
-            requests:
-              cpu: 500m
-              memory: 1000M
-        webservice:
-          maxReplicas: 2
-          minReplicas: 1
-          resources:
-            requests:
-              cpu: 500m
-              memory: 1500M
-      global:
-        hosts:
-          domain: techsecom.io
-          hostSuffix: null
-          gitlab:
-            name: gitlab.prod.techsecom.io
-            https: true
-        appConfig:
-          object_store:
-            enabled: true
-            connection:
-              secret: minio-s3-creds
-          # artifacts: 
-          #   bucket: gitlab-artifacts
-        registry:
-          bucket: gitlab-registry
-        minio:
-          enabled: false
-        ingress:
-          configureCertmanager: false
-          tls:
-            secretName: null
-        psql:
-          main:
-            host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
-            port: "5432"
-            database: "gitlabhq-production"
-            username: "gitlab"
-            password:
-              useSecret: true
-              secret: postgresql-secret
-              key: "password"
-          ci:
-            host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
-            port: "5432"
-            database: gitlabhq-roduction-ci
-            username: gitlab
-            password:
-              useSecret: true
-              secret: postgresql-secret
-              key: password
-      registry:
-        storage:
-          secret: registry-s3-config
-      redis:
-        resources:
-          requests:
-            cpu: 100m
-    version: 9.4.2
+
+
+# apiVersion: apps.gitlab.com/v1beta1
+# kind: GitLab
+# metadata:
+#   name: gitlab
+#   namespace: gitlab
+# spec:
+#   chart:
+#     values:
+#       installCertmanager: false
+#       postgresql:
+#         install: false
+#       nginx-ingress:
+#         enabled: false
+#       # gitlab:
+#       #   gitlab-shell:
+#       #     maxReplicas: 6
+#       #     minReplicas: 1
+#       #   sidekiq:
+#       #     maxReplicas: 6
+
+#       global:
+#         hosts:
+#           domain: techsecom.io
+#           hostSuffix: null
+#           gitlab:
+#             name: gitlab.prod.techsecom.io
+#             https: true
+#         appConfig:
+#           object_store:
+#             enabled: true
+#             proxy_download: false
+#             connection:
+#               secret: minio-s3-creds
+#           artifacts:
+#             bucket: gitlab-artifacts-storage
+#           backups:
+#             bucket: gitlab-backup-storage
+#             tmpBucket: gitlab-tmp-storage
+#           ciSecureFiles:
+#             bucket: gitlab-ci-secure-files-storage
+#             enabled: true
+#           dependencyProxy:
+#             bucket: gitlab-dependency-proxy
+#             enabled: true
+#           externalDiffs:
+#             bucket: gitlab-external-diffs
+#             enabled: true
+#           lfs:
+#             bucket: gitlab-lfs-storage
+#           packages:
+#             bucket: gitlab-packages-storage
+#           terraformState:
+#             bucket: gitlab-terraform-state-storage
+#             enabled: true
+#           uploads:
+#             bucket: gitlab-uploads-storage
+#         pages:
+#           enabled: true
+#           objectStore:
+#             enabled: true
+#             bucket: gitlab-pages-storage
+#             connection:
+#               secret: objectstore-pages
+#         registry:
+#           bucket: gitlab-registry-storage
+
+#         minio:
+#           enabled: false
+#         ingress:
+#           configureCertmanager: false
+#           tls:
+#             secretName: null
+#         psql:
+#           main:
+#             host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
+#             port: 5432
+#             database: gitlabhq-production
+#             username: gitlab
+#             password:
+#               useSecret: true
+#               secret: postgresql-secret
+#               key: password
+#           ci:
+#             host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
+#             port: 5432
+#             database: gitlabhq-roduction-ci
+#             username: gitlab
+#             password:
+#               useSecret: true
+#               secret: postgresql-secret
+#               key: password
+#       gitlab:
+#         toolbox:
+#           backups:
+#             objectStorage:
+#               config:
+#                 secret: minio-s3-creds
+#                 key: connection
+
+#       registry:
+#         storage:
+#           secret: registry-s3-config
+#           key: registry
+#       redis:
+#         resources:
+#           requests:
+#             cpu: 100m
+#     version: 9.4.2
