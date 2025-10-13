@@ -7,23 +7,3 @@ spec:
     owner: gitlab
     cluster:
         name: cnpg-cluster
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Database
-metadata:
-    name: gitlabhq-production-ci
-spec:
-    name: gitlabhq-production-ci
-    owner: gitlab
-    cluster:
-        name: cnpg-cluster
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Database
-metadata:
-    name: gitlabhq-production
-spec:
-    name: gitlabhq-production
-    owner: gitlab
-    cluster:
-        name: cnpg-cluster

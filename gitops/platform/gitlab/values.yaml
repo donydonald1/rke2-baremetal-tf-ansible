@@ -142,7 +142,7 @@ global:
 
     host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
     port: 5432
-    database: gitlabhq-production
+    database: gitlab
     username: gitlab
     password:
       useSecret: true
