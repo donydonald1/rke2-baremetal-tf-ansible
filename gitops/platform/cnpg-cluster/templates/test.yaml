@@ -129,7 +129,7 @@ Pooler connections: For application traffic via PgBouncer
 {{- end }}
 
 {{/*
-Direct connections: Calculated as remaining after system and pooler
+Direct connections: Calculated as remaining after reserved and pooler
 */}}
 {{- define "cnpg-cluster.directConnections" -}}
 {{- include "cnpg-cluster.validateConnections" . -}}
@@ -239,6 +239,3 @@ Schedule for automatic backups
 {{- $minute := mod $offset 60 -}}
 {{- printf "0 %02d %d * * *" $minute $hour -}}
 {{- end }}
-{{- define "cnpg-cluster.namespace" -}}
-{{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
