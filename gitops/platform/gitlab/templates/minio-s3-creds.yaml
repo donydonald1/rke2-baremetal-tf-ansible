@@ -1,7 +1,8 @@
-apiVersion: external-secrets.io/v1beta1
+---
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-    name: registry-storage
+    name: minio-s3-creds
     namespace: gitlab
 spec:
     refreshInterval: 1h
@@ -9,28 +10,112 @@ spec:
         kind: ClusterSecretStore
         name: vault
     target:
-        name: registry-storage
+        name: minio-s3-creds
         creationPolicy: Owner
         template:
             type: Opaque
             engineVersion: v2
             data:
-                storage: |
-                    storage:
-                      s3:
-                        accesskey: "{{ .MINIO_ACCESS_KEY }}"
-                        secretkey: "{{ .MINIO_SECRET_KEY }}"
-                        bucket: "gitlab-registry-storage"
-                        region: "us-east-1"
-                        regionendpoint: "http://minio.minio.svc.cluster.local:9000"
-                        v4auth: true
-                        pathstyle: true
-                        secure: false
-                        rootdirectory: "/"
+                connection: |
+                    provider: AWS
+                    region: us-east-1
+                    aws_access_key_id: "{{ .MINIO_ACCESS_KEY }}"
+                    aws_secret_access_key: "{{ .MINIO_SECRET_KEY }}"
+                    aws_signature_version: 4
+                    host: minio.minio.svc.cluster.local
+                    endpoint: "http://minio.minio.svc.cluster.local:9000"
+                    path_style: true
     data:
       - secretKey: MINIO_ACCESS_KEY
         remoteRef:
-            # Vault KV v2 path (relative to the kv mount configured above)
+            key: secret/minio/
+            property: postgres_user
+      - secretKey: MINIO_SECRET_KEY
+        remoteRef:
+            key: secret/minio/
+            property: postgres_password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+    name: aws-credentials
+spec:
+    refreshInterval: 1h
+    secretStoreRef:
+        kind: ClusterSecretStore
+        name: vault
+    data:
+      - secretKey: accessKeyId
+        remoteRef:
+            key: secret/minio/
+            property: postgres_user
+      - secretKey: secretAccessKey
+        remoteRef:
+            key: secret/minio/
+            property: postgres_password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+    name: registry-s3-config
+    namespace: gitlab
+spec:
+    refreshInterval: 1h
+    secretStoreRef:
+        kind: ClusterSecretStore
+        name: vault
+    target:
+        name: registry-s3-config
+        creationPolicy: Owner
+        template:
+            type: Opaque
+            engineVersion: v2
+            data:
+                registry: |
+                    s3:
+                      bucket: gitlab-registry
+                      accesskey: "{{ .MINIO_ACCESS_KEY }}"
+                      secretkey: "{{ .MINIO_SECRET_KEY }}"
+                      region: "us-east-1"
+                      regionendpoint: "http://minio.minio.svc.cluster.local:9000"
+                      v4auth: true
+    data:
+      - secretKey: MINIO_ACCESS_KEY
+        remoteRef:
+            key: secret/minio/
+            property: postgres_user
+      - secretKey: MINIO_SECRET_KEY
+        remoteRef:
+            key: secret/minio/
+            property: postgres_password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+    name: s3cmd-config
+    namespace: gitlab
+spec:
+    refreshInterval: 1h
+    secretStoreRef:
+        kind: ClusterSecretStore
+        name: vault
+    target:
+        name: s3cmd-config
+        creationPolicy: Owner
+        template:
+            type: Opaque
+            engineVersion: v2
+            data:
+                config: |
+                    [default]
+                      access_key = "{{ .MINIO_ACCESS_KEY }}"
+                      secret_key = "{{ .MINIO_SECRET_KEY }}"
+                      bucket_location = us-east-1
+                      multipart_chunk_size_mb = 128 
+                      regionendpoint: "http://minio.minio.svc.cluster.local:9000"
+    data:
+      - secretKey: MINIO_ACCESS_KEY
+        remoteRef:
             key: secret/minio/
             property: postgres_user
       - secretKey: MINIO_SECRET_KEY

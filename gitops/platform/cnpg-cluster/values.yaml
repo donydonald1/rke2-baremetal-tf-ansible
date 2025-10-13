@@ -11,8 +11,8 @@ resources:
     memory: 512Mi
     cpu: 300m
   limits:
-    memory: 512Mi
-    cpu: 300m
+    memory: 1000Mi
+    cpu: 500m
 
 # Pooler pod resources
 poolerResources:
@@ -20,8 +20,8 @@ poolerResources:
     memory: 128Mi
     cpu: 60m
   limits:
-    memory: 256Mi
-    cpu: 180m
+    memory: 512Mi
+    cpu: 260m
 annotations:
   argocd.argoproj.io/sync-wave: "-1"
   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true

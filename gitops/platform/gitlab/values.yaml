@@ -3,22 +3,89 @@ postgresql:
   install: false
 nginx-ingress:
   enabled: false
+prometheus:
+  install: false
+image:
+  pullPolicy: Always
+  tagSuffix: -fips
 
 global:
+  common:
+    labels:
+      environment: production
+  time_zone: America/Chicago
+  workhorse:
+    tls:
+      enabled: true
+      secretName: gitlab-tls-secret
+
   hosts:
     domain: techsecom.io
     hostSuffix: null
     gitlab:
       name: gitlab.prod.techsecom.io
-      https: true
+      protocol: https
+    registry:
+      name: gitlab.registry.techsecom.io
+      protocol: https
+    smartcard:
+      name: smartcard.gitlab.techsecom.io
+    kas:
+      name: kas.gitlab.techsecom.io
+      protocol: https
+    pages:
+      name: pages.gitlab.techsecom.io
+      protocol: https
+    ssh: gitlab.prod.techsecom.io
+
+  initialRootPassword:
+    secret: gitlab-initial-root-password
+    key: password
+  ingress:
+    enabled: true
+    configureCertmanager: false
+    class: nginx
+    tls:
+      enabled: true
+      secretName: gitlab-tls-secret
+    provider: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-ssl-protocols: "TLSv1.3 TLSv1.2"
+      nginx.ingress.kubernetes.io/enable-access-log: true
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      cert-manager.io/revision-history-limit: "3"
+      external-dns.alpha.kubernetes.io/enabled: "true"
+      cert-manager.io/duration: "2160h"
+      cert-manager.io/renew-before: "720h"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      # external-dns.alpha.kubernetes.io/target: "ops-dev-dc-bm-rke2.techsecoms.com"
+      # external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
   appConfig:
+    contentSecurityPolicy:
+      enabled: true
+      directives:
+        default_src: "'self'"
+        script_src: "'self' 'unsafe-inline' 'unsafe-eval' https://www.recaptcha.net https://apis.google.com"
+        frame_ancestors: "'self'"
+        frame_src: "'self' https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com"
+        img_src: "* data: blob:"
+        style_src: "'self' 'unsafe-inline'"
     object_store:
       enabled: true
-      proxy_download: false
-      connection: {}
-        # secret: minio-s3-creds
-        # key: connection
-
+      proxy_download: true
+      connection:
+        secret: minio-s3-creds
+        key: connection
+    omniauth:
+      enabled: true
+      aautoSignInWithProvider: 'saml'
+      syncProfileAttributes: [ 'email', "username", "profile" ]
+      allowBypassTwoFactor: []
+      autoLinkSamlUser: true
+      providers:
+      - secret: idp-provider
     lfs:
       enabled: true
       proxy_download: true
@@ -71,29 +138,16 @@ global:
 
   minio:
     enabled: false
-  ingress:
-    configureCertmanager: false
-    tls:
-      secretName: null
   psql:
-    main:
-      host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
-      port: 5432
-      database: gitlabhq-production
-      username: gitlab
-      password:
-        useSecret: true
-        secret: postgresql-secret
-        key: password
-    ci:
-      host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
-      port: 5432
-      database: gitlabhq-roduction-ci
-      username: gitlab
-      password:
-        useSecret: true
-        secret: postgresql-secret
-        key: password
+
+    host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
+    port: 5432
+    database: gitlabhq-production
+    username: gitlab
+    password:
+      useSecret: true
+      secret: postgresql-secret
+      key: password
 gitlab:
   toolbox:
     backups:
@@ -101,6 +155,18 @@ gitlab:
         config:
           secret: s3cmd-config
           key: config
+
+  gitaly:
+    persistence:
+      storageClass: longhorn
+      size: 100Gi
+
+  gitlab-rails:
+    artifacts:
+      objectStorage:
+        enabled: true
+        connection: {}
+        bucket: "gitlab-artifacts"
   gitlab-shell:
     maxReplicas: 6
     minReplicas: 1
@@ -109,27 +175,114 @@ gitlab:
     minReplicas: 1
     resources:
       requests:
-        cpu: 500m
+        cpu: 300m
         memory: 1000M
+
   webservice:
+    tls:
+      enabled: true
+      secretName: gitlab-tls-secret
+    metrics:
+      tls:
+        enabled: true
+        secretName: gitlab-tls-secret
+    workhorse:
+      tls:
+        secretName: gitlab-tls-secret
+      #   verify: true
+      monitoring:
+        exporter:
+          enabled: true
+          tls:
+            enabled: true
+            secretName: gitlab-tls-secret
+
     maxReplicas: 2
     minReplicas: 1
     resources:
       requests:
-        cpu: 500m
+        cpu: 300m
         memory: 1000M
   gitlab-pages:
-    maxReplicas: 1
+    tls:
+      enabled: true
+      secretName: gitlab-tls-secret
+    maxReplicas: 3
     minReplicas: 1
     resources:
       requests:
         cpu: 300m
         memory: 1000M
 registry:
+  tls:
+    enabled: true
+    secretName: gitlab-tls-secret
   storage:
     secret: registry-s3-config
     key: registry
 redis:
+  global:
+    defaultStorageClass: nfs-csi
+    storageClass: nfs-csi
+  architecture: replication
   resources:
     requests:
       cpu: 100m
+
+gitlab-runner:
+  log_level: "debug"
+  install: true
+  rbac:
+    create: true
+    clusterWideAccess: true
+    serviceAccountName: gitlab-runner
+    serviceAccount:
+      create: true
+  envVars:
+  - name: RUNNER_ENV
+    value: "DOCKER_TLS_CERTDIR=/certs"
+  - name: AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: aws-credentials
+        key: accessKeyId
+  - name: AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: aws-credentials
+        key: secretAccessKey
+
+  securityContext:
+    privileged: true
+    allowPrivilegeEscalation: true
+  runners:
+    privileged: true
+    config: |
+      [[runners]]
+        name = "gitlab-runner"
+        [runners.kubernetes]
+          privileged = true
+          poll_timeout = 2000
+          node_selector_overwrite_allowed = ".*"
+          namespace = "{{ .Release.Namespace }}"
+          image = "docker:stable"
+
+        [runners.cache]
+          Type = "s3"
+          Path = "gitlab-runner"
+          Shared = true
+          [runners.cache.s3]
+            ServerAddress = "minio.minio.svc.cluster.local:9000"
+            BucketName = "gitlab-runner-cache"
+            BucketLocation = "us-east-1"
+
+            S3ForcePathStyle = true
+            Insecure = true
+
+      [[runners.kubernetes.volumes.empty_dir]]
+        name = "docker-certs"
+        mount_path = "/certs/client"
+        medium = "Memory"
+  podAnnotations:
+    gitlab.com/prometheus_scrape: "true"
+    gitlab.com/prometheus_port: 9252

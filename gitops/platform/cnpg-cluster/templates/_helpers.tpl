@@ -83,7 +83,7 @@ Formula: (~totalMemoryMB / 10) capped between 25-200
 {{- $total := include "cnpg-cluster.totalMemoryMB" . | int -}}
 {{- $calculated := div $total 10 -}}
 {{- $min := 25 -}}
-{{- $max := 200 -}}
+{{- $max := 300 -}}
 {{- if lt $calculated $min -}}
   {{- $min -}}
 {{- else if gt $calculated $max -}}
@@ -93,29 +93,45 @@ Formula: (~totalMemoryMB / 10) capped between 25-200
 {{- end -}}
 {{- end }}
 
-{{/*
-System connections: CNPG, monitoring, migrations, psql, maintenance
+
+Reserved connections: CNPG, monitoring, migrations, psql, maintenance
 */}}
-{{- define "cnpg-cluster.systemConnections" -}}
-{{- .Values.connections.system | default 10 | int -}}
+{{- define "cnpg-cluster.reservedConnections" -}}
+{{- .Values.connections.reserved | default 10 | int -}}
 {{- end }}
 
 {{/*
 Pooler connections: For application traffic via PgBouncer
 */}}
 {{- define "cnpg-cluster.poolerConnections" -}}
-{{- .Values.connections.pooler | default 0 | int -}}
+{{- include "cnpg-cluster.validateConnections" . -}}
+{{- $pooler := .Values.connections.pooler | toString -}}
+{{- if eq $pooler "auto" -}}
+  {{- $max := include "cnpg-cluster.maxConnections" . | int -}}
+  {{- $reserved := include "cnpg-cluster.reservedConnections" . | int -}}
+  {{- $direct := .Values.connections.direct | int -}}
+  {{- $remaining := sub (sub $max $reserved) $direct -}}
+  {{- if lt $remaining 0 }}0{{ else }}{{ $remaining }}{{ end }}
+{{- else -}}
+  {{- $pooler | int -}}
+{{- end -}}
 {{- end }}
 
 {{/*
-Direct connections: Calculated as remaining after system and pooler
+Direct connections: Calculated as remaining after reserved and pooler
 */}}
 {{- define "cnpg-cluster.directConnections" -}}
-{{- $max := include "cnpg-cluster.maxConnections" . | int -}}
-{{- $system := include "cnpg-cluster.systemConnections" . | int -}}
-{{- $pooler := include "cnpg-cluster.poolerConnections" . | int -}}
-{{- $remaining := sub (sub $max $system) $pooler -}}
-{{- if lt $remaining 5 }}5{{ else }}{{ $remaining }}{{ end }}
+{{- include "cnpg-cluster.validateConnections" . -}}
+{{- $direct := .Values.connections.direct | toString -}}
+{{- if eq $direct "auto" -}}
+  {{- $max := include "cnpg-cluster.maxConnections" . | int -}}
+  {{- $reserved := include "cnpg-cluster.reservedConnections" . | int -}}
+  {{- $pooler := .Values.connections.pooler | int -}}
+  {{- $remaining := sub (sub $max $reserved) $pooler -}}
+  {{- if lt $remaining 5 }}5{{ else }}{{ $remaining }}{{ end }}
+{{- else -}}
+  {{- $direct | int -}}
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -212,6 +228,3 @@ Schedule for automatic backups
 {{- $minute := mod $offset 60 -}}
 {{- printf "0 %02d %d * * *" $minute $hour -}}
 {{- end }}
-{{- define "cnpg-cluster.namespace" -}}
-{{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
