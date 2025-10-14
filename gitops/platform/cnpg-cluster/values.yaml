@@ -32,7 +32,7 @@ connections:
   # Includes superuser access, background workers, and emergency access
   # Recommended minimum: 10
   reserved: 10
-
+  maxDbConnections: 2000
   # Pooler connections: For application connections via PgBouncer
   # Set to 0 to disable pooler, set to "auto" to allocate remaining connections
   # Cannot be "auto" if direct is also "auto"
