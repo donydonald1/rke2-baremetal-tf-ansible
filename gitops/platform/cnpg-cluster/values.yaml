@@ -124,11 +124,14 @@ managedRoles:
     name: gitlab-user-secret
 
 pooler:
+  maxDbConnections: 2000
   rw:
     enabled: true
     instances: 2
     mode: transaction
+    maxDbConnections: 2000
   ro:
     enabled: true
     instances: 2
     mode: transaction
+    maxDbConnections: 2000
