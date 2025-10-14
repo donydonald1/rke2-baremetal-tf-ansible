@@ -204,12 +204,12 @@ Pooler sizing helpers
 For transaction pooling mode
 */}}
 {{- define "cnpg-cluster.pooler.maxClientConn" -}}
-{{- /* For transaction mode: Allow 10-20x backend connections */ -}}
 {{- $db := include "cnpg-cluster.pooler.maxDbConnections" . | int -}}
 {{- if gt $db 0 -}}
-  {{- mul $db 15 -}}
+  {{- $calc := mul $db 15 -}}
+  {{- if lt $calc 2000 -}}2000{{- else -}}2000{{- end -}}
 {{- else -}}
-  10
+2000
 {{- end -}}
 {{- end }}
 
@@ -217,10 +217,10 @@ For transaction pooling mode
 {{- /* 70% of max_db_connections for transaction mode */ -}}
 {{- $db := include "cnpg-cluster.pooler.maxDbConnections" . | int -}}
 {{- if gt $db 0 -}}
-  {{- $v := div (mul $db 70) 2000 -}}
+  {{- $v := div (mul $db 2000) 2000 -}}
   {{- if lt $v 5 }}5{{ else }}{{ $v }}{{ end }}
 {{- else -}}
-  5
+  2000
 {{- end -}}
 {{- end }}
 
