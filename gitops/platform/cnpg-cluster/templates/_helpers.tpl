@@ -217,7 +217,7 @@ For transaction pooling mode
 {{- /* 70% of max_db_connections for transaction mode */ -}}
 {{- $db := include "cnpg-cluster.pooler.maxDbConnections" . | int -}}
 {{- if gt $db 0 -}}
-  {{- $v := div (mul $db 70) 100 -}}
+  {{- $v := div (mul $db 70) 2000 -}}
   {{- if lt $v 5 }}5{{ else }}{{ $v }}{{ end }}
 {{- else -}}
   5

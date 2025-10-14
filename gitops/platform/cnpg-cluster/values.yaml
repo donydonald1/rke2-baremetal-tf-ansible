@@ -36,13 +36,12 @@ connections:
   # Pooler connections: For application connections via PgBouncer
   # Set to 0 to disable pooler, set to "auto" to allocate remaining connections
   # Cannot be "auto" if direct is also "auto"
-  pooler: 0
-
+  pooler: 2
   # Direct connections: Uses internal connection pooling
   # Set to "auto" to allocate remaining connections after reserved and pooler
   # Cannot be "auto" if pooler is also "auto"
   # Automatically calculated as: max_connections - reserved - pooler
-  direct: auto
+  # direct: auto
 
 storageClass: longhorn
 storageSize: 150Gi
@@ -127,9 +126,9 @@ managedRoles:
 pooler:
   rw:
     enabled: true
-    instances: 1
+    instances: 2
     mode: transaction
   ro:
     enabled: true
-    instances: 1
+    instances: 2
     mode: transaction

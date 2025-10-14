@@ -143,10 +143,10 @@ global:
     host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
     port: 5432
     database: gitlab
-    username: gitlab
+    username: postgres
     password:
       useSecret: true
-      secret: postgresql-secret
+      secret: postgres-superuser-secret
       key: password
 gitlab:
   toolbox:
