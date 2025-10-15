@@ -5,6 +5,7 @@ metadata:
   namespace: gitlab
 spec:
   chart:
+    version: 9.4.2
     values:
       gitlab:
         gitaly:
