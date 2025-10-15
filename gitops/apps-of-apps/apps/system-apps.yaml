@@ -22,12 +22,12 @@ spec:
         namespace: elastic-system
         serverSideApply: true
 
-      # - name: gitlab-operator
-      #   namespace: gitlab
-      #   serverSideApply: true
-      #   helm:
-      #     values:
-      #     - values.yaml
+      - name: gitlab-operator
+        namespace: gitlab
+        serverSideApply: true
+        helm:
+          values:
+          - values.yaml
       # - name: longhorn
       #   namespace: longhorn-system
       #   serverSideApply: true
