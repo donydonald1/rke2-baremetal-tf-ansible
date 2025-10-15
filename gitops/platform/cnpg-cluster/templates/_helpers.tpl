@@ -76,20 +76,23 @@ Recommended for mixed workloads (OLTP + analytical queries)
 {{- end }}
 
 {{/*
-max_connections = Based on memory and expected workload
-Formula: (~totalMemoryMB / 10) capped between 25-2000
+max_connections = Based on memory unless overridden
 */}}
 {{- define "cnpg-cluster.maxConnections" -}}
-{{- $total := include "cnpg-cluster.totalMemoryMB" . | int -}}
-{{- $calculated := div $total 10 -}}
-{{- $min := 25 -}}
-{{- $max := 2000 -}}  {{/* was 200 */}}
-{{- if lt $calculated $min -}}
-  {{- $min -}}
-{{- else if gt $calculated $max -}}
-  {{- $max -}}
+{{- if .Values.postgresql.maxConnectionsOverride }}
+  {{- .Values.postgresql.maxConnectionsOverride | int -}}
 {{- else -}}
-  {{- $calculated -}}
+  {{- $total := include "cnpg-cluster.totalMemoryMB" . | int -}}
+  {{- $calculated := div $total 10 -}}
+  {{- $min := 25 -}}
+  {{- $max := 2000 -}}
+  {{- if lt $calculated $min -}}
+    {{- $min -}}
+  {{- else if gt $calculated $max -}}
+    {{- $max -}}
+  {{- else -}}
+    {{- $calculated -}}
+  {{- end -}}
 {{- end -}}
 {{- end }}
 

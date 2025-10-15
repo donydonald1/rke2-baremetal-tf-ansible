@@ -135,3 +135,5 @@ pooler:
     instances: 1
     mode: transaction
     maxDbConnections: 2000
+postgresql:
+  maxConnectionsOverride: 2000
