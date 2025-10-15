@@ -102,6 +102,7 @@ spec:
         syncOptions:
         - CreateNamespace=true
         # - ServerSideApply=true
+        - SkipCRDs=true
         - RespectIgnoreDifferences=true
         - PruneLast=true
         - PrunePropagationPolicy=foreground
