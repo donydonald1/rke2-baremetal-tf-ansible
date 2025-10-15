@@ -32,11 +32,10 @@ connections:
   # Includes superuser access, background workers, and emergency access
   # Recommended minimum: 10
   reserved: 10
-  maxDbConnections: 2000
   # Pooler connections: For application connections via PgBouncer
   # Set to 0 to disable pooler, set to "auto" to allocate remaining connections
   # Cannot be "auto" if direct is also "auto"
-  pooler: 2
+  pooler: auto
   # Direct connections: Uses internal connection pooling
   # Set to "auto" to allocate remaining connections after reserved and pooler
   # Cannot be "auto" if pooler is also "auto"
@@ -128,11 +127,11 @@ pooler:
   maxClientConn: 2000
   rw:
     enabled: true
-    instances: 2
+    instances: 1
     mode: transaction
     maxDbConnections: 2000
   ro:
     enabled: true
-    instances: 2
+    instances: 1
     mode: transaction
     maxDbConnections: 2000

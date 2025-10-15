@@ -77,13 +77,13 @@ Recommended for mixed workloads (OLTP + analytical queries)
 
 {{/*
 max_connections = Based on memory and expected workload
-Formula: (~totalMemoryMB / 10) capped between 25-200
+Formula: (~totalMemoryMB / 10) capped between 25-2000
 */}}
 {{- define "cnpg-cluster.maxConnections" -}}
 {{- $total := include "cnpg-cluster.totalMemoryMB" . | int -}}
 {{- $calculated := div $total 10 -}}
 {{- $min := 25 -}}
-{{- $max := 200 -}}
+{{- $max := 2000 -}}  {{/* was 200 */}}
 {{- if lt $calculated $min -}}
   {{- $min -}}
 {{- else if gt $calculated $max -}}
