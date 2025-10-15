@@ -9,7 +9,7 @@ spec:
   - list:
       elements:
       - name: apps
-        serverSideApply: true
+        # serverSideApply: true
         namespace: argocd
   template:
     metadata:
