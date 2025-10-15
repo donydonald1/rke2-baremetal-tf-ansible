@@ -24,7 +24,8 @@ spec:
       #   namespace: sonar
       - name: gitlab
         namespace: gitlab
-        serverSideApply: true
+        # serverSideApply: true
+        SkipCRDs: true
         helm:
           values:
           - values.yaml
