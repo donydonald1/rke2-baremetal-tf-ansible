@@ -307,7 +307,7 @@ prometheus:
   install: false
 
 redis:
-  # architecture: replication
+  architecture: replication
   global:
     defaultStorageClass: nfs-csi
     storageClass: nfs-csi
