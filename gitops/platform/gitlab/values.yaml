@@ -58,10 +58,10 @@ gitlab:
             key: config
     webservice:
       maxReplicas: 2
-      metrics:
-        tls:
-          enabled: true
-          secretName: webservice-metrics-tls-secret
+      # metrics:
+      #   tls:
+      #     enabled: true
+      #     secretName: webservice-metrics-tls-secret
       minReplicas: 1
       resources:
         requests:
@@ -74,9 +74,9 @@ gitlab:
         monitoring:
           exporter:
             enabled: true
-            tls:
-              enabled: true
-              secretName: workhorse-tls-secret
+            # tls:
+            #   enabled: true
+            #   secretName: workhorse-tls-secret
 
   gitlab-zoekt:
     install: false
@@ -292,10 +292,10 @@ gitlab:
       port: 5432
       username: postgres
     time_zone: America/Chicago
-    workhorse:
-      tls:
-        enabled: true
-        secretName: gitlab-tls-secret
+    # workhorse:
+    #   tls:
+    #     enabled: true
+    #     secretName: gitlab-tls-secret
   image:
     pullPolicy: Always
     tagSuffix: -fips
@@ -318,6 +318,6 @@ gitlab:
     storage:
       key: registry
       secret: registry-s3-config
-    tls:
-      enabled: true
-      secretName: registry-tls-secret
+      # tls:
+      #   enabled: true
+      # secretName: registry-tls-secret
