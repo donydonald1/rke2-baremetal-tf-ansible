@@ -183,7 +183,10 @@ ingress:
     gethomepage.dev/href: "https://${var.rancher_hostname != "" ? var.rancher_hostname : var.rancher_values}"
     gethomepage.dev/siteMonitor: "https://${var.rancher_hostname != "" ? var.rancher_hostname : var.rancher_values}"
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/revision-history-limit: "3"
     external-dns.alpha.kubernetes.io/enabled: "true"
+    cert-manager.io/duration: "2160h"
+    cert-manager.io/renew-before: "720h"
   hosts:
     - host: "${var.rancher_hostname != "" ? var.rancher_hostname : var.rancher_values}"
   tls:
