@@ -19,9 +19,17 @@ gitlab:
         bucket: gitlab-artifacts
         connection: {}
         enabled: true
+
   gitlab-shell:
     maxReplicas: 6
     minReplicas: 1
+    sshDaemon: gitlab-sshd
+    opensshd:
+      supplemental_config: |-
+        HostKeyAlgorithms +ssh-rsa,ssh-rsa-cert-v01@openssh.com
+        PubkeyAcceptedAlgorithms +ssh-rsa,ssh-rsa-cert-v01@openssh.com
+        CASignatureAlgorithms +ssh-rsa
+
   sidekiq:
     maxReplicas: 6
     minReplicas: 1
@@ -42,13 +50,16 @@ gitlab:
     extraEnv:
       AWS_DEFAULT_REGION: us-east-1
       AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+      AWS_ENDPOINT_URL_S3: http://minio.minio.svc.cluster.local:9000
+      AWS_S3_FORCE_PATH_STYLE: "1"
     persistence:
       enabled: true
     backups:
       cron:
         enabled: true
-        schedule: "@daily"
-        extraArgs: "--s3tool awscli --aws-s3-endpoint-url minio.minio.svc.cluster.local:9000"
+        # schedule: "@daily"
+        schedule: "0 * * * *"
+        extraArgs: "--s3tool awscli --aws-s3-endpoint-url http://minio.minio.svc.cluster.local:9000"
         persistence:
           enabled: true
       objectStorage:
@@ -57,6 +68,9 @@ gitlab:
           key: config
   webservice:
     maxReplicas: 2
+    ingress:
+      tls:
+        secretName: webservice-tls-secret
     # metrics:
     #   tls:
     #     enabled: true
@@ -68,7 +82,7 @@ gitlab:
         memory: 1000M
     # tls:
     #   enabled: true
-    #   secretName: webservice-tls-secret
+    #   secretName: gitlab-wildcard-tls
     workhorse:
       monitoring:
         exporter:
@@ -86,6 +100,7 @@ openbao:
   install: false
 
 gitlab-runner:
+  certsSecretName: gitlab-wildcard-tls-chain
   envVars:
   - name: RUNNER_ENV
     value: DOCKER_TLS_CERTDIR=/certs
@@ -141,6 +156,8 @@ gitlab-runner:
   securityContext:
     allowPrivilegeEscalation: true
     privileged: true
+certmanager-issuer:
+  email: donydonald1@icloud.com
 global:
   monitoring:
     enabled: true
@@ -225,12 +242,28 @@ global:
   common:
     labels:
       environment: production
+  registry:
+    notifications:
+      events:
+        includereferences: true
+      endpoints:
+      - name: alertmanager
+        url: http://kps-alertmanager.monitoring.svc.cluster.local:9093
+        timeout: 500ms
+        # DEPRECATED: use `maxretries` instead https://gitlab.com/gitlab-org/container-registry/-/issues/1243.
+        # When using `maxretries`, `threshold` is ignored: https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/configuration.md?ref_type=heads#endpoints
+        threshold: 5
+        maxretries: 5
+        backoff: 1s
+        headers:
+          X-Random-Config: [ plain direct ]
   hosts:
     domain: techsecom.io
+    https: true
+    hostSuffix: null
     gitlab:
       name: gitlab.prod.techsecom.io
-      protocol: https
-    hostSuffix: null
+      https: true
     kas:
       name: kas.gitlab.techsecom.io
       protocol: https
@@ -240,42 +273,29 @@ global:
     registry:
       name: gitlab.registry.techsecom.io
       protocol: https
-      notifications:
-        events:
-          includereferences: true
-        endpoints:
-        - name: alertmanager
-          url: http://kps-alertmanager.monitoring.svc.cluster.local:9093
-          timeout: 500mx
-          # DEPRECATED: use `maxretries` instead https://gitlab.com/gitlab-org/container-registry/-/issues/1243.
-          # When using `maxretries`, `threshold` is ignored: https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/configuration.md?ref_type=heads#endpoints
-          threshold: 5
-          maxretries: 5
-          backoff: 1s
-          headers:
-            X-Random-Config: [ plain direct ]
     smartcard:
       name: smartcard.gitlab.techsecom.io
-    ssh: gitlab.prod.techsecom.io
+    # ssh: ssh.gitlab.techsecom.io
   ingress:
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/tls-acme: "true"
       cert-manager.io/duration: 2160h
       cert-manager.io/renew-before: 720h
       cert-manager.io/revision-history-limit: "3"
       external-dns.alpha.kubernetes.io/enabled: "true"
       nginx.ingress.kubernetes.io/enable-access-log: "true"
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
-      # nginx.ingress.kubernetes.io/proxy-ssl-protocols: TLSv1.3 TLSv1.2
+      nginx.ingress.kubernetes.io/proxy-ssl-protocols: TLSv1.3 TLSv1.2
       nginx.ingress.kubernetes.io/ssl-passthrough: "false"
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
     class: nginx
     configureCertmanager: false
     enabled: true
-    provider: nginx
-    tls:
-      enabled: true
-      secretName: gitlab-wildcard-tls
+    # provider: nginx
+    # tls:
+    #   enabled: true
+    #   secretName: gitlab-wildcard-tls
   initialRootPassword:
     key: password
     secret: gitlab-initial-root-password
@@ -317,7 +337,10 @@ redis:
 registry:
   storage:
     key: registry
-    secret: registry-s3-config
+    secret: minio-s3-creds
+  ingress:
+    tls:
+      secretName: registry-tls-secret
     # tls:
     #   enabled: true
     # secretName: registry-tls-secret

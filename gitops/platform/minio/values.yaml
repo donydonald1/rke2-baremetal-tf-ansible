@@ -407,6 +407,12 @@ minio:
     versioning: true
     objectlocking: false
 
+  - name: gitlab-backups
+    policy: none
+    purge: false
+    versioning: true
+    objectlocking: false
+
   - name: rke2-management-clusters
     policy: none
     purge: false
