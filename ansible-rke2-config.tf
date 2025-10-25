@@ -77,8 +77,8 @@ rke2_kubelet_config:
   imageGCLowThresholdPercent: 70
 
 rke2_kubelet_arg:
-  - "kube-reserved=cpu=200m,memory=512Mi,ephemeral-storage=1Gi"
-  - "system-reserved=cpu=200m,memory=512Mi,ephemeral-storage=1Gi"
+  - "kube-reserved=cpu=200m,memory=512Mi"
+  - "system-reserved=cpu=200m,memory=512Mi"
   - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
   - "cgroup-driver=systemd"
   - "max-pods=600"
