@@ -56,7 +56,6 @@ rke2_kube_apiserver_args: [
     "audit-log-path=/var/log/rancher/audit.log",
     "audit-log-maxage=30",
     "audit-log-mode=blocking-strict",
-    "audit-log-maxage=30",
     # "anonymous-auth=false",
     # "insecure-port=0",
     "enable-admission-plugins=NodeRestriction,PodSecurity",
@@ -77,9 +76,9 @@ rke2_kubelet_config:
   imageGCLowThresholdPercent: 70
 
 rke2_kubelet_arg:
-  - "kube-reserved=cpu=200m,memory=512Mi"
-  - "system-reserved=cpu=200m,memory=512Mi"
-  - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
+  - "kube-reserved=cpu=500m,memory=512Mi"
+  - "system-reserved=cpu=500m,memory=512Mi"
+  # - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
   - "cgroup-driver=systemd"
   - "max-pods=600"
   # - "anonymous-auth=false"
@@ -90,6 +89,7 @@ rke2_kubelet_arg:
   - "alsologtostderr=true"
   - "logtostderr=true"
   - "protect-kernel-defaults=true"
+  - "root-dir=/opt/rke2/kubelet"
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: ${var.enable_rke2_selinux}

@@ -44,6 +44,7 @@ spec:
     - wg0
     - enp0s31f6
     - br0
+    - eth0
     operator:
       replicas: 1
     agent: true
