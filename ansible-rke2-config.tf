@@ -117,12 +117,7 @@ rke2_server_options:
   - "etcd-s3-region: ${var.s3_backup_region}"
   - "etcd-s3-folder: ${var.cluster_name}"
   - "etcd-snapshot-retention: ${var.etcd_snapshot_retention}"
-  - "enable-admission-plugins=NodeRestriction,PodSecurity"
-  - "auto-compaction-retention=1h"
-  - "max-request-bytes=33554432"
-  - "quota-backend-bytes=8589934592"  # 8GB
-  - "heartbeat-interval=100"
-  - "election-timeout=1000"
+
 rke2_cluster_cidr:
   - 10.42.0.0/16
 
