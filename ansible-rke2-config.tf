@@ -57,8 +57,8 @@ rke2_kube_apiserver_args: [
     "audit-log-maxage=30",
     "audit-log-mode=blocking-strict",
     "audit-log-maxage=30",
-    "anonymous-auth=false",
-    "insecure-port=0",
+    # "anonymous-auth=false",
+    # "insecure-port=0",
     "enable-admission-plugins=NodeRestriction,PodSecurity",
     "admission-control-config-file=/etc/rancher/rke2/rke2-psa.yaml",
 ]
@@ -82,8 +82,8 @@ rke2_kubelet_arg:
   - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
   - "cgroup-driver=systemd"
   - "max-pods=600"
-  - "anonymous-auth=false"
-  - "authorization-mode=Webhook"
+  # - "anonymous-auth=false"
+  # - "authorization-mode=Webhook"
   - "skip-log-headers=false"
   - "stderrthreshold=INFO"
   - "log-file-max-size=10"
