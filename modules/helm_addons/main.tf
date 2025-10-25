@@ -31,3 +31,16 @@ resource "helm_release" "metallb" {
   values           = [local.metallb_values]
 
 }
+
+resource "helm_release" "cnpg-barman-cloud" {
+  count            = var.enable_cloudnative_pg ? 1 : 0
+  name             = "cnpg-barman-cloud"
+  repository       = "https://cloudnative-pg.io/charts/"
+  chart            = "plugin-barman-cloud"
+  version          = var.cnpg_barman_cloud_version != "" ? var.cnpg_barman_cloud_version : "~> 0.7.0"
+  namespace        = var.cnpg_barman_cloud_namespace != "" ? var.cnpg_barman_cloud_namespace : "cnpg-system"
+  create_namespace = true
+  wait             = false
+  values           = [local.cnpg_barman_cloud_values]
+
+}

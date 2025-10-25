@@ -93,4 +93,15 @@ udp:
       - key: "node-role.kubernetes.io/master"
         operator: "Exists"
   EOT
+
+  cnpg_barman_cloud_values = var.cnpg_barman_cloud_values != "" ? var.cnpg_barman_cloud_values : <<EOT
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  EOT
 }

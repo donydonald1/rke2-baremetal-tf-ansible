@@ -57,6 +57,9 @@ rke2_kube_apiserver_args: [
     "audit-log-maxage=30",
     "audit-log-mode=blocking-strict",
     "audit-log-maxage=30",
+    "anonymous-auth=false",
+    "insecure-port=0",
+    "enable-admission-plugins=NodeRestriction,PodSecurity",
     "admission-control-config-file=/etc/rancher/rke2/rke2-psa.yaml",
 ]
 rke2_kube_controller_manager_arg:
@@ -74,11 +77,13 @@ rke2_kubelet_config:
   imageGCLowThresholdPercent: 70
 
 rke2_kubelet_arg:
-  # - "kube-reserved=cpu=0.5,memory=1Gi,ephemeral-storage=1Gi"
-  # - "system-reserved=cpu=2,memory=10Gi,ephemeral-storage=1Gi"
+  - "kube-reserved=cpu=200m,memory=512Mi,ephemeral-storage=1Gi"
+  - "system-reserved=cpu=200m,memory=512Mi,ephemeral-storage=1Gi"
   - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
   - "cgroup-driver=systemd"
   - "max-pods=600"
+  - "anonymous-auth=false"
+  - "authorization-mode=Webhook"
   - "skip-log-headers=false"
   - "stderrthreshold=INFO"
   - "log-file-max-size=10"
@@ -90,7 +95,7 @@ rke2_kubelet_arg:
 rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
 rke2_disable_cloud_controller: false
-
+rke2_etcd_snapshot_schedule: "0 */6 * * *"
 rke2_custom_manifests: 
   - "${path.module}/manifest/cilium.yaml"
   - "${path.module}/manifest/coredns.yaml"
@@ -112,6 +117,12 @@ rke2_server_options:
   - "etcd-s3-region: ${var.s3_backup_region}"
   - "etcd-s3-folder: ${var.cluster_name}"
   - "etcd-snapshot-retention: ${var.etcd_snapshot_retention}"
+  - "enable-admission-plugins=NodeRestriction,PodSecurity"
+  - "auto-compaction-retention=1h"
+  - "max-request-bytes=33554432"
+  - "quota-backend-bytes=8589934592"  # 8GB
+  - "heartbeat-interval=100"
+  - "election-timeout=1000"
 rke2_cluster_cidr:
   - 10.42.0.0/16
 

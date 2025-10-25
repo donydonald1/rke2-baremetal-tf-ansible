@@ -119,3 +119,27 @@ variable "ingress_lb_ip" {
   type        = string
   default     = ""
 }
+
+variable "cnpg_barman_cloud_version" {
+  description = "The version of the CNPG Barman Cloud Helm chart to use"
+  type        = string
+  default     = "~> 0.7"
+}
+
+variable "cnpg_barman_cloud_values" {
+  description = "Values for the CNPG Barman Cloud Helm chart"
+  type        = string
+  default     = ""
+}
+
+variable "cnpg_barman_cloud_namespace" {
+  description = "The namespace for the CNPG Barman Cloud Helm chart"
+  type        = string
+  default     = "cnpg-system"
+}
+
+variable "enable_cloudnative_pg" {
+  description = "Whether to enable the CloudNativePG Barman Cloud Helm chart"
+  type        = bool
+  default     = true
+}

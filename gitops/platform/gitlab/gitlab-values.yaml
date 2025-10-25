@@ -8,7 +8,7 @@ gitlab:
     minReplicas: 1
     resources:
       requests:
-        cpu: 300m
+        cpu: 200m
         memory: 1000M
     # tls:
     #   enabled: true
@@ -163,7 +163,11 @@ global:
     enabled: true
   openbao:
     enabled: false
+
   appConfig:
+    initialDefaults:
+      signupEnabled: false
+      gitlabProductUsageData: true
     artifacts:
       bucket: gitlab-artifacts
       connection: {}
@@ -292,7 +296,7 @@ global:
     class: nginx
     configureCertmanager: false
     enabled: true
-    # provider: nginx
+    provider: nginx
     # tls:
     #   enabled: true
     #   secretName: gitlab-wildcard-tls
@@ -337,7 +341,7 @@ redis:
 registry:
   storage:
     key: registry
-    secret: minio-s3-creds
+    secret: registry-s3-config
   ingress:
     tls:
       secretName: registry-tls-secret
