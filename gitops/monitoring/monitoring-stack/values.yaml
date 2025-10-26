@@ -262,7 +262,7 @@ kube-prometheus-stack:
       podMonitorSelectorNilUsesHelmValues: true
       enableRemoteWriteReceiver: true
       enableAdminAPI: true
-      replicas: 2
+      replicas: 1
       # walCompression: true
       # allow operator to pick up ScrapeConfig CRDs from anywhere
       scrapeConfigSelector: {}

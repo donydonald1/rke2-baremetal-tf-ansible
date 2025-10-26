@@ -22,9 +22,9 @@ spec:
         namespace: elastic-system
         serverSideApply: true
 
-      - name: gitlab-operator
-        namespace: gitlab
-        serverSideApply: true
+        # - name: gitlab-operator
+        #   namespace: gitlab
+        #   serverSideApply: true
         helm:
           values:
           - values.yaml
@@ -59,17 +59,18 @@ spec:
         namespace: keycloak-operator
         serverSideApply: true
 
-      - name: minio-operator
-        namespace: minio-operator
-        serverSideApply: true
+      # - name: minio-operator
+      #   namespace: minio-operator
+      #   serverSideApply: true
 
       - name: opentelemetry-operator
-      - name: redis-operator
-        serverSideApply: true
 
-      - name: sonar-operator
-        namespace: sonarqube
-        serverSideApply: true
+      # - name: redis-operator
+      #   serverSideApply: true
+
+      # - name: sonar-operator
+      #   namespace: sonarqube
+      #   serverSideApply: true
 
       - name: keda
         namespace: keda
