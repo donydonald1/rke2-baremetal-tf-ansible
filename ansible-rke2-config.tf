@@ -76,16 +76,17 @@ rke2_kubelet_config:
   imageGCLowThresholdPercent: 70
 
 rke2_kubelet_arg:
-  # - "kube-reserved=cpu=1000m,memory=1Gi"
-  # - "system-reserved=cpu=1000m,memory=1Gi"
-  - "memory-manager-policy=Static"
-  # - "reserved-memory=0:memory=2Gi"
-  # - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
-  # - "eviction-minimum-reclaim=imagefs.available=10%,nodefs.available=10%"
   - "fail-swap-on=false"
-  - "feature-gates=MemoryManager=true"
-  - "cgroup-driver=cgroupfs"
-  # - "cgroup-driver=systemd"
+  - "cgroup-driver=systemd"
+  - "max-pods=600"
+  - "protect-kernel-defaults=true"
+  # CPU and Memory reservations
+  - "memory-manager-policy=Static"
+  - "system-reserved=cpu=500m,memory=1Gi"
+  - "kube-reserved=cpu=1200m,memory=1.5Gi"
+  # Eviction policy
+  - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
+  - "eviction-minimum-reclaim=imagefs.available=100Mi,nodefs.available=100Mi"
   - "max-pods=600"
   # - "anonymous-auth=false"
   # - "authorization-mode=Webhook"
@@ -95,7 +96,7 @@ rke2_kubelet_arg:
   - "alsologtostderr=true"
   - "logtostderr=true"
   - "protect-kernel-defaults=true"
-  - "root-dir=/opt/rke2/kubelet"
+  # - "root-dir=/opt/rke2/kubelet"
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: ${var.enable_rke2_selinux}
