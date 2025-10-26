@@ -72,8 +72,29 @@ k8s_node_label:
   - rke2_upgrade=true
 
 rke2_kubelet_config:
-  imageGCHighThresholdPercent: 80
-  imageGCLowThresholdPercent: 70
+    cpuManagerReconcilePeriod: 0s
+    clusterDomain: cluster.local
+    cpuManagerPolicy: static
+    cpuManagerPolicyOptions:
+      full-pcpus-only: "true"
+      distribute-cpus-across-numa: "true"
+      align-by-socket: "true"
+    kubeReserved:
+      cpu: "1200m"
+      memory: "2Gi"
+      ephemeral-storage: "1Gi"
+    systemReserved:
+      cpu: "500m"
+      memory: "1Gi"
+      ephemeral-storage: "1Gi"
+    # evictionHard:
+    #   memory.available: "100Mi"
+    #   nodefs.available: "10%"
+    featureGates:
+      CPUManager: true
+      CPUManagerPolicyOptions: true
+      CPUManagerPolicyAlphaOptions: true
+      CPUManagerPolicyBetaOptions: true
 
 rke2_kubelet_arg:
   - "fail-swap-on=false"
@@ -96,7 +117,7 @@ rke2_kubelet_arg:
   - "alsologtostderr=true"
   - "logtostderr=true"
   - "root-dir=/opt/rke2/kubelet"
-  # - "config=/etc/rancher/rke2/kubelet-config.yaml"
+  - "config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
