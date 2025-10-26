@@ -76,10 +76,16 @@ rke2_kubelet_config:
   imageGCLowThresholdPercent: 70
 
 rke2_kubelet_arg:
-  - "kube-reserved=cpu=500m,memory=512Mi"
-  - "system-reserved=cpu=500m,memory=512Mi"
-  - "eviction-hard=memory.available<500Mi,nodefs.available<10%"
-  - "cgroup-driver=systemd"
+  - "kube-reserved=cpu=400m,memory=1Gi"
+  - "system-reserved=cpu=400m,memory=1Gi"
+  - "memory-manager-policy=Static"
+  - "reserved-memory=0:memory=2Gi"
+  - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
+  - "eviction-minimum-reclaim=imagefs.available=10%,nodefs.available=10%"
+  - "fail-swap-on=false"
+  - "feature-gates=MemoryManager=true"
+  - "cgroup-driver=cgroupfs"
+  # - "cgroup-driver=systemd"
   - "max-pods=600"
   # - "anonymous-auth=false"
   # - "authorization-mode=Webhook"
