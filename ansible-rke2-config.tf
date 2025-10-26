@@ -95,8 +95,8 @@ rke2_kubelet_arg:
   - "log-file-max-size=10"
   - "alsologtostderr=true"
   - "logtostderr=true"
-  # - "root-dir=/opt/rke2/kubelet"
-  - "--config=/etc/rancher/rke2/kubelet-config.yaml"
+  - "root-dir=/opt/rke2/kubelet"
+  - "config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
