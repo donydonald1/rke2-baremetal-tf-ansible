@@ -72,7 +72,6 @@ k8s_node_label:
   - rke2_upgrade=true
 
 rke2_kubelet_config:
-    cpuManagerReconcilePeriod: 0s
     clusterDomain: cluster.local
     cpuManagerPolicy: static
     cpuManagerPolicyOptions:
