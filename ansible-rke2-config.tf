@@ -76,8 +76,8 @@ rke2_kubelet_config:
   imageGCLowThresholdPercent: 70
 
 rke2_kubelet_arg:
-  - "kube-reserved=cpu=500m,memory=1Gi"
-  - "system-reserved=cpu=500m,memory=1Gi"
+  # - "kube-reserved=cpu=1000m,memory=1Gi"
+  # - "system-reserved=cpu=1000m,memory=1Gi"
   - "memory-manager-policy=Static"
   - "reserved-memory=0:memory=2Gi"
   - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
