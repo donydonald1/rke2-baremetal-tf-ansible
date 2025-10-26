@@ -95,7 +95,6 @@ rke2_kubelet_arg:
   - "log-file-max-size=10"
   - "alsologtostderr=true"
   - "logtostderr=true"
-  - "protect-kernel-defaults=true"
   # - "root-dir=/opt/rke2/kubelet"
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
