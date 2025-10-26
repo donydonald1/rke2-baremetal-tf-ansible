@@ -87,9 +87,13 @@ rke2_kubelet_config:
       cpu: "500m"
       memory: "1Gi"
       ephemeral-storage: "1Gi"
-    # evictionHard:
-    #   memory.available: "100Mi"
-    #   nodefs.available: "10%"
+    serializeImagePulls: false
+    evictionHard:
+        memory.available:  "100Mi"
+        nodefs.available:  "10%"
+        nodefs.inodesFree: "5%"
+        imagefs.available: "15%"
+        imagefs.inodesFree: "5%"
     featureGates:
       CPUManager: true
       CPUManagerPolicyOptions: true
