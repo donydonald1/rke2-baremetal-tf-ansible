@@ -88,6 +88,10 @@ rke2_kubelet_config:
       memory: "1Gi"
       ephemeral-storage: "1Gi"
     serializeImagePulls: false
+    cgroupDriver: "systemd"
+    protectKernelDefaults: true
+    failSwapOn: false
+    maxPods: 600
     evictionHard:
         memory.available:  "100Mi"
         nodefs.available:  "10%"
@@ -101,26 +105,26 @@ rke2_kubelet_config:
       CPUManagerPolicyBetaOptions: true
 
 rke2_kubelet_arg:
-  - "fail-swap-on=false"
-  - "cgroup-driver=systemd"
-  - "max-pods=600"
-  - "protect-kernel-defaults=true"
-  # CPU and Memory reservations
-  - "memory-manager-policy=Static"
-  - "system-reserved=cpu=500m,memory=1Gi"
-  - "kube-reserved=cpu=1200m,memory=1.5Gi"
-  # Eviction policy
-  - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
-  - "eviction-minimum-reclaim=imagefs.available=100Mi,nodefs.available=100Mi"
-  - "max-pods=600"
-  # - "anonymous-auth=false"
-  # - "authorization-mode=Webhook"
-  - "skip-log-headers=false"
-  - "stderrthreshold=INFO"
-  - "log-file-max-size=10"
-  - "alsologtostderr=true"
-  - "logtostderr=true"
-  - "root-dir=/opt/rke2/kubelet"
+  # - "fail-swap-on=false"
+  # - "cgroup-driver=systemd"
+  # - "max-pods=600"
+  # - "protect-kernel-defaults=true"
+  # # CPU and Memory reservations
+  # # - "memory-manager-policy=Static"
+  # # - "system-reserved=cpu=500m,memory=1Gi"
+  # # - "kube-reserved=cpu=1200m,memory=1.5Gi"
+  # # Eviction policy
+  # - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
+  # - "eviction-minimum-reclaim=imagefs.available=100Mi,nodefs.available=100Mi"
+  # - "max-pods=600"
+  # # - "anonymous-auth=false"
+  # # - "authorization-mode=Webhook"
+  # - "skip-log-headers=false"
+  # - "stderrthreshold=INFO"
+  # - "log-file-max-size=10"
+  # - "alsologtostderr=true"
+  # - "logtostderr=true"
+  # - "root-dir=/opt/rke2/kubelet"
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: ${var.enable_rke2_selinux}
