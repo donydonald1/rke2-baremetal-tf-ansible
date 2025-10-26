@@ -78,7 +78,7 @@ rke2_kubelet_config:
 rke2_kubelet_arg:
   - "kube-reserved=cpu=500m,memory=512Mi"
   - "system-reserved=cpu=500m,memory=512Mi"
-  # - "eviction-hard=memory.available<300Mi,nodefs.available<10%"
+  - "eviction-hard=memory.available<500Mi,nodefs.available<10%"
   - "cgroup-driver=systemd"
   - "max-pods=600"
   # - "anonymous-auth=false"

@@ -123,7 +123,11 @@ variable "ingress_lb_ip" {
 variable "cnpg_barman_cloud_version" {
   description = "The version of the CNPG Barman Cloud Helm chart to use"
   type        = string
-  default     = "~> 0.7"
+  default     = "0.2.0"
+  validation {
+    condition     = (var.enable_cloudnative_pg && var.cnpg_barman_cloud_version != "")
+    error_message = "If enable_cloudnative_pg is true, cnpg_barman_cloud_version must be provided and cannot be empty."
+  }
 }
 
 variable "cnpg_barman_cloud_values" {
