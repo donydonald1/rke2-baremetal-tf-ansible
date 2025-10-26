@@ -63,7 +63,7 @@ spec:
       #   namespace: minio-operator
       #   serverSideApply: true
 
-      - name: opentelemetry-operator
+      # - name: opentelemetry-operator
 
       # - name: redis-operator
       #   serverSideApply: true
