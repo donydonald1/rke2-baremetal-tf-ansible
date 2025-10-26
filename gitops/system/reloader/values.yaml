@@ -1,0 +1,3 @@
+reloader:
+  autoReloadAll: true
+  isArgoRollouts: true

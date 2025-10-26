@@ -86,10 +86,9 @@ spec:
       - name: descheduler
         namespace: descheduler
         serverSideApply: true
-
-      - name: node-feature-discovery
-        namespace: node-feature-discovery
-        serverSideApply: true
+        # - name: node-feature-discovery
+        #   namespace: node-feature-discovery
+        #   serverSideApply: true
         # - name: node-problem-detector
         #   namespace: node-problem-detector
         #   serverSideApply: true
