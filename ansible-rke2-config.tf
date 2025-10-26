@@ -92,12 +92,39 @@ rke2_kubelet_config:
     protectKernelDefaults: true
     failSwapOn: false
     maxPods: 600
-    evictionHard:
-      memory.available:  "100Mi"
-      nodefs.available:  "10%"
+    evictionSoft:
+      memory.available: "500Mi"
+      nodefs.available: "10%"
       nodefs.inodesFree: "5%"
       imagefs.available: "15%"
+      imagefs.inodesFree: "10%"
+    evictionSoftGracePeriod:
+      memory.available: "1m30s"
+      nodefs.available: "1m30s"
+      nodefs.inodesFree: "1m30s"
+      imagefs.available: "1m30s"
+      imagefs.inodesFree: "1m30s"
+    evictionHard:
+      memory.available: "200Mi"
+      nodefs.available: "5%"
+      nodefs.inodesFree: "4%"
+      imagefs.available: "10%"
       imagefs.inodesFree: "5%"
+    evictionPressureTransitionPeriod: 5m0s
+    imageMinimumGCAge: 5m
+    imageGCHighThresholdPercent: 80
+    imageGCLowThresholdPercent: 75
+    streamingConnectionIdleTimeout: 4h0m0s
+    nodeStatusUpdateFrequency: 10s
+    nodeStatusReportFrequency: 1m
+    volumeStatsAggPeriod: 1m0s
+    syncFrequency: 1m0s
+    fileCheckFrequency: 20s
+    httpCheckFrequency: 20s
+    cpuManagerReconcilePeriod: 10s
+    runtimeRequestTimeout: 2m0s
+    shutdownGracePeriod: 0s
+    shutdownGracePeriodCriticalPods: 0s
     featureGates:
       CPUManagerPolicyOptions: true
       CPUManagerPolicyAlphaOptions: true
