@@ -606,6 +606,7 @@ clusterResourceNamespace: cert-manager
             external-dns.alpha.kubernetes.io/enabled: "true"
   EOT
   csi-driver-nfs_values = var.csi-driver-nfs_values != "" ? var.csi-driver-nfs_values : <<EOT
+    kubeletDir: /opt/rke2/kubelet
     feature:
       enableFSGroupPolicy: true
       enableInlineVolume: true
