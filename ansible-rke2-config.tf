@@ -99,7 +99,6 @@ rke2_kubelet_config:
         imagefs.available: "15%"
         imagefs.inodesFree: "5%"
     featureGates:
-      CPUManager: true
       CPUManagerPolicyOptions: true
       CPUManagerPolicyAlphaOptions: true
       CPUManagerPolicyBetaOptions: true
