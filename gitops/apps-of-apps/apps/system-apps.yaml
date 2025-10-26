@@ -55,9 +55,9 @@ spec:
 
       # - name: jaeger-operator
 
-      - name: keycloak-operator
-        namespace: keycloak-operator
-        serverSideApply: true
+      # - name: keycloak-operator
+      #   namespace: keycloak-operator
+      #   serverSideApply: true
 
       # - name: minio-operator
       #   namespace: minio-operator
@@ -90,10 +90,10 @@ spec:
       - name: node-feature-discovery
         namespace: node-feature-discovery
         serverSideApply: true
+        # - name: node-problem-detector
+        #   namespace: node-problem-detector
+        #   serverSideApply: true
 
-      - name: node-problem-detector
-        namespace: node-problem-detector
-        serverSideApply: true
         # - name: external-secrets
         #   namespace: external-secrets
         #   serverSideApply: true
