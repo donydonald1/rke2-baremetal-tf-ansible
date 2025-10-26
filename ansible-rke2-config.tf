@@ -93,11 +93,11 @@ rke2_kubelet_config:
     failSwapOn: false
     maxPods: 600
     evictionHard:
-        memory.available:  "100Mi"
-        nodefs.available:  "10%"
-        nodefs.inodesFree: "5%"
-        imagefs.available: "15%"
-        imagefs.inodesFree: "5%"
+      memory.available:  "100Mi"
+      nodefs.available:  "10%"
+      nodefs.inodesFree: "5%"
+      imagefs.available: "15%"
+      imagefs.inodesFree: "5%"
     featureGates:
       CPUManagerPolicyOptions: true
       CPUManagerPolicyAlphaOptions: true
