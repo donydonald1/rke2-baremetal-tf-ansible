@@ -129,6 +129,6 @@ resource "null_resource" "nfs_host_mapping" {
       EOT
     ]
   }
-  depends_on = [null_resource.rhel_rh_enable]
+  # depends_on = [null_resource.rhel_rh_enable]
 }
 
