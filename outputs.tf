@@ -1,13 +1,16 @@
-output "server_names" {
-  value = module.rke2_metalhost_servers.server_names
+output "control_plane_hosts" {
+  value = module.rke2_metalhost_servers.control_plane_hosts
 }
 
-output "servers_ips" {
-  value = module.rke2_metalhost_servers.server_ips
+output "worker_hosts" {
+  value = module.rke2_metalhost_servers.worker_hosts
+}
+output "all_hosts_name_to_ip" {
+  value = module.rke2_metalhost_servers.all_hosts_name_to_ip
 }
 
-output "servers_by_name" {
-  value = { for server in module.rke2_metalhost_servers.servers_by_name : server.name => server.ip }
+output "all_hosts_by_name" {
+  value = module.rke2_metalhost_servers.all_hosts_by_name
 }
 
 output "rke2_private_registries" {
