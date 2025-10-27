@@ -1,5 +1,13 @@
-variable "baremetal_servers" {
-  description = "List of bare-metal servers with name and IP"
+variable "control_plane_servers" {
+  description = "List of control plane servers with name and IP"
+  type = list(object({
+    name = string
+    ip   = string
+  }))
+}
+
+variable "worker_servers" {
+  description = "List of worker servers with name and IP"
   type = list(object({
     name = string
     ip   = string
@@ -7,7 +15,7 @@ variable "baremetal_servers" {
 
   // Optional: guard that IPs look like IPv4
   validation {
-    condition     = alltrue([for s in var.baremetal_servers : can(regex("^((25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.){3}(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$", s.ip))])
+    condition     = alltrue([for s in var.worker_servers : can(regex("^((25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.){3}(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$", s.ip))])
     error_message = "Each server.ip must be a valid IPv4 address."
   }
 }

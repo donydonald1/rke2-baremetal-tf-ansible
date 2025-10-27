@@ -1,7 +1,14 @@
 locals {
-  server_names    = [for s in var.baremetal_servers : s.name]
-  server_ips      = [for s in var.baremetal_servers : s.ip]
-  servers_by_name = { for s in var.baremetal_servers : s.name => s } # map lookup
+  # server_names    = [for s in var.baremetal_servers : s.name]
+  # server_ips      = [for s in var.baremetal_servers : s.ip]
+
+  control_plane_hosts = { for s in var.control_plane_servers : s.name => s.ip }
+  worker_hosts        = { for s in var.worker_servers : s.name => s.ip }
+  all_hosts_by_name = {
+    for s in concat(var.control_plane_servers, var.worker_servers) :
+    s.name => s
+  }
+  all_hosts_name_to_ip = merge(local.control_plane_hosts, local.worker_hosts)
   rke2_registries_yaml = var.private_registries != "" ? trimspace(var.private_registries) : yamlencode({
     configs = {
       (var.private_registry_url) = {

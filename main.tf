@@ -1,6 +1,7 @@
 module "rke2_metalhost_servers" {
   source                                = "./modules/metalhost/"
-  baremetal_servers                     = var.baremetal_servers
+  control_plane_servers                 = var.control_plane_servers
+  worker_servers                        = var.worker_servers
   private_registry_url                  = var.private_registry_url
   private_registry_username             = var.private_registry_username
   private_registry_password             = var.private_registry_password
@@ -19,7 +20,7 @@ module "rke2_metalhost_servers" {
 }
 
 resource "null_resource" "control_plane_config" {
-  for_each = { for idx, ip in module.rke2_metalhost_servers.server_ips : idx => ip }
+  for_each = { for idx, ip in module.rke2_metalhost_servers.control_plane_hosts : idx => ip }
 
   connection {
     user        = "root"
@@ -63,14 +64,14 @@ resource "random_password" "rancher_bootstrap" {
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/templates/ansible_inventory.tftpl", {
-    hosts           = zipmap(module.rke2_metalhost_servers.server_names, module.rke2_metalhost_servers.server_ips)
-    vm_user         = "root"
-    ssh_port        = var.ssh_port
-    ssh_private_key = var.ssh_private_key_file
-    cluster_name    = var.cluster_name
+    control_plane_hosts = module.rke2_metalhost_servers.control_plane_hosts
+    worker_hosts        = module.rke2_metalhost_servers.worker_hosts
+    vm_user             = "root"
+    ssh_port            = var.ssh_port
+    ssh_private_key     = var.ssh_private_key_file
+    cluster_name        = var.cluster_name
   })
-  filename = "${path.root}/${var.cluster_name}-inventory.ini"
-
+  filename   = "${path.root}/${var.cluster_name}-inventory.ini"
   depends_on = [module.rke2_metalhost_servers]
 }
 
