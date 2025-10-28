@@ -83,7 +83,7 @@ rke2_kubelet_config:
       distribute-cpus-across-numa: "true"
       align-by-socket: "true"
     kubeReserved:
-      cpu: "1200m"
+      cpu: "500m"
       memory: "2Gi"
       ephemeral-storage: "1Gi"
     systemReserved:
@@ -97,7 +97,7 @@ rke2_kubelet_config:
     maxPods: 600
     evictionSoft:
       memory.available: "500Mi"
-      nodefs.available: "10%"
+      nodefs.available: "1%"
       nodefs.inodesFree: "5%"
       imagefs.available: "15%"
       imagefs.inodesFree: "10%"
