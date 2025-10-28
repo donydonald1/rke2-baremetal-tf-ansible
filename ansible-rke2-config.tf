@@ -83,11 +83,11 @@ rke2_kubelet_config:
       distribute-cpus-across-numa: "true"
       align-by-socket: "true"
     kubeReserved:
-      cpu: "500m"
+      cpu: "100m"
       memory: "2Gi"
       ephemeral-storage: "1Gi"
     systemReserved:
-      cpu: "500m"
+      cpu: "100m"
       memory: "1Gi"
       ephemeral-storage: "1Gi"
     serializeImagePulls: false
