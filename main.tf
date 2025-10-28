@@ -135,7 +135,7 @@ resource "null_resource" "rke2_selinux_labels" {
   }
 
   triggers = {
-    host       = each.value
+    host       = each.value.ip
     script_rev = "2"
   }
 
