@@ -125,7 +125,7 @@ resource "null_resource" "run_ansible_playbook" {
 }
 
 resource "null_resource" "rke2_selinux_labels" {
-  for_each = toset(module.rke2_metalhost_servers.all_hosts_name_to_ip)
+  for_each = module.rke2_metalhost_servers.all_hosts_by_name
 
   connection {
     type        = "ssh"
