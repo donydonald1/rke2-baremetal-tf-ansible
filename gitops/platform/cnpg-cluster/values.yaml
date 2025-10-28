@@ -42,7 +42,7 @@ connections:
   # Automatically calculated as: max_connections - reserved - pooler
   # direct: auto
 
-storageClass: longhorn
+storageClass: nfs-local-path
 storageSize: 50Gi
 maxConnections: 2000
 objectStore:
