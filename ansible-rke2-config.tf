@@ -1,12 +1,17 @@
 locals {
   ansible_hosts_group = var.ansible_hosts_group != "" ? var.ansible_hosts_group : "all"
-  all_sans = concat(
-    flatten([module.rke2_metalhost_servers.all_hosts_name_to_ip]),
-    # flatten([module.rke2_metalhost_servers.all_hosts_by_name]),
-    flatten([var.manager_rke2_api_dns]),
-    flatten([var.manager_rke2_api_ip]),
+  all_sans = distinct(
+    concat(
+      local.hostnames,
+      local.hostips,
+      var.manager_rke2_api_dns,
+      var.manager_rke2_api_ip
+    )
   )
-
+  name_to_ip = module.rke2_metalhost_servers.all_hosts_name_to_ip
+  # Derive lists of strings
+  hostnames             = [for n in keys(local.name_to_ip) : tostring(n)]
+  hostips               = [for i in values(local.name_to_ip) : tostring(i)]
   cluster_config_values = var.cluster_config_values != "" ? var.cluster_config_values : <<EOT
 rke2_airgap_mode: false
 rke2_ha_mode: true
