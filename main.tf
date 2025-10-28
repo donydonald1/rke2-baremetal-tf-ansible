@@ -183,7 +183,7 @@ resource "null_resource" "kustomization" {
   connection {
     user        = "root"
     private_key = file(var.ssh_private_key_file)
-    host        = module.rke2_metalhost_servers.all_hosts_name_to_ip[0]
+    host        = module.rke2_metalhost_servers.control_plane_ips[0]
     port        = var.ssh_port
     script_path = "/root/terraform_%RAND%.sh"
   }
