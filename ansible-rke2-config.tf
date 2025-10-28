@@ -1,8 +1,8 @@
 locals {
   ansible_hosts_group = var.ansible_hosts_group != "" ? var.ansible_hosts_group : "all"
   all_sans = concat(
-    flatten([module.rke2_metalhost_servers.control_plane_hosts]),
-    flatten([module.rke2_metalhost_servers.worker_hosts]),
+    flatten([module.rke2_metalhost_servers.control_plane_ips]),
+    flatten([module.rke2_metalhost_servers.worker_ips]),
     flatten([var.manager_rke2_api_dns]),
     flatten([var.manager_rke2_api_ip]),
   )
