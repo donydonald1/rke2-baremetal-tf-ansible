@@ -101,10 +101,7 @@ spec:
       method: any
       number: 1
     {{- end }}
-    securityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
+
   # https://cloudnative-pg.io/documentation/current/storage/
   storage:
     storageClass: {{ .Values.storageClass }}
