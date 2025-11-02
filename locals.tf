@@ -662,4 +662,5 @@ clusterResourceNamespace: cert-manager
     "${path.module}/manifest/prometheus-operator.yaml",
     "${path.module}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml",
   ]
+  extra_manifests_dir = coalesce(var.extra_manifests_dir, "${path.module}/manifest")
 }

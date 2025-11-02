@@ -729,8 +729,8 @@ variable "extra_manifests" {
   default = []
 }
 
-variable "generated_manifest_dir" {
-  description = "Where generated files will be written."
+variable "extra_manifests_dir" {
+  description = "Directory containing additional manifest files to append to rke2_custom_manifests."
   type        = string
-  default     = "${path.module}/manifest/"
+  default     = null
 }

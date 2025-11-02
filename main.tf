@@ -360,17 +360,16 @@ resource "null_resource" "kustomization" {
 
 resource "null_resource" "ensure_generated_dir" {
   provisioner "local-exec" {
-    command = "mkdir -p ${var.generated_manifest_dir}"
+    command = "mkdir -p ${local.extra_manifests_dir}"
   }
 }
+
 
 resource "local_file" "extra_manifest" {
   for_each = {
     for m in var.extra_manifests : m.filename => m
   }
-
-  filename = "${var.generated_manifest_dir}/${each.key}"
-  content  = each.value.content
-
+  filename   = "${local.extra_manifests_dir}/${each.key}"
+  content    = each.value.content
   depends_on = [null_resource.ensure_generated_dir]
 }
