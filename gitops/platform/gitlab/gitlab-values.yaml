@@ -362,7 +362,7 @@ registry:
     host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
     port: 5432
     migrations:
-      enabled: true
+      enabled: false
   storage:
     key: registry
     secret: registry-s3-config
