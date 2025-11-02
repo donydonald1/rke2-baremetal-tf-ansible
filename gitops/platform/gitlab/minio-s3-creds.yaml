@@ -79,6 +79,8 @@ spec:
                       region: "us-east-1"
                       regionendpoint: "http://minio.minio.svc.cluster.local:9000"
                       v4auth: true
+                      secure: false
+                      pathstyle: true
     data:
       - secretKey: MINIO_ACCESS_KEY
         remoteRef:

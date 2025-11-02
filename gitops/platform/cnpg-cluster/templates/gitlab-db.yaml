@@ -7,3 +7,13 @@ spec:
     owner: gitlab
     cluster:
         name: cnpg-cluster
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+    name: gitlab-registry-db
+spec:
+    name: gitlab-registry
+    owner: gitlab
+    cluster:
+        name: cnpg-cluster

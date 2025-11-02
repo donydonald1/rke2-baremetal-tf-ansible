@@ -247,6 +247,7 @@ global:
     labels:
       environment: production
   registry:
+    bucket: gitlab-registry
     notifications:
       events:
         includereferences: true
@@ -331,20 +332,58 @@ prometheus:
   install: false
 
 redis:
-  architecture: replication
+  # architecture: replication
   global:
     defaultStorageClass: nfs-csi
     storageClass: nfs-csi
+  replica:
+    kind: StatefulSet
+    persistence:
+      size: 20Gi
+    replicaCount: 3
   resources:
     requests:
       cpu: 100m
+    # sentinel:
+    #   enabled: true
+    # image:
+    #   registry: docker.io
+    #   repository: bitnamilegacy/redis-sentinel
+    #   tag: 8.2.1-debian-12-r0
 registry:
+  enabled: true
+  database:
+    enabled: true
+    name: gitlab-registry-db
+    user: postgres
+    password:
+      key: password
+      secret: postgres-superuser-secret
+    host: cnpg-cluster-rw.cnpg-system.svc.cluster.local
+    port: 5432
+    migrations:
+      enabled: true
   storage:
     key: registry
     secret: registry-s3-config
   ingress:
+    enabled: true
     tls:
       secretName: registry-tls-secret
-    # tls:
-    #   enabled: true
-    # secretName: registry-tls-secret
+  tls:
+    enabled: true
+    secretName: registry-tls-secret
+  notifications:
+    events:
+      includereferences: true
+    endpoints:
+    - name: alertmanager
+      url: http://kps-alertmanager.monitoring.svc.cluster.local:9093
+      timeout: 500ms
+      # DEPRECATED: use `maxretries` instead https://gitlab.com/gitlab-org/container-registry/-/issues/1243.
+      # When using `maxretries`, `threshold` is ignored: https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/configuration.md?ref_type=heads#endpoints
+      threshold: 5
+      maxretries: 5
+      backoff: 1s
+      headers:
+        X-Random-Config: [ plain direct ]
