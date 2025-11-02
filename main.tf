@@ -346,7 +346,8 @@ resource "null_resource" "kustomization" {
         "echo 'Waiting for the system-upgrade-controller deployment to become available...'",
         "kubectl -n system-upgrade wait --for=condition=available --timeout=360s deployment/system-upgrade-controller",
         "sleep 7", # important as the system upgrade controller CRDs sometimes don't get ready right away, especially with Cilium.
-        "kubectl -n system-upgrade apply -f /var/post_install/plans.yaml"
+        "kubectl -n system-upgrade apply -f /var/post_install/plans.yaml",
+        "kubectl apply -f https://github.com/apecloud/kubeblocks/releases/download/${var.kubeblocks_version}/kubeblocks_crds.yaml"
     ])
   }
 
@@ -357,66 +358,19 @@ resource "null_resource" "kustomization" {
   ]
 }
 
-# resource "null_resource" "uninstall_rke2" {
-#   # (typo fix) master, not mater
-#   for_each = { for idx, ip in module.rke2_metalhost_servers.server_ips : idx => ip }
+resource "null_resource" "ensure_generated_dir" {
+  provisioner "local-exec" {
+    command = "mkdir -p ${var.generated_manifest_dir}"
+  }
+}
 
-#   # Store all external refs ON the resource so we can use self.triggers.* at destroy-time
-#   triggers = {
-#     host            = each.value
-#     ssh_port        = var.ssh_port
-#     ssh_user        = "root"
-#     ssh_private_key = file(var.ssh_private_key_file)
-#   }
+resource "local_file" "extra_manifest" {
+  for_each = {
+    for m in var.extra_manifests : m.filename => m
+  }
 
-#   connection {
-#     type        = "ssh"
-#     user        = self.triggers.ssh_user
-#     host        = self.triggers.host
-#     port        = tonumber(self.triggers.ssh_port)
-#     private_key = self.triggers.ssh_private_key
-#     script_path = "/root/terraform_%RAND%.sh"
-#   }
+  filename = "${var.generated_manifest_dir}/${each.key}"
+  content  = each.value.content
 
-#   provisioner "remote-exec" {
-#     when       = destroy
-#     on_failure = continue
-
-#     inline = [
-#       "set -euxo pipefail",
-#       "if [ -x /usr/bin/rke2-uninstall.sh ]; then",
-#       "  sudo /usr/bin/rke2-uninstall.sh",
-#       "elif [ -x /usr/local/bin/rke2-uninstall.sh ]; then",
-#       "  sudo /usr/local/bin/rke2-uninstall.sh",
-#       "else",
-#       "  sudo systemctl stop rke2-server || true",
-#       "  sudo systemctl disable rke2-server || true",
-#       "fi",
-#       "sudo rm -rf /etc/rancher/rke2 /var/lib/rancher/rke2 /var/post_install /opt/rke2-artifacts /var/lib/rancher/rke2/server/manifests || true",
-#     ]
-#   }
-#   depends_on = [
-#     module.rke2_metalhost_servers,
-#     null_resource.run_ansible_playbook,
-#     helm_release.cloudflared,
-#     helm_release.vault_operator,
-#     kubernetes_namespace.this,
-#     kubectl_manifest.vault_role,
-#     kubectl_manifest.vault_clusterrolebinding,
-#     kubectl_manifest.vault_sa,
-#     kubectl_manifest.vault_rolebinding,
-#     kubectl_manifest.vault,
-#     helm_release.cloudflared,
-#     kubernetes_secret.cert_manager_token,
-#     kubernetes_secret.cloudflared_credentials,
-#     kubernetes_secret.external_dns_token,
-#     kubernetes_secret.vault_credentials,
-#     kubernetes_namespace.this,
-#     kubectl_manifest.clusterissuer_letsencrypt_prod,
-#     kubectl_manifest.external_secret_vault,
-#     kubectl_manifest.app_projects,
-#     kubernetes_config_map.cmp-plugin
-
-#   ]
-#   # depends_on = [module.rke2_metalhost_servers]
-# }
+  depends_on = [null_resource.ensure_generated_dir]
+}

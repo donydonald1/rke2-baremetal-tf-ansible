@@ -134,41 +134,15 @@ rke2_kubelet_config:
       CPUManagerPolicyBetaOptions: true
 
 rke2_kubelet_arg:
-  # - "fail-swap-on=false"
-  # - "cgroup-driver=systemd"
-  # - "max-pods=600"
-  # - "protect-kernel-defaults=true"
-  # # CPU and Memory reservations
-  # # - "memory-manager-policy=Static"
-  # # - "system-reserved=cpu=500m,memory=1Gi"
-  # # - "kube-reserved=cpu=1200m,memory=1.5Gi"
-  # # Eviction policy
-  # - "eviction-hard=imagefs.available<5%,nodefs.available<5%"
-  # - "eviction-minimum-reclaim=imagefs.available=100Mi,nodefs.available=100Mi"
-  # - "max-pods=600"
-  # # - "anonymous-auth=false"
-  # # - "authorization-mode=Webhook"
-  # - "skip-log-headers=false"
-  # - "stderrthreshold=INFO"
-  # - "log-file-max-size=10"
-  # - "alsologtostderr=true"
-  # - "logtostderr=true"
-  # - "root-dir=/opt/rke2/kubelet"
   - "--config=/etc/rancher/rke2/kubelet-config.yaml"
 
 rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
 rke2_disable_cloud_controller: false
 rke2_etcd_snapshot_schedule: "0 */6 * * *"
-rke2_custom_manifests: 
-  - "${path.module}/manifest/cilium.yaml"
-  - "${path.module}/manifest/coredns.yaml"
-  - "${path.module}/manifest/multus.yaml"
-  - "${path.module}/manifest/generic-device-plugin.yaml"
-  - "${path.module}/manifest/nodelocaldns.yaml"
-  - "${path.module}/manifest/configmap-dns-proxy.yaml"
-  - "${path.module}/manifest/prometheus-operator.yaml"
-  - "${path.module}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml"
+rke2_custom_manifests = concat(
+  local.rke2_custom_manifests_base,
+  [for f in local_file.extra_manifest : f.filename],)
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"

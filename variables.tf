@@ -719,3 +719,18 @@ variable "enable_rke2_selinux" {
   type        = bool
   default     = true
 }
+
+variable "extra_manifests" {
+  description = "Additional manifests to materialize as files and append to rke2_custom_manifests."
+  type = list(object({
+    filename = string # e.g., "my-extra.yaml" (no slashes)
+    content  = string # raw YAML (or pre-rendered Helm output)
+  }))
+  default = []
+}
+
+variable "generated_manifest_dir" {
+  description = "Where generated files will be written."
+  type        = string
+  default     = "${path.module}/manifest/"
+}

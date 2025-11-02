@@ -651,4 +651,15 @@ clusterResourceNamespace: cert-manager
     nodePathMap: []
     sharedFileSystemPath: "${var.nfs_mount_point}"
   EOT
+
+  rke2_custom_manifests_base = [
+    "${path.module}/manifest/cilium.yaml",
+    "${path.module}/manifest/coredns.yaml",
+    "${path.module}/manifest/multus.yaml",
+    "${path.module}/manifest/generic-device-plugin.yaml",
+    "${path.module}/manifest/nodelocaldns.yaml",
+    "${path.module}/manifest/configmap-dns-proxy.yaml",
+    "${path.module}/manifest/prometheus-operator.yaml",
+    "${path.module}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml",
+  ]
 }
