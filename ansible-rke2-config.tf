@@ -140,7 +140,8 @@ rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
 rke2_disable_cloud_controller: false
 rke2_etcd_snapshot_schedule: "0 */6 * * *"
-rke2_custom_manifests = ${yamlencode(local.rke2_custom_manifests)}
+rke2_custom_manifests:
+${yamlencode(local.rke2_custom_manifests)}
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"
