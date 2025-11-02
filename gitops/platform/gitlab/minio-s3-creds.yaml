@@ -72,23 +72,13 @@ spec:
             engineVersion: v2
             data:
                 registry: |
-                    version: 0.1
-                    log:
-                        level: info
-                    storage:
-                        s3:
-                            accesskey: "{{ .MINIO_ACCESS_KEY }}"
-                            secretkey: "{{ .MINIO_SECRET_KEY }}"
-                            bucket: "gitlab-registry"
-                            region: "us-east-1"
-                            regionendpoint: "http://minio.minio.svc.cluster.local:9000"
-                            secure: false
-                            v4auth: true
-                            pathstyle: true
-                    http:
-                        addr: :5000
-                        headers:
-                            X-Content-Type-Options: [ nosniff ]
+                    s3:
+                      bucket: gitlab-registry
+                      accesskey: "{{ .MINIO_ACCESS_KEY }}"
+                      secretkey: "{{ .MINIO_SECRET_KEY }}"
+                      region: "us-east-1"
+                      regionendpoint: "http://minio.minio.svc.cluster.local:9000"
+                      v4auth: true
     data:
       - secretKey: MINIO_ACCESS_KEY
         remoteRef:
