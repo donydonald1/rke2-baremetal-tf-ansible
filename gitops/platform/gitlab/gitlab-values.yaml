@@ -373,17 +373,3 @@ registry:
   tls:
     enabled: true
     secretName: registry-tls-secret
-  notifications:
-    events:
-      includereferences: true
-    endpoints:
-    - name: alertmanager
-      url: http://kps-alertmanager.monitoring.svc.cluster.local:9093
-      timeout: 500ms
-      # DEPRECATED: use `maxretries` instead https://gitlab.com/gitlab-org/container-registry/-/issues/1243.
-      # When using `maxretries`, `threshold` is ignored: https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/configuration.md?ref_type=heads#endpoints
-      threshold: 5
-      maxretries: 5
-      backoff: 1s
-      headers:
-        X-Random-Config: [ plain direct ]
