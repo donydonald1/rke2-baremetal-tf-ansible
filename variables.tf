@@ -734,3 +734,9 @@ variable "extra_manifests_dir" {
   type        = string
   default     = null
 }
+
+variable "kubeblocks_version" {
+  type        = string
+  default     = "v1.0.2-beta.12"
+  description = "Version of Kubeblocks to install."
+}
