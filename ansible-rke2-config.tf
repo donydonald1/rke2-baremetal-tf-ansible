@@ -140,9 +140,7 @@ rke2_selinux: ${var.enable_rke2_selinux}
 disable_kube_proxy: true
 rke2_disable_cloud_controller: false
 rke2_etcd_snapshot_schedule: "0 */6 * * *"
-rke2_custom_manifests = concat(
-  local.rke2_custom_manifests_base,
-  [for f in local_file.extra_manifest : f.filename],)
+rke2_custom_manifests = ${yamlencode(local.rke2_custom_manifests)}
 
 rke2_server_options:
   - "private-registry: /etc/rancher/rke2/registries.yaml"
@@ -165,5 +163,6 @@ rke2_service_cidr:
 # rke2_ingress_controller: ${var.ingress_controller_name != "" ? var.ingress_controller_name : "nginx"}
 
 EOT
+
 }
 # - "${path.module}/manifest/rke2-cilium.yaml"

@@ -663,4 +663,8 @@ clusterResourceNamespace: cert-manager
     "${path.module}/manifest/nvidia-kubevirt-gpu-device-plugin.yaml",
   ]
   extra_manifests_dir = coalesce(var.extra_manifests_dir, "${path.module}/manifest")
+  rke2_custom_manifests = concat(
+    local.rke2_custom_manifests_base,
+    [for f in local_file.extra_manifest : f.filename],
+  )
 }
