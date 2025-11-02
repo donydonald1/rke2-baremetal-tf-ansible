@@ -121,6 +121,7 @@ resource "null_resource" "run_ansible_playbook" {
 
   triggers = {
     cluster_config_hash = md5(local.cluster_config_values)
+    extra_manifests     = join(",", [for f in local_file.extra_manifest : f.filename])
   }
 }
 
