@@ -347,7 +347,8 @@ resource "null_resource" "kustomization" {
         "kubectl -n system-upgrade wait --for=condition=available --timeout=360s deployment/system-upgrade-controller",
         "sleep 7", # important as the system upgrade controller CRDs sometimes don't get ready right away, especially with Cilium.
         "kubectl -n system-upgrade apply -f /var/post_install/plans.yaml",
-        "kubectl apply -f https://github.com/apecloud/kubeblocks/releases/download/${var.kubeblocks_version}/kubeblocks_crds.yaml"
+        # KubeBlocks CRDs — use server-side apply to avoid huge last-applied annotations
+        "kubectl apply --server-side -f \"https://github.com/apecloud/kubeblocks/releases/download/${var.kubeblocks_version}/kubeblocks_crds.yaml\""
     ])
   }
 
