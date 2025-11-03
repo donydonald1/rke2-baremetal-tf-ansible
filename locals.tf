@@ -653,7 +653,7 @@ clusterResourceNamespace: cert-manager
   EOT
 
   rke2_custom_manifests_base = [
-    # "${path.module}/manifest/cilium.yaml",
+    "${path.module}/manifest/cilium.yaml",
     "${path.module}/manifest/coredns.yaml",
     "${path.module}/manifest/multus.yaml",
     "${path.module}/manifest/generic-device-plugin.yaml",
