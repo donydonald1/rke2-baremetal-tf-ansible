@@ -172,10 +172,10 @@ harbor:
     enabled: true
     serviceMonitor:
       enabled: true
-  # oidc:
-  #   enabled: true
+    # oidc:
+    #   enabled: true
 
-  # # Configure components of the External Secrets Operator (ESO).
+    # # Configure components of the External Secrets Operator (ESO).
 eso:
   # -- Install components of the ESO.
   enabled: true
