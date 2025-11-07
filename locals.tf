@@ -362,7 +362,7 @@ configs:
     argocdServerAdminPassword: ${var.argocd_admin_password}
 
 externalRedis:
-  host: redis-cluster-redis-headless.kb-system.svc.cluster.local
+  host: redis-cluster-redis-redis.kb-system.svc.cluster.local
   username: ""
   password: ""
   port: 6379
@@ -387,13 +387,13 @@ dex:
 
 redis-ha:
   enabled: false
-redis:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 64Mi
-    limits:
-      memory: 1Gi
+# redis:
+#   resources:
+#     requests:
+#       cpu: 100m
+#       memory: 64Mi
+#     limits:
+#       memory: 1Gi
 
 server:
   resources:
