@@ -361,6 +361,17 @@ configs:
   secret:
     argocdServerAdminPassword: ${var.argocd_admin_password}
 
+externalRedis:
+  host: redis-cluster-redis-redis.kb-system.svc.cluster.local
+  username: ""
+  password: ""
+  port: 6379
+  existingSecret: redis-admin-secret
+  secretAnnotations: {}
+
+redis:
+  enabled: false
+  
 controller:
   resources:
     requests:
@@ -375,7 +386,7 @@ dex:
   enabled: false
 
 redis-ha:
-  enabled: true
+  enabled: false
 redis:
   resources:
     requests:
