@@ -362,7 +362,7 @@ configs:
     argocdServerAdminPassword: ${var.argocd_admin_password}
 
 externalRedis:
-  host: redis-cluster-redis-redis.kb-system.svc.cluster.local
+  host: redis-cluster-redis-headless.kb-system.svc.cluster.local
   username: ""
   password: ""
   port: 6379
@@ -371,7 +371,7 @@ externalRedis:
 
 redis:
   enabled: false
-  
+
 controller:
   resources:
     requests:
