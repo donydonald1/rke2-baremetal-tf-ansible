@@ -1,39 +1,8 @@
-# redis:
-#   fullnameOverride: redis
-#   image:
-#     registry: docker.io
-#     repository: bitnamilegacy/redis-cluster
-#     tag: 8.2.1-debian-12-r0
-#   auth:
-#     sentinel: false
-#     existingSecret: redis-creds
-#     existingSecretPasswordKey: REDIS_PASSWORD
-#   master:
-#     persistence:
-#       size: 1Gi
-#       storageClass: nfs-csi
-#   replica:
-#     persistence:
-#       size: 1Gi
-#       storageClass: nfs-csi
-#     resources:
-#       requests:
-#         cpu: 50m
-#         memory: 100Mi
-#       limits:
-#         memory: 512Mi
-#   sentinel:
-#     enabled: true
-#     image:
-#       registry: docker.io
-#       repository: bitnamilegacy/redis-sentinel
-#       tag: 8.2.1-debian-12-r0
-harbor-ha:
+harbor:
   # we use harbor secret to consolidate all the secrets
   existingSecretAdminPassword: harbor
   existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
   existingSecretSecretKey: harbor
-
   core:
     replicas: 3
     resources:
@@ -203,21 +172,20 @@ harbor-ha:
     enabled: true
     serviceMonitor:
       enabled: true
+  # oidc:
+  #   enabled: true
 
-oidc:
-  enabled: true
-
-# Configure components of the External Secrets Operator (ESO).
-eso:
-  # -- Install components of the ESO.
-  enabled: true
-  # -- Defines provider type. One of `aws` or `generic`.
-  type: "vault"
-  # -- Defines Secret Store name.
-  secretStoreName: "vault"
-  # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
-  secretName: "secret/harbor"
-  # -- Role ARN for the ExternalSecretOperator to assume.
+  # # Configure components of the External Secrets Operator (ESO).
+  # eso:
+  #   # -- Install components of the ESO.
+  #   enabled: true
+  #   # -- Defines provider type. One of `aws` or `generic`.
+  #   type: "vault"
+  #   # -- Defines Secret Store name.
+  #   secretStoreName: "vault"
+  #   # -- Value name in AWS ParameterStore, AWS SecretsManager or other Secret Store.
+  #   secretName: "secret/harbor"
+  #   # -- Role ARN for the ExternalSecretOperator to assume.
 
   #  gcpsm:
   #    projectID: "alphabet-123"
