@@ -1,4 +1,4 @@
-harbor:
+harbor-ha:
   # we use harbor secret to consolidate all the secrets
   existingSecretAdminPassword: harbor
   existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
