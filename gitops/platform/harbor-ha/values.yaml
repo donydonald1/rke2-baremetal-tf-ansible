@@ -28,7 +28,7 @@
 #       registry: docker.io
 #       repository: bitnamilegacy/redis-sentinel
 #       tag: 8.2.1-debian-12-r0
-harbor:
+harbor-ha:
   # we use harbor secret to consolidate all the secrets
   existingSecretAdminPassword: harbor
   existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
