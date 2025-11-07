@@ -1,33 +1,33 @@
-redis:
-  fullnameOverride: redis
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/redis-cluster
-    tag: 8.2.1-debian-12-r0
-  auth:
-    sentinel: false
-    existingSecret: redis-creds
-    existingSecretPasswordKey: REDIS_PASSWORD
-  master:
-    persistence:
-      size: 1Gi
-      storageClass: nfs-csi
-  replica:
-    persistence:
-      size: 1Gi
-      storageClass: nfs-csi
-    resources:
-      requests:
-        cpu: 50m
-        memory: 100Mi
-      limits:
-        memory: 512Mi
-  sentinel:
-    enabled: true
-    image:
-      registry: docker.io
-      repository: bitnamilegacy/redis-sentinel
-      tag: 8.2.1-debian-12-r0
+# redis:
+#   fullnameOverride: redis
+#   image:
+#     registry: docker.io
+#     repository: bitnamilegacy/redis-cluster
+#     tag: 8.2.1-debian-12-r0
+#   auth:
+#     sentinel: false
+#     existingSecret: redis-creds
+#     existingSecretPasswordKey: REDIS_PASSWORD
+#   master:
+#     persistence:
+#       size: 1Gi
+#       storageClass: nfs-csi
+#   replica:
+#     persistence:
+#       size: 1Gi
+#       storageClass: nfs-csi
+#     resources:
+#       requests:
+#         cpu: 50m
+#         memory: 100Mi
+#       limits:
+#         memory: 512Mi
+#   sentinel:
+#     enabled: true
+#     image:
+#       registry: docker.io
+#       repository: bitnamilegacy/redis-sentinel
+#       tag: 8.2.1-debian-12-r0
 
 harbor:
   # we use harbor secret to consolidate all the secrets
@@ -193,12 +193,12 @@ harbor:
   redis:
     type: external
     external:
-      sentinelMasterSet: "mymaster"
-      addr: "redis-node-0.redis-headless.harbor.svc.cluster.local:26379,redis-node-1.redis-headless.harbor.svc.cluster.local:26379,redis-node-2.redis-headless.harbor.svc.cluster.local:26379"
+      sentinelMasterSet: "default"
+      addr: "redis-cluster-redis-redis.kb-system.svc.cluster.local:6379,redis-cluster-redis-headless.kb-system.svc.cluster.local:6379,redis-cluster-redis-sentinel-headless.kb-system.svc.cluster.local:6379,redis-cluster-redis-sentinel-redis-sentinel.kb-system.svc.cluster.local:6379"
       # https://github.com/goharbor/harbor-helm/issues/1352
-      # existingSecret: "harbor-redis"
+      existingSecret: "redis-creds"
       # Copy here the password value from the "redis-creds" secret
-      password: "Techsecoms-@rke2"
+      # password: "Techsecoms-@rke2"
 
   metrics:
     enabled: true

@@ -18,9 +18,10 @@ dependencies:
 - name: harbor
   version: 1.18.0
   repository: https://helm.goharbor.io
-- name: redis
-  version: 22.0.7
-  repository: https://charts.bitnami.com/bitnami
+
+# - name: redis
+#   version: 22.0.7
+#   repository: https://charts.bitnami.com/bitnami
 
 # - name: minio
 #   # version: 14.10.1
